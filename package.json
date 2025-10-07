@@ -2,11 +2,12 @@
   "name": "psa-integrated-system",
   "version": "2.0.0",
   "description": "PSA代行統合システム - PSA Agency Integrated System",
-  "main": "src/server/integrated_server.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node src/server/integrated_server.js",
-    "dev": "nodemon src/server/integrated_server.js",
-    "old-server": "node src/server/psa_approval_server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "full": "node src/server/integrated_server.js",
+    "full-dev": "nodemon src/server/integrated_server.js"
   },
   "keywords": [
     "psa",
