@@ -22,10 +22,10 @@ const apiLimiter = rateLimit({
   }
 });
 
-// 認証APIの厳しいレート制限（開発環境では緩く設定）
+// 認証APIのレート制限
 const authLimiter = rateLimit({
-  windowMs: process.env.NODE_ENV === 'production' ? 15 * 60 * 1000 : 1 * 60 * 1000, // 本番: 15分、開発: 1分
-  max: process.env.NODE_ENV === 'production' ? 5 : 100, // 本番: 5回、開発: 100回
+  windowMs: 1 * 60 * 1000, // 1分
+  max: 100, // 1分間で100回まで
   message: '認証試行回数が上限に達しました。しばらく待ってから再度お試しください。',
   skipSuccessfulRequests: true, // 成功したリクエストはカウントしない
   handler: (req, res) => {
@@ -39,10 +39,10 @@ const authLimiter = rateLimit({
   }
 });
 
-// コード検証の厳しいレート制限（開発環境では緩く設定）
+// コード検証のレート制限
 const verifyLimiter = rateLimit({
-  windowMs: process.env.NODE_ENV === 'production' ? 10 * 60 * 1000 : 1 * 60 * 1000, // 本番: 10分、開発: 1分
-  max: process.env.NODE_ENV === 'production' ? 5 : 100, // 本番: 5回、開発: 100回
+  windowMs: 1 * 60 * 1000, // 1分
+  max: 100, // 1分間で100回まで
   message: '認証コードの試行回数が上限に達しました。しばらく待ってから再度お試しください。',
   handler: (req, res) => {
     logger.security('Verify code rate limit exceeded', {
