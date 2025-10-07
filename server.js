@@ -307,6 +307,102 @@ app.post('/api/rich-form-submit', async (req, res) => {
   }
 });
 
+// お問い合わせAPI
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, subject, message } = req.body;
+
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ error: '必須項目が不足しています' });
+    }
+
+    // 管理者向けメール
+    const adminMailOptions = {
+      from: process.env.FROM_EMAIL || 'collection@kanucard.com',
+      to: process.env.ADMIN_EMAIL || 'collection@kanucard.com',
+      subject: `[お問い合わせ] ${subject}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #333; border-bottom: 3px solid #4f46e5; padding-bottom: 10px;">
+            新規お問い合わせ
+          </h2>
+
+          <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0 0 12px 0;"><strong>お名前:</strong> ${name}</p>
+            <p style="margin: 0 0 12px 0;"><strong>メールアドレス:</strong> ${email}</p>
+            <p style="margin: 0 0 12px 0;"><strong>件名:</strong> ${subject}</p>
+          </div>
+
+          <div style="background: white; padding: 20px; border: 2px solid #e5e7eb; border-radius: 8px;">
+            <p style="margin: 0 0 8px 0; font-weight: bold;">お問い合わせ内容:</p>
+            <p style="margin: 0; line-height: 1.6; white-space: pre-wrap;">${message}</p>
+          </div>
+        </div>
+      `
+    };
+
+    // お客様向け自動返信メール
+    const customerMailOptions = {
+      from: process.env.FROM_EMAIL || 'collection@kanucard.com',
+      to: email,
+      subject: `お問い合わせを受け付けました - ${subject}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #333; border-bottom: 3px solid #4f46e5; padding-bottom: 10px;">
+            お問い合わせありがとうございます
+          </h2>
+
+          <p style="font-size: 16px; color: #555;">
+            ${name} 様
+          </p>
+
+          <p style="font-size: 14px; line-height: 1.6; color: #666;">
+            この度はPSA代行サービスにお問い合わせいただき、誠にありがとうございます。<br>
+            以下の内容でお問い合わせを受け付けました。
+          </p>
+
+          <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0 0 12px 0;"><strong>件名:</strong> ${subject}</p>
+            <p style="margin: 0 0 8px 0; font-weight: bold;">お問い合わせ内容:</p>
+            <p style="margin: 0; line-height: 1.6; white-space: pre-wrap;">${message}</p>
+          </div>
+
+          <p style="font-size: 14px; line-height: 1.6; color: #666;">
+            担当者が内容を確認次第、ご返信させていただきます。<br>
+            通常24時間以内にご返信しておりますので、しばらくお待ちください。
+          </p>
+
+          <div style="background: #fef3c7; padding: 16px; border-radius: 8px; margin-top: 20px;">
+            <p style="margin: 0; color: #92400e; font-size: 14px;">
+              ※ このメールは自動送信されています。<br>
+              ご返信いただいても対応できかねますので、ご了承ください。
+            </p>
+          </div>
+
+          <p style="font-size: 14px; color: #999; margin-top: 32px; text-align: center;">
+            PSA代行サービス<br>
+            collection@kanucard.com
+          </p>
+        </div>
+      `
+    };
+
+    // メール送信
+    await transporter.sendMail(adminMailOptions);
+    await transporter.sendMail(customerMailOptions);
+
+    res.json({
+      success: true,
+      message: 'お問い合わせを受け付けました'
+    });
+  } catch (error) {
+    console.error('Contact form error:', error);
+    res.status(500).json({
+      error: 'メール送信に失敗しました。もう一度お試しください。'
+    });
+  }
+});
+
 // 管理者ページのルーティング
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'admin', 'index.html'));
@@ -315,6 +411,21 @@ app.get('/admin', (req, res) => {
 // リッチフォームのルーティング
 app.get('/form', (req, res) => {
   res.sendFile(path.join(__dirname, 'form.html'));
+});
+
+// 進捗確認ページ
+app.get('/status', (req, res) => {
+  res.sendFile(path.join(__dirname, 'status.html'));
+});
+
+// 買取承認ページ
+app.get('/approval', (req, res) => {
+  res.sendFile(path.join(__dirname, 'approval.html'));
+});
+
+// お問い合わせページ
+app.get('/contact', (req, res) => {
+  res.sendFile(path.join(__dirname, 'contact.html'));
 });
 
 // その他のルート（利用者向けページ）

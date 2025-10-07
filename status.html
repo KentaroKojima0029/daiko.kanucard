@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>進捗確認 - PSA代行サービス</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 80px 20px 20px;
+            color: #2d3748;
+        }
+
+        /* ナビゲーションバー */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4f46e5;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 8px;
+            list-style: none;
+        }
+
+        .navbar-link {
+            padding: 10px 20px;
+            color: #374151;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-link:hover {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .navbar-link.active {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+        }
+
+        .mobile-menu-button {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #4f46e5;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 70px;
+            }
+
+            .navbar-container {
+                padding: 12px 16px;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .mobile-menu-button {
+                display: block;
+            }
+
+            .navbar-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                padding: 8px;
+            }
+
+            .navbar-menu.show {
+                display: flex;
+            }
+
+            .navbar-link {
+                padding: 14px 20px;
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.95;
+        }
+
+        .form-content {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 15px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 10px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #ffffff;
+            color: #1f2937;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: 700;
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px -4px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px -5px rgba(79, 70, 229, 0.5);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status-card {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-processing {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .info-value {
+            color: #6b7280;
+        }
+
+        .note-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid #f59e0b;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 24px;
+        }
+
+        .note-box strong {
+            color: #92400e;
+            font-size: 1.1rem;
+        }
+
+        .note-box ul {
+            margin-top: 12px;
+            margin-left: 24px;
+            color: #78350f;
+        }
+
+        .note-box li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        #resultContainer {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- ナビゲーションバー -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">
+                🎴 PSA代行サービス
+            </a>
+            <button class="mobile-menu-button" id="mobileMenuButton">
+                ☰
+            </button>
+            <ul class="navbar-menu" id="navbarMenu">
+                <li><a href="/" class="navbar-link">代行フォーム</a></li>
+                <li><a href="/status" class="navbar-link active">進捗確認</a></li>
+                <li><a href="/approval" class="navbar-link">買取承認</a></li>
+                <li><a href="/contact" class="navbar-link">お問い合わせ</a></li>
+                <li><a href="/admin" class="navbar-link">管理者</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="main-card">
+            <div class="header">
+                <h1>📊 進捗確認</h1>
+                <p>代行依頼の進捗状況を確認できます</p>
+            </div>
+
+            <div class="form-content">
+                <form id="statusForm">
+                    <div class="form-group">
+                        <label class="form-label" for="email">
+                            📧 ご登録のメールアドレス
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            class="form-input"
+                            placeholder="example@email.com"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        🔍 進捗を確認
+                    </button>
+                </form>
+
+                <div id="resultContainer">
+                    <div class="status-card">
+                        <span class="status-badge status-processing" id="statusBadge">処理中</span>
+
+                        <div class="info-row">
+                            <span class="info-label">申請日</span>
+                            <span class="info-value" id="requestDate">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">お名前</span>
+                            <span class="info-value" id="customerName">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">カード枚数</span>
+                            <span class="info-value" id="cardCount">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">現在のステータス</span>
+                            <span class="info-value" id="currentStatus">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="note-box">
+                    <strong>※ 進捗確認について</strong>
+                    <ul>
+                        <li>代行依頼時に登録したメールアドレスを入力してください</li>
+                        <li>進捗状況は随時更新されます</li>
+                        <li>ご不明な点がございましたら、お問い合わせページからご連絡ください</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // モバイルメニュー
+        document.addEventListener('DOMContentLoaded', () => {
+            setupMobileMenu();
+        });
+
+        function setupMobileMenu() {
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const navbarMenu = document.getElementById('navbarMenu');
+
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', () => {
+                    navbarMenu.classList.toggle('show');
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!mobileMenuButton.contains(e.target) && !navbarMenu.contains(e.target)) {
+                        navbarMenu.classList.remove('show');
+                    }
+                });
+            }
+        }
+
+        // フォーム送信
+        document.getElementById('statusForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const email = document.getElementById('email').value;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '確認中...';
+
+            try {
+                // TODO: APIエンドポイントを実装
+                // const response = await fetch(`/api/status?email=${encodeURIComponent(email)}`);
+                // const data = await response.json();
+
+                // デモデータ（実際はAPIから取得）
+                setTimeout(() => {
+                    document.getElementById('resultContainer').style.display = 'block';
+                    document.getElementById('requestDate').textContent = '2025-10-07';
+                    document.getElementById('customerName').textContent = '山田 太郎';
+                    document.getElementById('cardCount').textContent = '15枚';
+                    document.getElementById('currentStatus').textContent = 'PSA社に鑑定依頼済み（到着待ち）';
+                    document.getElementById('statusBadge').textContent = '処理中';
+                    document.getElementById('statusBadge').className = 'status-badge status-processing';
+
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '🔍 進捗を確認';
+                }, 1000);
+            } catch (error) {
+                alert('進捗情報の取得に失敗しました。もう一度お試しください。');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🔍 進捗を確認';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お問い合わせ - PSA代行サービス</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 80px 20px 20px;
+            color: #2d3748;
+        }
+
+        /* ナビゲーションバー */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4f46e5;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 8px;
+            list-style: none;
+        }
+
+        .navbar-link {
+            padding: 10px 20px;
+            color: #374151;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-link:hover {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .navbar-link.active {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+        }
+
+        .mobile-menu-button {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #4f46e5;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 70px;
+            }
+
+            .navbar-container {
+                padding: 12px 16px;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .mobile-menu-button {
+                display: block;
+            }
+
+            .navbar-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                padding: 8px;
+            }
+
+            .navbar-menu.show {
+                display: flex;
+            }
+
+            .navbar-link {
+                padding: 14px 20px;
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.95;
+        }
+
+        .form-content {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 15px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 10px;
+        }
+
+        .required {
+            color: #ef4444;
+            margin-left: 4px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #ffffff;
+            color: #1f2937;
+            font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: 700;
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px -4px rgba(79, 70, 229, 0.4);
+            margin-top: 32px;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px -5px rgba(79, 70, 229, 0.5);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .contact-info {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .contact-info h3 {
+            font-size: 1.2rem;
+            color: #1a202c;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .contact-info p {
+            color: #6b7280;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .contact-info strong {
+            color: #1a202c;
+        }
+
+        .note-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid #f59e0b;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 24px;
+        }
+
+        .note-box strong {
+            color: #92400e;
+            font-size: 1.1rem;
+        }
+
+        .note-box ul {
+            margin-top: 12px;
+            margin-left: 24px;
+            color: #78350f;
+        }
+
+        .note-box li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- ナビゲーションバー -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">
+                🎴 PSA代行サービス
+            </a>
+            <button class="mobile-menu-button" id="mobileMenuButton">
+                ☰
+            </button>
+            <ul class="navbar-menu" id="navbarMenu">
+                <li><a href="/" class="navbar-link">代行フォーム</a></li>
+                <li><a href="/status" class="navbar-link">進捗確認</a></li>
+                <li><a href="/approval" class="navbar-link">買取承認</a></li>
+                <li><a href="/contact" class="navbar-link active">お問い合わせ</a></li>
+                <li><a href="/admin" class="navbar-link">管理者</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="main-card">
+            <div class="header">
+                <h1>📧 お問い合わせ</h1>
+                <p>ご質問・ご相談はこちらからお気軽にどうぞ</p>
+            </div>
+
+            <div class="form-content">
+                <div class="contact-info">
+                    <h3>📞 直接のお問い合わせ</h3>
+                    <p><strong>メール:</strong> collection@kanucard.com</p>
+                    <p><strong>受付時間:</strong> 平日 10:00 - 18:00</p>
+                    <p>お急ぎの場合は、直接メールでお問い合わせください。24時間以内にご返信いたします。</p>
+                </div>
+
+                <form id="contactForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="name">
+                                👤 お名前<span class="required">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="name"
+                                class="form-input"
+                                placeholder="山田 太郎"
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="email">
+                                📧 メールアドレス<span class="required">*</span>
+                            </label>
+                            <input
+                                type="email"
+                                id="email"
+                                class="form-input"
+                                placeholder="example@email.com"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="subject">
+                            📋 件名<span class="required">*</span>
+                        </label>
+                        <select id="subject" class="form-select" required>
+                            <option value="">選択してください</option>
+                            <option value="代行依頼について">代行依頼について</option>
+                            <option value="進捗確認について">進捗確認について</option>
+                            <option value="買取について">買取について</option>
+                            <option value="料金について">料金について</option>
+                            <option value="配送について">配送について</option>
+                            <option value="その他">その他</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="message">
+                            💬 お問い合わせ内容<span class="required">*</span>
+                        </label>
+                        <textarea
+                            id="message"
+                            class="form-textarea"
+                            placeholder="お問い合わせ内容をご記入ください"
+                            required
+                        ></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        📧 送信する
+                    </button>
+
+                    <div class="note-box">
+                        <strong>※ お問い合わせについて</strong>
+                        <ul>
+                            <li>ご入力いただいたメールアドレスにご返信いたします</li>
+                            <li>通常24時間以内にご返信しております</li>
+                            <li>土日祝日のお問い合わせは、翌営業日のご返信となります</li>
+                            <li>お急ぎの場合は、メールに「至急」とご記入ください</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // モバイルメニュー
+        document.addEventListener('DOMContentLoaded', () => {
+            setupMobileMenu();
+        });
+
+        function setupMobileMenu() {
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const navbarMenu = document.getElementById('navbarMenu');
+
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', () => {
+                    navbarMenu.classList.toggle('show');
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!mobileMenuButton.contains(e.target) && !navbarMenu.contains(e.target)) {
+                        navbarMenu.classList.remove('show');
+                    }
+                });
+            }
+        }
+
+        // フォーム送信
+        document.getElementById('contactForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '送信中...';
+
+            try {
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        subject,
+                        message
+                    })
+                });
+
+                if (response.ok) {
+                    alert('お問い合わせを受け付けました。ご返信までしばらくお待ちください。');
+                    document.getElementById('contactForm').reset();
+                } else {
+                    throw new Error('送信に失敗しました');
+                }
+            } catch (error) {
+                alert('送信に失敗しました。もう一度お試しいただくか、直接メールでお問い合わせください。');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '📧 送信する';
+            }
+        });
+    </script>
+</body>
+</html>
