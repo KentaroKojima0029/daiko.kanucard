@@ -270,63 +270,95 @@
         }
 
         .choice-btn {
-            padding: 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            background: white;
-            color: #374151;
+            padding: 18px 24px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            background: linear-gradient(to bottom, #ffffff, #f8fafc);
+            color: #475569;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            letter-spacing: 0.02em;
         }
 
         .choice-btn:hover {
-            border-color: #4f46e5;
+            border-color: #1e40af;
             transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(30, 64, 175, 0.15);
+            background: linear-gradient(to bottom, #ffffff, #f1f5f9);
         }
 
         .choice-btn.selected {
-            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
             border-color: #1e40af;
             color: white;
+            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
         .choice-btn.approve.selected {
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             border-color: #10b981;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
         .choice-btn.reject.selected {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             border-color: #ef4444;
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
         .choice-btn.pending.selected {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             border-color: #f59e0b;
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
         .btn-submit {
-            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
             color: white;
-            padding: 18px 40px;
-            font-size: 18px;
+            padding: 20px 48px;
+            font-size: 16px;
             font-weight: 700;
             width: 100%;
             border: none;
             border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px -4px rgba(30, 64, 175, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
             margin-top: 32px;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn-submit:hover:not(:disabled)::before {
+            left: 100%;
         }
 
         .btn-submit:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 25px -5px rgba(30, 64, 175, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
+        }
+
+        .btn-submit:active:not(:disabled) {
+            transform: translateY(0px);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
         .btn-submit:disabled {
