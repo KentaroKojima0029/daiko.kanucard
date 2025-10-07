@@ -1,0 +1,163 @@
+const nodemailer = require('nodemailer');
+const { verificationQueries, userQueries } = require('./database');
+const { findCustomerByEmail } = require('./shopify-client');
+
+// SMTP設定
+const transporter = nodemailer.createTransporter({
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+// 認証コード生成（6桁の数字）
+function generateCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// メールで認証コードを送信
+async function sendVerificationCode(email) {
+  try {
+    // Shopifyで顧客を検索
+    const shopifyCustomer = await findCustomerByEmail(email);
+
+    if (!shopifyCustomer) {
+      return {
+        success: false,
+        error: 'このメールアドレスはShopifyに登録されていません。先にShopifyでアカウントを作成してください。'
+      };
+    }
+
+    const code = generateCode();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10分後に期限切れ
+
+    // データベースに保存（phone_numberフィールドにemailを格納）
+    verificationQueries.create.run(email, code, expiresAt);
+
+    // 開発環境ではコンソールに出力（メール送信しない）
+    if (process.env.NODE_ENV === 'development' || process.env.MAIL_DEBUG === 'true') {
+      console.log(`\n====================`);
+      console.log(`認証コード: ${code}`);
+      console.log(`メールアドレス: ${email}`);
+      console.log(`有効期限: ${expiresAt}`);
+      console.log(`====================\n`);
+    }
+
+    // メール送信
+    try {
+      await transporter.sendMail({
+        from: `"PSA代行サービス" <${process.env.FROM_EMAIL}>`,
+        to: email,
+        subject: '【PSA代行サービス】認証コード',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>認証コード</h2>
+            <p>以下の認証コードを入力してログインを完了してください。</p>
+            <div style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">
+              ${code}
+            </div>
+            <p style="color: #666; font-size: 14px;">
+              このコードの有効期限は10分間です。<br>
+              心当たりがない場合は、このメールを無視してください。
+            </p>
+          </div>
+        `,
+        text: `【PSA代行サービス】認証コード: ${code}\n有効期限は10分間です。`,
+      });
+
+      return { success: true, message: 'メールに認証コードを送信しました' };
+    } catch (mailError) {
+      console.error('メール送信エラー:', mailError);
+
+      // 開発環境ではメール送信失敗でもコンソールに表示されているので成功とする
+      if (process.env.NODE_ENV === 'development' || process.env.MAIL_DEBUG === 'true') {
+        return { success: true, message: '開発モード: コンソールに認証コードを表示しました' };
+      }
+
+      return { success: false, error: 'メール送信に失敗しました' };
+    }
+  } catch (error) {
+    console.error('認証コード生成エラー:', error);
+    return { success: false, error: '認証コードの生成に失敗しました' };
+  }
+}
+
+// 認証コードを検証
+async function verifyCode(email, code) {
+  try {
+    // 最新の未検証コードを取得（phone_numberフィールドにemailが格納されている）
+    const verification = verificationQueries.findLatest.get(email);
+
+    if (!verification) {
+      return { success: false, error: '認証コードが見つかりません' };
+    }
+
+    // 試行回数チェック（5回まで）
+    if (verification.attempts >= 5) {
+      return { success: false, error: '試行回数が上限に達しました。新しい認証コードをリクエストしてください' };
+    }
+
+    // コードが一致しない場合
+    if (verification.code !== code) {
+      verificationQueries.incrementAttempts.run(verification.id);
+      return { success: false, error: '認証コードが正しくありません' };
+    }
+
+    // 検証成功 - コードを検証済みとしてマーク
+    verificationQueries.markAsVerified.run(verification.id);
+
+    // Shopifyから顧客情報を取得
+    const shopifyCustomer = await findCustomerByEmail(email);
+
+    if (!shopifyCustomer) {
+      return {
+        success: false,
+        error: 'Shopify顧客情報が見つかりません'
+      };
+    }
+
+    // ローカルデータベースでユーザーを検索または作成
+    let user = userQueries.findByPhoneNumber.get(email);
+    if (!user) {
+      const fullName = `${shopifyCustomer.firstName || ''} ${shopifyCustomer.lastName || ''}`.trim();
+      const result = userQueries.create.run(
+        shopifyCustomer.email,
+        email, // phone_numberフィールドにemailを格納
+        fullName || null
+      );
+      user = userQueries.findById.get(result.lastInsertRowid);
+    } else {
+      // 既存ユーザーの情報を更新
+      const fullName = `${shopifyCustomer.firstName || ''} ${shopifyCustomer.lastName || ''}`.trim();
+      userQueries.update.run(shopifyCustomer.email, fullName, user.id);
+      user = userQueries.findById.get(user.id);
+    }
+
+    // Shopify顧客情報も返す
+    return {
+      success: true,
+      user,
+      shopifyCustomer
+    };
+  } catch (error) {
+    console.error('認証コード検証エラー:', error);
+    return { success: false, error: '認証に失敗しました' };
+  }
+}
+
+// 期限切れコードのクリーンアップ
+function cleanupExpiredCodes() {
+  verificationQueries.deleteExpired.run();
+}
+
+// 定期的にクリーンアップ（30分ごと）
+setInterval(cleanupExpiredCodes, 30 * 60 * 1000);
+
+module.exports = {
+  sendVerificationCode,
+  verifyCode,
+  cleanupExpiredCodes,
+};

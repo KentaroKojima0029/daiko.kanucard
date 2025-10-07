@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const { initDatabase, submissionQueries } = require('./database');
-const { sendVerificationCode, verifyCode } = require('./sms-auth');
+const { sendVerificationCode, verifyCode } = require('./email-auth');
 const { createSession, authenticate, optionalAuthenticate, logout } = require('./auth');
 const { getCustomerById, getCustomerOrders, listAllCustomers } = require('./shopify-client');
 const logger = require('./logger');
@@ -490,15 +490,15 @@ app.post('/api/contact', async (req, res) => {
 app.post(
   '/api/auth/send-code',
   authLimiter,
-  validatePhoneNumber,
+  validateEmail,
   handleValidationErrors,
   async (req, res) => {
     try {
-      const { phoneNumber } = req.body;
+      const { email } = req.body;
 
-      logger.info('Send verification code request', { phoneNumber: phoneNumber.substring(0, 7) + '***' });
+      logger.info('Send verification code request', { email: email.substring(0, 3) + '***' });
 
-      const result = await sendVerificationCode(phoneNumber);
+      const result = await sendVerificationCode(email);
 
       if (!result.success) {
         logger.warn('Failed to send verification code', { error: result.error });
@@ -518,19 +518,19 @@ app.post(
 app.post(
   '/api/auth/verify-code',
   verifyLimiter,
-  [...validatePhoneNumber, ...validateVerificationCode],
+  [...validateEmail, ...validateVerificationCode],
   handleValidationErrors,
   async (req, res) => {
     try {
-      const { phoneNumber, code } = req.body;
+      const { email, code } = req.body;
 
-      logger.info('Verify code request', { phoneNumber: phoneNumber.substring(0, 7) + '***' });
+      logger.info('Verify code request', { email: email.substring(0, 3) + '***' });
 
-      const result = await verifyCode(phoneNumber, code);
+      const result = await verifyCode(email, code);
 
       if (!result.success) {
         logger.security('Failed verification attempt', {
-          phoneNumber: phoneNumber.substring(0, 7) + '***',
+          email: email.substring(0, 3) + '***',
           error: result.error
         });
         return res.status(400).json({ error: result.error });

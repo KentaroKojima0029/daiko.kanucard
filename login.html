@@ -203,18 +203,18 @@
                 <div id="errorMessage" class="error-message"></div>
                 <div id="codeSentMessage" class="code-sent-message"></div>
 
-                <!-- Step 1: 電話番号入力 -->
-                <div id="phoneStep" class="verification-step active">
-                    <form id="phoneForm">
+                <!-- Step 1: メールアドレス入力 -->
+                <div id="emailStep" class="verification-step active">
+                    <form id="emailForm">
                         <div class="form-group">
-                            <label class="form-label" for="phoneNumber">
-                                携帯電話番号
+                            <label class="form-label" for="email">
+                                メールアドレス
                             </label>
                             <input
-                                type="tel"
-                                id="phoneNumber"
+                                type="email"
+                                id="email"
                                 class="form-input"
-                                placeholder="090-1234-5678"
+                                placeholder="example@email.com"
                                 required
                             >
                         </div>
@@ -226,8 +226,7 @@
 
                     <div class="note-box">
                         <strong>ご注意</strong><br>
-                        Shopifyに登録されている携帯電話番号を入力してください。<br>
-                        未登録の場合は、先にShopifyでアカウントを作成してください。
+                        Shopifyに登録されているメールアドレスを入力してください。認証コードがメールで送信されます。
                     </div>
                 </div>
 
@@ -254,26 +253,26 @@
                         </button>
                     </form>
 
-                    <a href="#" class="back-link" id="backToPhone">← 電話番号入力に戻る</a>
+                    <a href="#" class="back-link" id="backToEmail">← メールアドレス入力に戻る</a>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const phoneForm = document.getElementById('phoneForm');
+        const emailForm = document.getElementById('emailForm');
         const codeForm = document.getElementById('codeForm');
-        const phoneStep = document.getElementById('phoneStep');
+        const emailStep = document.getElementById('emailStep');
         const codeStep = document.getElementById('codeStep');
-        const phoneNumberInput = document.getElementById('phoneNumber');
+        const emailInput = document.getElementById('email');
         const verificationCodeInput = document.getElementById('verificationCode');
         const sendCodeBtn = document.getElementById('sendCodeBtn');
         const verifyCodeBtn = document.getElementById('verifyCodeBtn');
         const errorMessage = document.getElementById('errorMessage');
         const codeSentMessage = document.getElementById('codeSentMessage');
-        const backToPhone = document.getElementById('backToPhone');
+        const backToEmail = document.getElementById('backToEmail');
 
-        let currentPhoneNumber = '';
+        let currentEmail = '';
 
         // エラー表示
         function showError(message) {
@@ -294,13 +293,13 @@
         }
 
         // Step 1: 認証コード送信
-        phoneForm.addEventListener('submit', async (e) => {
+        emailForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            currentPhoneNumber = phoneNumberInput.value.trim();
+            currentEmail = emailInput.value.trim();
 
-            if (!currentPhoneNumber) {
-                showError('携帯電話番号を入力してください');
+            if (!currentEmail) {
+                showError('メールアドレスを入力してください');
                 return;
             }
 
@@ -313,7 +312,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ phoneNumber: currentPhoneNumber })
+                    body: JSON.stringify({ email: currentEmail })
                 });
 
                 const data = await response.json();
@@ -323,8 +322,8 @@
                 }
 
                 // 成功 - 認証コード入力画面へ
-                showSuccess(data.message || '認証コードをSMSで送信しました');
-                phoneStep.classList.remove('active');
+                showSuccess(data.message || '認証コードをメールで送信しました');
+                emailStep.classList.remove('active');
                 codeStep.classList.add('active');
                 verificationCodeInput.focus();
             } catch (error) {
@@ -356,7 +355,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        phoneNumber: currentPhoneNumber,
+                        email: currentEmail,
                         code: code
                     })
                 });
@@ -376,11 +375,11 @@
             }
         });
 
-        // 電話番号入力に戻る
-        backToPhone.addEventListener('click', (e) => {
+        // メールアドレス入力に戻る
+        backToEmail.addEventListener('click', (e) => {
             e.preventDefault();
             codeStep.classList.remove('active');
-            phoneStep.classList.add('active');
+            emailStep.classList.add('active');
             verificationCodeInput.value = '';
         });
     </script>

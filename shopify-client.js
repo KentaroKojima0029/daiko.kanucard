@@ -44,6 +44,71 @@ function createGraphQLClient() {
   return new shopify.clients.Graphql({ session });
 }
 
+// メールアドレスで顧客を検索
+async function findCustomerByEmail(email) {
+  const client = createGraphQLClient();
+
+  if (!client) {
+    console.warn('Shopify client not available');
+    return null;
+  }
+
+  try {
+    console.log('[Shopify Debug] Searching for email:', { email });
+
+    const query = `
+      query findCustomer($query: String!) {
+        customers(first: 1, query: $query) {
+          edges {
+            node {
+              id
+              email
+              firstName
+              lastName
+              phone
+              defaultAddress {
+                phone
+              }
+              tags
+              numberOfOrders
+              amountSpent {
+                amount
+              }
+              createdAt
+              updatedAt
+            }
+          }
+        }
+      }
+    `;
+
+    const response = await client.request(query, {
+      variables: {
+        query: `email:${email}`,
+      },
+    });
+
+    const customers = response.data.customers.edges;
+
+    console.log('[Shopify Debug] Found customers:', customers.length);
+
+    if (customers.length > 0) {
+      const customer = customers[0].node;
+      // Normalize phone field - use defaultAddress phone if main phone is null
+      if (!customer.phone && customer.defaultAddress?.phone) {
+        customer.phone = customer.defaultAddress.phone;
+      }
+      return customer;
+    }
+
+    console.warn('[Shopify Debug] No customer found for email:', email);
+    return null;
+  } catch (error) {
+    console.error('Shopify customer lookup error:', error);
+    return null;
+  }
+}
+
 // 携帯番号で顧客を検索
 async function findCustomerByPhone(phoneNumber) {
   const client = createGraphQLClient();
@@ -322,6 +387,7 @@ async function listAllCustomers(limit = 10) {
 }
 
 module.exports = {
+  findCustomerByEmail,
   findCustomerByPhone,
   getCustomerById,
   getCustomerOrders,
