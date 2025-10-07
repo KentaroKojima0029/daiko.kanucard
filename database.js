@@ -3,13 +3,6 @@ const path = require('path');
 
 const db = new Database(path.join(__dirname, 'daiko.db'));
 
-// クエリオブジェクトを先に定義（後で初期化）
-let userQueries;
-let verificationQueries;
-let submissionQueries;
-let sessionQueries;
-let contactQueries;
-
 // データベース初期化
 function initDatabase() {
   // ユーザーテーブル
@@ -92,8 +85,11 @@ function initDatabase() {
     )
   `);
 
-  // クエリオブジェクトを初期化
-  userQueries = {
+  console.log('Database initialized successfully');
+}
+
+// クエリオブジェクトを初期化（モジュールロード時に実行）
+const userQueries = {
   findByEmail: db.prepare('SELECT * FROM users WHERE email = ?'),
   findById: db.prepare('SELECT * FROM users WHERE id = ?'),
   findByPhoneNumber: db.prepare('SELECT * FROM users WHERE phone_number = ?'),
@@ -109,7 +105,7 @@ function initDatabase() {
 };
 
 // 認証コード操作
-verificationQueries = {
+const verificationQueries = {
   create: db.prepare(`
     INSERT INTO verification_codes (phone_number, code, expires_at)
     VALUES (?, ?, ?)
@@ -136,7 +132,7 @@ verificationQueries = {
 };
 
 // 代行依頼操作
-submissionQueries = {
+const submissionQueries = {
   findById: db.prepare('SELECT * FROM form_submissions WHERE id = ?'),
   findByEmail: db.prepare('SELECT * FROM form_submissions WHERE email = ? ORDER BY created_at DESC'),
   findByUserId: db.prepare('SELECT * FROM form_submissions WHERE user_id = ? ORDER BY created_at DESC'),
@@ -151,7 +147,7 @@ submissionQueries = {
 };
 
 // セッション操作
-sessionQueries = {
+const sessionQueries = {
   findByToken: db.prepare("SELECT * FROM sessions WHERE token = ? AND expires_at > datetime('now')"),
   create: db.prepare('INSERT INTO sessions (id, user_id, token, expires_at) VALUES (?, ?, ?, ?)'),
   delete: db.prepare('DELETE FROM sessions WHERE token = ?'),
@@ -159,7 +155,7 @@ sessionQueries = {
 };
 
 // お問い合わせ操作
-contactQueries = {
+const contactQueries = {
   findById: db.prepare('SELECT * FROM contacts WHERE id = ?'),
   findByUserId: db.prepare('SELECT * FROM contacts WHERE user_id = ? ORDER BY created_at DESC'),
   create: db.prepare(`
@@ -168,9 +164,6 @@ contactQueries = {
   `),
   updateStatus: db.prepare('UPDATE contacts SET status = ? WHERE id = ?'),
 };
-
-  console.log('Database initialized successfully');
-}
 
 module.exports = {
   db,

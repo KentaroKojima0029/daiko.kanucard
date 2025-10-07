@@ -57,9 +57,14 @@ async function findCustomerByPhone(phoneNumber) {
     // 電話番号を正規化（Shopifyの形式に合わせる）
     const normalizedPhone = phoneNumber.replace(/[\s-]/g, '');
 
+    console.log('[Shopify Debug] Searching for phone:', {
+      original: phoneNumber,
+      normalized: normalizedPhone
+    });
+
     const query = `
       query findCustomer($query: String!) {
-        customers(first: 1, query: $query) {
+        customers(first: 5, query: $query) {
           edges {
             node {
               id
@@ -67,9 +72,14 @@ async function findCustomerByPhone(phoneNumber) {
               firstName
               lastName
               phone
+              defaultAddress {
+                phone
+              }
               tags
-              ordersCount
-              totalSpent
+              numberOfOrders
+              amountSpent {
+                amount
+              }
               createdAt
               updatedAt
             }
@@ -78,22 +88,46 @@ async function findCustomerByPhone(phoneNumber) {
       }
     `;
 
-    const response = await client.query({
-      data: {
-        query,
+    // 複数のフォーマットで検索を試みる
+    const searchFormats = [
+      `phone:${normalizedPhone}`,
+      `phone:*${normalizedPhone.slice(-10)}*`,  // 末尾10桁で部分一致
+      `phone:+81${normalizedPhone.replace(/^0/, '')}`,  // 国際形式
+      `phone:${normalizedPhone.replace(/^\+81/, '0')}`,  // 日本形式
+    ];
+
+    for (const searchQuery of searchFormats) {
+      console.log('[Shopify Debug] Trying query:', searchQuery);
+
+      const response = await client.request(query, {
         variables: {
-          query: `phone:${normalizedPhone}`,
+          query: searchQuery,
         },
-      },
-    });
+      });
 
-    const customers = response.body.data.customers.edges;
+      const customers = response.data.customers.edges;
 
-    if (customers.length === 0) {
-      return null;
+      console.log('[Shopify Debug] Found customers:', customers.length);
+      if (customers.length > 0) {
+        console.log('[Shopify Debug] Customer phone data:',
+          customers.map(c => ({
+            phone: c.node.phone,
+            addressPhone: c.node.defaultAddress?.phone
+          })));
+      }
+
+      if (customers.length > 0) {
+        const customer = customers[0].node;
+        // Normalize phone field - use defaultAddress phone if main phone is null
+        if (!customer.phone && customer.defaultAddress?.phone) {
+          customer.phone = customer.defaultAddress.phone;
+        }
+        return customer;
+      }
     }
 
-    return customers[0].node;
+    console.warn('[Shopify Debug] No customer found for phone:', phoneNumber);
+    return null;
   } catch (error) {
     console.error('Shopify customer lookup error:', error);
     return null;
@@ -146,16 +180,18 @@ async function getCustomerById(customerId) {
       }
     `;
 
-    const response = await client.query({
-      data: {
-        query,
-        variables: {
-          id: customerId,
-        },
+    const response = await client.request(query, {
+      variables: {
+        id: customerId,
       },
     });
 
-    return response.body.data.customer;
+    const customer = response.data.customer;
+    // Normalize phone field - use defaultAddress phone if main phone is null
+    if (customer && !customer.phone && customer.addresses?.[0]?.phone) {
+      customer.phone = customer.addresses[0].phone;
+    }
+    return customer;
   } catch (error) {
     console.error('Shopify customer detail error:', error);
     return null;
@@ -201,17 +237,14 @@ async function getCustomerOrders(customerId, limit = 20) {
       }
     `;
 
-    const response = await client.query({
-      data: {
-        query,
-        variables: {
-          id: customerId,
-          first: limit,
-        },
+    const response = await client.request(query, {
+      variables: {
+        id: customerId,
+        first: limit,
       },
     });
 
-    return response.body.data.customer?.orders.edges.map(edge => edge.node) || [];
+    return response.data.customer?.orders.edges.map(edge => edge.node) || [];
   } catch (error) {
     console.error('Shopify orders error:', error);
     return [];
@@ -221,8 +254,76 @@ async function getCustomerOrders(customerId, limit = 20) {
 // 初期化
 initShopify();
 
+// 全顧客リストを取得（デバッグ用）
+async function listAllCustomers(limit = 10) {
+  const client = createGraphQLClient();
+
+  if (!client) {
+    return { error: 'Shopify client not available' };
+  }
+
+  try {
+    const query = `
+      query listCustomers($limit: Int!) {
+        customers(first: $limit, sortKey: UPDATED_AT, reverse: true) {
+          edges {
+            node {
+              id
+              email
+              firstName
+              lastName
+              phone
+              defaultAddress {
+                phone
+              }
+              tags
+              numberOfOrders
+              amountSpent {
+                amount
+              }
+              createdAt
+              updatedAt
+            }
+          }
+        }
+      }
+    `;
+
+    const response = await client.request(query, {
+      variables: {
+        limit,
+      },
+    });
+
+    const customers = response.data.customers.edges.map(edge => edge.node);
+
+    return {
+      success: true,
+      count: customers.length,
+      customers: customers.map(c => ({
+        id: c.id,
+        name: `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'No name',
+        email: c.email || 'No email',
+        phone: c.phone || c.defaultAddress?.phone || 'No phone',
+        ordersCount: c.numberOfOrders,
+        totalSpent: c.amountSpent?.amount || '0',
+        createdAt: c.createdAt,
+        updatedAt: c.updatedAt
+      }))
+    };
+  } catch (error) {
+    console.error('List customers error:', error);
+    return {
+      success: false,
+      error: error.message,
+      details: error.response?.errors || error.stack
+    };
+  }
+}
+
 module.exports = {
   findCustomerByPhone,
   getCustomerById,
   getCustomerOrders,
+  listAllCustomers,
 };

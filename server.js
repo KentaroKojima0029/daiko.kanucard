@@ -7,7 +7,7 @@ require('dotenv').config();
 const { initDatabase, submissionQueries } = require('./database');
 const { sendVerificationCode, verifyCode } = require('./sms-auth');
 const { createSession, authenticate, optionalAuthenticate, logout } = require('./auth');
-const { getCustomerById, getCustomerOrders } = require('./shopify-client');
+const { getCustomerById, getCustomerOrders, listAllCustomers } = require('./shopify-client');
 const logger = require('./logger');
 const {
   apiLimiter,
@@ -662,6 +662,28 @@ app.get('/api/test/database', async (req, res) => {
     logger.error('Database test error', { error: error.message });
     res.status(500).json({
       error: 'テストの実行に失敗しました',
+      details: error.message
+    });
+  }
+});
+
+// Shopify顧客リスト取得（デバッグ用）
+app.get('/api/debug/customers', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    const results = await listAllCustomers(limit);
+
+    logger.info('Customer list retrieved', {
+      count: results.count,
+      success: results.success
+    });
+
+    res.json(results);
+  } catch (error) {
+    logger.error('List customers error', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: '顧客リストの取得に失敗しました',
       details: error.message
     });
   }
