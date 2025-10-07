@@ -15,14 +15,14 @@
             font-family: 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
             min-height: 100vh;
-            padding: 150px 20px 20px;
+            padding: 160px 20px 20px;
             color: #1e293b;
             letter-spacing: 0.02em;
         }
 
         @media (max-width: 768px) {
             body {
-                padding: 160px 4px 20px;
+                padding: 140px 4px 20px;
             }
         }
 
@@ -642,23 +642,26 @@
         @media (max-width: 768px) {
             .fixed-summary {
                 top: 60px;
-                padding: 12px 8px;
+                padding: 10px 8px;
             }
 
             .fixed-summary-content {
-                flex-direction: column;
-                gap: 8px;
+                flex-direction: row;
+                gap: 12px;
             }
 
             .fixed-summary-item {
-                width: 100%;
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
+                flex: 1;
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .fixed-summary-label {
+                font-size: 10px;
             }
 
             .fixed-summary-value {
-                font-size: 18px;
+                font-size: 16px;
             }
         }
 
