@@ -689,6 +689,13 @@ app.get('/api/debug/customers', async (req, res) => {
   }
 });
 
+// ===== HTMLページルーティング =====
+
+// ログインページ
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'login.html'));
+});
+
 // SPAのフォールバック（HTMLファイルのみ）
 app.get('*', (req, res) => {
   // 静的ファイルのリクエストは除外
@@ -713,6 +720,7 @@ app.listen(port, () => {
   });
   console.log(`Server running on port ${port}`);
   console.log(`- User page: http://localhost:${port}/`);
+  console.log(`- Login: http://localhost:${port}/login`);
   console.log(`- Status: http://localhost:${port}/status`);
   console.log(`- Approval: http://localhost:${port}/approval`);
   console.log(`- Contact: http://localhost:${port}/contact`);
