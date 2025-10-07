@@ -15,14 +15,14 @@
             font-family: 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
             min-height: 100vh;
-            padding: 80px 20px 20px;
+            padding: 80px 20px 100px;
             color: #1e293b;
             letter-spacing: 0.02em;
         }
 
         @media (max-width: 768px) {
             body {
-                padding: 70px 4px 4px;
+                padding: 70px 4px 120px;
             }
         }
 
@@ -597,6 +597,70 @@
             margin-top: 24px;
         }
 
+        /* 固定フッター - 代行料合計表示 */
+        .fixed-summary {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+            color: white;
+            padding: 16px 20px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .fixed-summary-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .fixed-summary-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .fixed-summary-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.9;
+        }
+
+        .fixed-summary-value {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        @media (max-width: 768px) {
+            .fixed-summary {
+                padding: 12px 8px;
+            }
+
+            .fixed-summary-content {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .fixed-summary-item {
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .fixed-summary-value {
+                font-size: 18px;
+            }
+        }
+
         .note-box strong {
             color: #92400e;
             font-size: 1.1rem;
@@ -969,7 +1033,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label" for="quantity">📦 数量<span class="required">*</span></label>
+                                <label class="form-label" for="quantity">数量<span class="required">*</span></label>
                                 <input
                                     type="number"
                                     id="quantity"
@@ -985,10 +1049,10 @@
 
                         <div class="button-container">
                             <button class="btn btn-primary" type="submit">
-                                💾 カードを保存
+                                カードを保存
                             </button>
                             <button class="btn btn-danger" id="deleteDataButton" type="button">
-                                🗑️ 全削除
+                                全削除
                             </button>
                         </div>
                     </form>
@@ -1114,7 +1178,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="contactBody">💬 メッセージ</label>
+                            <label class="form-label" for="contactBody">メッセージ</label>
                             <textarea
                                 rows="4"
                                 id="contactBody"
@@ -1151,22 +1215,55 @@
             </div>
             <div class="modal-body">
                 <div class="fee-summary-card">
-                    <div class="fee-row">
-                        <span>代行手数料</span>
-                        <span id="confirmAgencyFee">0円</span>
+                    <h4 style="margin-bottom: 16px; color: #1e40af; font-weight: 700;">お支払いについて</h4>
+
+                    <div style="background: linear-gradient(135deg, #f0f9ff, #dbeafe); padding: 16px; border-radius: 12px; margin-bottom: 16px; border-left: 4px solid #1e40af;">
+                        <h5 style="font-weight: 700; color: #1e293b; margin-bottom: 12px;">1回目のお支払い（サービス開始時）</h5>
+                        <div class="fee-row">
+                            <span>代行手数料</span>
+                            <span id="confirmAgencyFee" style="font-weight: 700; color: #1e40af;">0円</span>
+                        </div>
+                        <div class="fee-row" style="border-top: 2px solid #1e40af; padding-top: 8px; margin-top: 8px;">
+                            <span style="font-weight: 700;">小計</span>
+                            <span id="confirmFirstPayment" style="font-weight: 700; font-size: 1.1rem; color: #1e40af;">0円</span>
+                        </div>
                     </div>
-                    <div class="fee-row">
-                        <span>見込鑑定料</span>
-                        <span id="confirmEstimatedGradingFee">設定してください</span>
+
+                    <div style="background: linear-gradient(135deg, #fefce8, #fef08a); padding: 16px; border-radius: 12px; margin-bottom: 16px; border-left: 4px solid #ca8a04;">
+                        <h5 style="font-weight: 700; color: #1e293b; margin-bottom: 12px;">2回目のお支払い（カード受取時）</h5>
+                        <div class="fee-row">
+                            <span>鑑定料</span>
+                            <span id="confirmEstimatedGradingFee" style="font-weight: 700; color: #ca8a04;">設定してください</span>
+                        </div>
+                        <div class="fee-row">
+                            <span>輸出入送料</span>
+                            <span style="font-weight: 700; color: #ca8a04;">実費精算</span>
+                        </div>
+                        <div class="fee-row" id="taxRow">
+                            <span>関税（発生時のみ）</span>
+                            <span id="confirmEstimatedTax" style="font-weight: 700; color: #ca8a04;">0円</span>
+                        </div>
+                        <div class="fee-row">
+                            <span>その他諸費用</span>
+                            <span style="font-weight: 700; color: #ca8a04;">実費精算</span>
+                        </div>
+                        <div class="fee-row" style="border-top: 2px solid #ca8a04; padding-top: 8px; margin-top: 8px;">
+                            <span style="font-weight: 700;">小計（見込）</span>
+                            <span id="confirmSecondPayment" style="font-weight: 700; font-size: 1.1rem; color: #ca8a04;">0円</span>
+                        </div>
                     </div>
-                    <div class="fee-row">
-                        <span>見込関税</span>
-                        <span id="confirmEstimatedTax">0円</span>
+
+                    <div style="background: linear-gradient(135deg, #1e40af, #2563eb); padding: 16px; border-radius: 12px; color: white;">
+                        <div class="fee-row" style="border-bottom: none;">
+                            <span style="font-weight: 700; font-size: 1.1rem;">総額（見込）</span>
+                            <span id="confirmTotalEstimatedFee" style="font-weight: 700; font-size: 1.3rem;">0円</span>
+                        </div>
                     </div>
-                    <div class="fee-row">
-                        <span>合計見込み金額</span>
-                        <span id="confirmTotalEstimatedFee">0円</span>
-                    </div>
+
+                    <p style="font-size: 0.9rem; color: #64748b; margin-top: 12px; line-height: 1.6;">
+                        ※ 2回目のお支払いは実際の費用確定後にご請求いたします。<br>
+                        ※ 関税は発生しない場合もございます。
+                    </p>
                 </div>
 
                 <div class="confirmation-details" id="confirmationDetails"></div>
@@ -1415,6 +1512,10 @@
 
             document.getElementById('totalQuantity').textContent = totalQuantity + '枚';
             document.getElementById('totalFee').textContent = '¥' + Math.round(totalFee).toLocaleString();
+
+            // 固定フッターも更新
+            document.getElementById('fixedTotalQuantity').textContent = totalQuantity + '枚';
+            document.getElementById('fixedTotalFee').textContent = '¥' + Math.round(totalFee).toLocaleString();
         }
 
         // 手数料率取得
@@ -1507,14 +1608,22 @@
             const gradingFee = calculateGradingFee(serviceOption, totalQuantity, plan);
             const estimatedTax = totalAcquisitionValue * 0.15;
 
-            document.getElementById('confirmAgencyFee').textContent = '¥' + Math.round(totalFee).toLocaleString();
+            // 1回目の支払い（代行手数料のみ）
+            const firstPayment = Math.round(totalFee);
+            document.getElementById('confirmAgencyFee').textContent = '¥' + firstPayment.toLocaleString();
+            document.getElementById('confirmFirstPayment').textContent = '¥' + firstPayment.toLocaleString();
+
+            // 2回目の支払い（鑑定料 + 関税）
             document.getElementById('confirmEstimatedTax').textContent = '¥' + Math.round(estimatedTax).toLocaleString();
 
             if (gradingFee !== null) {
+                const secondPayment = Math.round(gradingFee + estimatedTax);
                 document.getElementById('confirmEstimatedGradingFee').textContent = '¥' + gradingFee.toLocaleString();
-                document.getElementById('confirmTotalEstimatedFee').textContent = '¥' + Math.round(totalFee + gradingFee + estimatedTax).toLocaleString();
+                document.getElementById('confirmSecondPayment').textContent = '¥' + secondPayment.toLocaleString() + ' +実費';
+                document.getElementById('confirmTotalEstimatedFee').textContent = '¥' + Math.round(totalFee + gradingFee + estimatedTax).toLocaleString() + ' +実費';
             } else {
                 document.getElementById('confirmEstimatedGradingFee').textContent = '別途見積もり';
+                document.getElementById('confirmSecondPayment').textContent = '見積もり後に表示';
                 document.getElementById('confirmTotalEstimatedFee').textContent = '見積もり後に表示';
             }
 
@@ -1654,5 +1763,19 @@
             // フォームデータも保存できる
         }
     </script>
+
+    <!-- 固定フッター：代行料合計表示 -->
+    <div class="fixed-summary">
+        <div class="fixed-summary-content">
+            <div class="fixed-summary-item">
+                <div class="fixed-summary-label">カード枚数</div>
+                <div class="fixed-summary-value" id="fixedTotalQuantity">0枚</div>
+            </div>
+            <div class="fixed-summary-item">
+                <div class="fixed-summary-label">代行料合計</div>
+                <div class="fixed-summary-value" id="fixedTotalFee">¥0</div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

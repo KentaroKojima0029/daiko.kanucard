@@ -96,29 +96,62 @@ app.post('/api/rich-form-submit', async (req, res) => {
             以下の内容で代行依頼を受け付けました。
           </p>
 
-          <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 20px; border-radius: 12px; margin: 24px 0;">
-            <h3 style="margin: 0 0 16px 0; font-size: 18px;">料金情報</h3>
-            <table style="width: 100%; color: white;">
-              <tr>
-                <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">代行手数料</td>
-                <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.2); text-align: right; font-weight: bold;">${totalFee}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">見込鑑定料</td>
-                <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.2); text-align: right; font-weight: bold;">${estimatedGradingFee}</td>
-              </tr>
-              <tr>
-                <td style="padding: 12px 0 8px 0; font-size: 16px; font-weight: bold;">支払総額（予定額）</td>
-                <td style="padding: 12px 0 8px 0; text-align: right; font-size: 18px; font-weight: bold;">${totalEstimatedFee}</td>
-              </tr>
-            </table>
-          </div>
+          <div style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 20px; border-radius: 12px; margin: 24px 0;">
+            <h3 style="margin: 0 0 16px 0; font-size: 18px;">💰 お支払いについて</h3>
 
-          <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 16px; border-radius: 12px; margin: 16px 0;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 14px;">関税見込み額（15%）※発生時のみ</span>
-              <span style="font-weight: bold; font-size: 16px;">${estimatedTax}</span>
+            <div style="background: rgba(255, 255, 255, 0.15); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+              <h4 style="margin: 0 0 12px 0; font-size: 16px; color: #fff;">1回目のお支払い（サービス開始時）</h4>
+              <table style="width: 100%; color: white;">
+                <tr>
+                  <td style="padding: 8px 0;">代行手数料</td>
+                  <td style="padding: 8px 0; text-align: right; font-weight: bold; font-size: 16px;">${totalFee}</td>
+                </tr>
+                <tr style="border-top: 2px solid rgba(255,255,255,0.4);">
+                  <td style="padding: 8px 0; font-weight: bold;">小計</td>
+                  <td style="padding: 8px 0; text-align: right; font-weight: bold; font-size: 18px;">${totalFee}</td>
+                </tr>
+              </table>
             </div>
+
+            <div style="background: rgba(255, 255, 255, 0.15); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+              <h4 style="margin: 0 0 12px 0; font-size: 16px; color: #fff;">2回目のお支払い（カード受取時）</h4>
+              <table style="width: 100%; color: white;">
+                <tr>
+                  <td style="padding: 8px 0;">鑑定料</td>
+                  <td style="padding: 8px 0; text-align: right; font-weight: bold;">${estimatedGradingFee}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0;">輸出入送料</td>
+                  <td style="padding: 8px 0; text-align: right; font-weight: bold;">実費精算</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0;">関税（発生時のみ）</td>
+                  <td style="padding: 8px 0; text-align: right; font-weight: bold;">${estimatedTax}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0;">その他諸費用</td>
+                  <td style="padding: 8px 0; text-align: right; font-weight: bold;">実費精算</td>
+                </tr>
+                <tr style="border-top: 2px solid rgba(255,255,255,0.4);">
+                  <td style="padding: 8px 0; font-weight: bold;">小計（見込）</td>
+                  <td style="padding: 8px 0; text-align: right; font-weight: bold; font-size: 18px;">${estimatedGradingFee} +実費</td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.25); padding: 16px; border-radius: 8px;">
+              <table style="width: 100%; color: white;">
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; font-size: 18px;">総額（見込）</td>
+                  <td style="padding: 8px 0; text-align: right; font-weight: bold; font-size: 20px;">${totalEstimatedFee}</td>
+                </tr>
+              </table>
+            </div>
+
+            <p style="font-size: 13px; color: rgba(255, 255, 255, 0.9); margin: 12px 0 0 0; line-height: 1.6;">
+              ※ 2回目のお支払いは実際の費用確定後にご請求いたします。<br>
+              ※ 関税は発生しない場合もございます。
+            </p>
           </div>
 
           <h3 style="color: #333; margin-top: 30px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">
@@ -193,7 +226,7 @@ app.post('/api/rich-form-submit', async (req, res) => {
     // 管理者向けメール
     const adminMailOptions = {
       from: process.env.FROM_EMAIL || 'collection@kanucard.com',
-      to: process.env.ADMIN_EMAIL || 'collection@kanucard.com',
+      to: process.env.ADMIN_EMAIL || 'contact@kanucard.com',
       replyTo: contactEmail,
       subject: `【新規申込】PSA代行サービス - ${contactName}様`,
       html: `
@@ -328,7 +361,7 @@ app.post('/api/contact', async (req, res) => {
     // 管理者向けメール
     const adminMailOptions = {
       from: process.env.FROM_EMAIL || 'collection@kanucard.com',
-      to: process.env.ADMIN_EMAIL || 'collection@kanucard.com',
+      to: process.env.ADMIN_EMAIL || 'contact@kanucard.com',
       subject: `[お問い合わせ] ${subject}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
