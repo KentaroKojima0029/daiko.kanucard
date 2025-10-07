@@ -1,14 +1,24 @@
 const express = require('express');
 const path = require('path');
 const nodemailer = require('nodemailer');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
+
+const { initDatabase, submissionQueries } = require('./database');
+const { sendVerificationCode, verifyCode } = require('./sms-auth');
+const { createSession, authenticate, optionalAuthenticate, logout } = require('./auth');
+const { getCustomerById, getCustomerOrders } = require('./shopify-client');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+// データベース初期化
+initDatabase();
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // 静的ファイルの配信（優先）
 app.use(express.static(__dirname, {
@@ -442,6 +452,126 @@ app.post('/api/contact', async (req, res) => {
     res.status(500).json({
       error: 'メール送信に失敗しました。もう一度お試しください。'
     });
+  }
+});
+
+// ===== 認証API =====
+
+// 認証コード送信
+app.post('/api/auth/send-code', async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+
+    if (!phoneNumber) {
+      return res.status(400).json({ error: '電話番号を入力してください' });
+    }
+
+    const result = await sendVerificationCode(phoneNumber);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    res.json({ success: true, message: result.message || '認証コードを送信しました' });
+  } catch (error) {
+    console.error('Send code error:', error);
+    res.status(500).json({ error: '認証コードの送信に失敗しました' });
+  }
+});
+
+// 認証コード検証
+app.post('/api/auth/verify-code', async (req, res) => {
+  try {
+    const { phoneNumber, code } = req.body;
+
+    if (!phoneNumber || !code) {
+      return res.status(400).json({ error: '電話番号と認証コードを入力してください' });
+    }
+
+    const result = await verifyCode(phoneNumber, code);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    // セッション作成
+    const token = createSession(result.user.id);
+
+    // クッキーに保存
+    res.cookie('auth_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: 'strict'
+    });
+
+    res.json({
+      success: true,
+      user: {
+        id: result.user.id,
+        name: result.user.name,
+        email: result.user.email,
+        phoneNumber: result.user.phone_number
+      },
+      shopifyCustomer: result.shopifyCustomer
+    });
+  } catch (error) {
+    console.error('Verify code error:', error);
+    res.status(500).json({ error: '認証に失敗しました' });
+  }
+});
+
+// ログアウト
+app.post('/api/auth/logout', (req, res) => {
+  const token = req.cookies.auth_token;
+
+  if (token) {
+    logout(token);
+  }
+
+  res.clearCookie('auth_token');
+  res.json({ success: true, message: 'ログアウトしました' });
+});
+
+// 現在のユーザー情報取得
+app.get('/api/auth/me', authenticate, async (req, res) => {
+  try {
+    const shopifyCustomer = await getCustomerById(req.user.shopify_customer_id);
+
+    res.json({
+      user: {
+        id: req.user.id,
+        name: req.user.name,
+        email: req.user.email,
+        phoneNumber: req.user.phone_number
+      },
+      shopifyCustomer
+    });
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ error: 'ユーザー情報の取得に失敗しました' });
+  }
+});
+
+// 顧客の代行依頼一覧取得
+app.get('/api/submissions', authenticate, (req, res) => {
+  try {
+    const submissions = submissionQueries.findByUserId.all(req.user.id);
+    res.json({ submissions });
+  } catch (error) {
+    console.error('Get submissions error:', error);
+    res.status(500).json({ error: '代行依頼の取得に失敗しました' });
+  }
+});
+
+// 顧客のShopify注文履歴取得
+app.get('/api/orders', authenticate, async (req, res) => {
+  try {
+    const orders = await getCustomerOrders(req.user.shopify_customer_id);
+    res.json({ orders });
+  } catch (error) {
+    console.error('Get orders error:', error);
+    res.status(500).json({ error: '注文履歴の取得に失敗しました' });
   }
 });
 
