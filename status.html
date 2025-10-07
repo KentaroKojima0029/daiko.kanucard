@@ -82,6 +82,19 @@
             box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
         }
 
+        .logout-btn {
+            border: none;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        .logout-btn:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+
         .mobile-menu-button {
             display: none;
             background: none;
@@ -384,6 +397,7 @@
                 <li><a href="/approval" class="navbar-link">買取承認</a></li>
                 <li><a href="/contact" class="navbar-link">お問い合わせ</a></li>
                 <li><a href="/admin" class="navbar-link">管理者</a></li>
+                <li><button onclick="handleLogout()" class="navbar-link logout-btn">ログアウト</button></li>
             </ul>
         </div>
     </nav>
@@ -515,6 +529,33 @@
                 submitBtn.textContent = '進捗を確認';
             }
         });
+    </script>
+
+    <!-- ログアウト機能 -->
+    <script>
+        async function handleLogout() {
+            if (!confirm('ログアウトしますか？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    window.location.href = '/login';
+                } else {
+                    alert('ログアウトに失敗しました');
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('ログアウトに失敗しました');
+            }
+        }
     </script>
 
     <!-- 認証チェック -->
