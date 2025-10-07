@@ -15,14 +15,14 @@
             font-family: 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
             min-height: 100vh;
-            padding: 80px 20px 100px;
+            padding: 150px 20px 20px;
             color: #1e293b;
             letter-spacing: 0.02em;
         }
 
         @media (max-width: 768px) {
             body {
-                padding: 70px 4px 120px;
+                padding: 160px 4px 20px;
             }
         }
 
@@ -597,18 +597,18 @@
             margin-top: 24px;
         }
 
-        /* 固定フッター - 代行料合計表示 */
+        /* 固定ヘッダー - 代行料合計表示 */
         .fixed-summary {
             position: fixed;
-            bottom: 0;
+            top: 70px;
             left: 0;
             right: 0;
             background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
             color: white;
             padding: 16px 20px;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
             z-index: 999;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .fixed-summary-content {
@@ -641,6 +641,7 @@
 
         @media (max-width: 768px) {
             .fixed-summary {
+                top: 60px;
                 padding: 12px 8px;
             }
 
@@ -1102,7 +1103,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label" for="serviceOption">⭐ PSA社プラン<span class="required">*</span></label>
+                                <label class="form-label" for="serviceOption">PSA社プラン<span class="required">*</span></label>
                                 <select id="serviceOption" class="form-select" required>
                                     <option value="バリューバルク">バリューバルク</option>
                                     <option value="バリュー">バリュー</option>
