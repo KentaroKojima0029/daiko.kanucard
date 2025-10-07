@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSA代行サービス - システムメンテナンス中</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 60px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .info-box h2 {
+            color: #333;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .info-box p {
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .info-box strong {
+            color: #667eea;
+        }
+
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            color: #856404;
+            font-size: 0.95rem;
+            text-align: left;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .links {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #ddd;
+        }
+
+        .links a {
+            display: inline-block;
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 0.95rem;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🚧</div>
+        <h1>PSA代行サービス</h1>
+        <p class="message">
+            現在、システムは<strong>GitHub Pages</strong>上で静的ページとして公開されています。<br>
+            完全な機能をご利用いただくには、サーバー版をご使用ください。
+        </p>
+
+        <div class="info-box">
+            <h2>📦 このシステムについて</h2>
+            <p><strong>プロジェクト:</strong> PSA代行統合システム v2.0.0</p>
+            <p><strong>機能:</strong> トレーディングカードのPSA鑑定代行と買取承認を統合管理</p>
+            <p><strong>技術:</strong> Node.js + Express + Nodemailer</p>
+        </div>
+
+        <div class="note">
+            <strong>⚠️ 重要:</strong> このシステムはNode.jsサーバーアプリケーションです。GitHub Pagesでは静的ファイルのみが表示され、以下の機能は動作しません：
+            <ul style="margin-top: 10px; margin-left: 20px;">
+                <li>代行依頼フォームの送信</li>
+                <li>メール通知</li>
+                <li>データ保存</li>
+                <li>リアルタイム通信</li>
+            </ul>
+        </div>
+
+        <div class="links">
+            <a href="https://github.com/KentaroKojima0029/new-daiko-form" target="_blank">📂 GitHubリポジトリ</a>
+            <a href="https://github.com/KentaroKojima0029/new-daiko-form/blob/master/README.md" target="_blank">📖 ドキュメント</a>
+            <a href="https://github.com/KentaroKojima0029/new-daiko-form/blob/master/SETUP_GUIDE.md" target="_blank">🔧 セットアップガイド</a>
+        </div>
+
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #999; font-size: 0.9rem;">
+            <p>完全版をご利用になる場合は、Render、Railway、VPS等でホスティングしてください。</p>
+        </div>
+    </div>
+</body>
+</html>
