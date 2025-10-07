@@ -8,6 +8,26 @@ const { initDatabase, submissionQueries } = require('./database');
 const { sendVerificationCode, verifyCode } = require('./sms-auth');
 const { createSession, authenticate, optionalAuthenticate, logout } = require('./auth');
 const { getCustomerById, getCustomerOrders } = require('./shopify-client');
+const logger = require('./logger');
+const {
+  apiLimiter,
+  authLimiter,
+  verifyLimiter,
+  validatePhoneNumber,
+  validateVerificationCode,
+  validateEmail,
+  validateName,
+  handleValidationErrors,
+  securityHeaders,
+  notFoundHandler,
+  errorHandler,
+  requestLogger
+} = require('./middleware');
+const {
+  testShopifyConnection,
+  testDatabaseConnection,
+  healthCheck
+} = require('./shopify-test');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -15,10 +35,19 @@ const port = process.env.PORT || 3000;
 // データベース初期化
 initDatabase();
 
+// セキュリティヘッダーとロギング（最優先）
+app.use(securityHeaders);
+app.use(requestLogger);
+
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+
+logger.info('Server initializing', {
+  nodeEnv: process.env.NODE_ENV,
+  port
+});
 
 // 静的ファイルの配信（優先）
 app.use(express.static(__dirname, {
@@ -458,68 +487,84 @@ app.post('/api/contact', async (req, res) => {
 // ===== 認証API =====
 
 // 認証コード送信
-app.post('/api/auth/send-code', async (req, res) => {
-  try {
-    const { phoneNumber } = req.body;
+app.post(
+  '/api/auth/send-code',
+  authLimiter,
+  validatePhoneNumber,
+  handleValidationErrors,
+  async (req, res) => {
+    try {
+      const { phoneNumber } = req.body;
 
-    if (!phoneNumber) {
-      return res.status(400).json({ error: '電話番号を入力してください' });
+      logger.info('Send verification code request', { phoneNumber: phoneNumber.substring(0, 7) + '***' });
+
+      const result = await sendVerificationCode(phoneNumber);
+
+      if (!result.success) {
+        logger.warn('Failed to send verification code', { error: result.error });
+        return res.status(400).json({ error: result.error });
+      }
+
+      logger.info('Verification code sent successfully');
+      res.json({ success: true, message: result.message || '認証コードを送信しました' });
+    } catch (error) {
+      logger.error('Send code error', { error: error.message, stack: error.stack });
+      res.status(500).json({ error: '認証コードの送信に失敗しました' });
     }
-
-    const result = await sendVerificationCode(phoneNumber);
-
-    if (!result.success) {
-      return res.status(400).json({ error: result.error });
-    }
-
-    res.json({ success: true, message: result.message || '認証コードを送信しました' });
-  } catch (error) {
-    console.error('Send code error:', error);
-    res.status(500).json({ error: '認証コードの送信に失敗しました' });
   }
-});
+);
 
 // 認証コード検証
-app.post('/api/auth/verify-code', async (req, res) => {
-  try {
-    const { phoneNumber, code } = req.body;
+app.post(
+  '/api/auth/verify-code',
+  verifyLimiter,
+  [...validatePhoneNumber, ...validateVerificationCode],
+  handleValidationErrors,
+  async (req, res) => {
+    try {
+      const { phoneNumber, code } = req.body;
 
-    if (!phoneNumber || !code) {
-      return res.status(400).json({ error: '電話番号と認証コードを入力してください' });
+      logger.info('Verify code request', { phoneNumber: phoneNumber.substring(0, 7) + '***' });
+
+      const result = await verifyCode(phoneNumber, code);
+
+      if (!result.success) {
+        logger.security('Failed verification attempt', {
+          phoneNumber: phoneNumber.substring(0, 7) + '***',
+          error: result.error
+        });
+        return res.status(400).json({ error: result.error });
+      }
+
+      // セッション作成
+      const token = createSession(result.user.id);
+
+      // クッキーに保存
+      res.cookie('auth_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        sameSite: 'strict'
+      });
+
+      logger.info('User logged in successfully', { userId: result.user.id });
+
+      res.json({
+        success: true,
+        user: {
+          id: result.user.id,
+          name: result.user.name,
+          email: result.user.email,
+          phoneNumber: result.user.phone_number
+        },
+        shopifyCustomer: result.shopifyCustomer
+      });
+    } catch (error) {
+      logger.error('Verify code error', { error: error.message, stack: error.stack });
+      res.status(500).json({ error: '認証に失敗しました' });
     }
-
-    const result = await verifyCode(phoneNumber, code);
-
-    if (!result.success) {
-      return res.status(400).json({ error: result.error });
-    }
-
-    // セッション作成
-    const token = createSession(result.user.id);
-
-    // クッキーに保存
-    res.cookie('auth_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      sameSite: 'strict'
-    });
-
-    res.json({
-      success: true,
-      user: {
-        id: result.user.id,
-        name: result.user.name,
-        email: result.user.email,
-        phoneNumber: result.user.phone_number
-      },
-      shopifyCustomer: result.shopifyCustomer
-    });
-  } catch (error) {
-    console.error('Verify code error:', error);
-    res.status(500).json({ error: '認証に失敗しました' });
   }
-});
+);
 
 // ログアウト
 app.post('/api/auth/logout', (req, res) => {
@@ -575,6 +620,53 @@ app.get('/api/orders', authenticate, async (req, res) => {
   }
 });
 
+// ===== テスト/ヘルスチェックAPI =====
+
+// ヘルスチェック
+app.get('/api/health', async (req, res) => {
+  try {
+    const health = await healthCheck();
+    const statusCode = health.status === 'healthy' ? 200 : 503;
+    res.status(statusCode).json(health);
+  } catch (error) {
+    logger.error('Health check error', { error: error.message });
+    res.status(503).json({
+      status: 'unhealthy',
+      error: error.message
+    });
+  }
+});
+
+// Shopify接続テスト
+app.get('/api/test/shopify', async (req, res) => {
+  try {
+    const results = await testShopifyConnection();
+    logger.info('Shopify connection test completed', { overall: results.overall });
+    res.json(results);
+  } catch (error) {
+    logger.error('Shopify test error', { error: error.message });
+    res.status(500).json({
+      error: 'テストの実行に失敗しました',
+      details: error.message
+    });
+  }
+});
+
+// データベーステスト
+app.get('/api/test/database', async (req, res) => {
+  try {
+    const results = await testDatabaseConnection();
+    logger.info('Database test completed', { overall: results.overall });
+    res.json(results);
+  } catch (error) {
+    logger.error('Database test error', { error: error.message });
+    res.status(500).json({
+      error: 'テストの実行に失敗しました',
+      details: error.message
+    });
+  }
+});
+
 // SPAのフォールバック（HTMLファイルのみ）
 app.get('*', (req, res) => {
   // 静的ファイルのリクエストは除外
@@ -584,11 +676,25 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// ===== エラーハンドリング =====
+
+// 404エラーハンドラ
+app.use(notFoundHandler);
+
+// グローバルエラーハンドラ
+app.use(errorHandler);
+
 app.listen(port, () => {
+  logger.info('Server started successfully', {
+    port,
+    nodeEnv: process.env.NODE_ENV
+  });
   console.log(`Server running on port ${port}`);
   console.log(`- User page: http://localhost:${port}/`);
   console.log(`- Status: http://localhost:${port}/status`);
   console.log(`- Approval: http://localhost:${port}/approval`);
   console.log(`- Contact: http://localhost:${port}/contact`);
   console.log(`- Admin: http://localhost:${port}/admin`);
+  console.log(`- Health Check: http://localhost:${port}/api/health`);
+  console.log(`- Shopify Test: http://localhost:${port}/api/test/shopify`);
 });
