@@ -411,6 +411,14 @@
                         navbarMenu.classList.remove('show');
                     }
                 });
+
+                // メニュー内のリンクをクリックしたらメニューを閉じる
+                const menuLinks = navbarMenu.querySelectorAll('.navbar-link');
+                menuLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        navbarMenu.classList.remove('show');
+                    });
+                });
             }
         }
 
