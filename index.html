@@ -19,6 +19,12 @@
             color: #2d3748;
         }
 
+        @media (max-width: 768px) {
+            body {
+                padding: 70px 8px 8px;
+            }
+        }
+
         /* ナビゲーションバー */
         .navbar {
             position: fixed;
@@ -602,7 +608,7 @@
 
         @media (max-width: 768px) {
             .form-content {
-                padding: 24px;
+                padding: 16px 12px;
             }
 
             .form-row {
@@ -628,7 +634,8 @@
             }
 
             .choice-buttons {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
             }
 
             .button-container {
@@ -639,23 +646,108 @@
                 flex-direction: column;
             }
 
+            /* モバイル用テーブル2行表示 */
+            .modern-table thead {
+                display: none;
+            }
+
+            .modern-table tbody {
+                display: block;
+            }
+
+            .modern-table tbody tr {
+                display: grid;
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+                border: 2px solid #e5e7eb;
+                border-radius: 12px;
+                margin-bottom: 12px;
+                padding: 12px;
+                background: white;
+            }
+
+            .modern-table tbody tr td {
+                border: none;
+                padding: 4px 0;
+            }
+
+            .modern-table tbody tr td:nth-child(1) {
+                display: none; /* No列を非表示 */
+            }
+
+            .modern-table tbody tr td:nth-child(2) {
+                grid-column: 1;
+                grid-row: 1;
+                font-weight: 700;
+                font-size: 14px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid #e5e7eb;
+                margin-bottom: 8px;
+            }
+
+            .modern-table tbody tr td:nth-child(3),
+            .modern-table tbody tr td:nth-child(4),
+            .modern-table tbody tr td:nth-child(5),
+            .modern-table tbody tr td:nth-child(6) {
+                grid-column: 1;
+                grid-row: 2;
+                display: inline-block;
+                width: auto;
+            }
+
+            .modern-table tbody tr td:nth-child(3)::before {
+                content: '数量: ';
+                font-weight: 600;
+                color: #6b7280;
+            }
+
+            .modern-table tbody tr td:nth-child(4)::before {
+                content: ' | 申告額: ';
+                font-weight: 600;
+                color: #6b7280;
+            }
+
+            .modern-table tbody tr td:nth-child(5)::before {
+                content: ' | 取得額: ';
+                font-weight: 600;
+                color: #6b7280;
+            }
+
+            .modern-table tbody tr td:nth-child(6) {
+                display: block;
+                margin-top: 8px;
+                padding-top: 8px;
+                border-top: 1px solid #e5e7eb;
+            }
+
+            .modern-table tfoot {
+                display: block;
+                background: white;
+                border-radius: 12px;
+                padding: 12px;
+            }
+
+            .modern-table tfoot tr {
+                display: block;
+            }
+
+            .modern-table tfoot td {
+                display: block;
+                padding: 4px 0;
+                border: none;
+                text-align: left;
+            }
+
             .card-name-cell {
-                max-width: 150px;
-                font-size: 13px;
-            }
-
-            .modern-table {
-                font-size: 13px;
-            }
-
-            .modern-table th,
-            .modern-table td {
-                padding: 8px 6px;
+                max-width: none;
+                font-size: 14px;
+                -webkit-line-clamp: 2;
             }
 
             .action-btn {
-                padding: 6px 10px;
+                padding: 6px 12px;
                 font-size: 12px;
+                margin-right: 6px;
             }
         }
     </style>
