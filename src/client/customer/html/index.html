@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSA代行買取承認</title>
+    <link rel="stylesheet" href="css/customer.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>PSA代行買取承認</h1>
+            <p class="subtitle">カード承認フォーム</p>
+        </header>
+
+        <div id="loadingMessage" class="message-box info">
+            読み込み中...
+        </div>
+
+        <div id="errorMessage" class="message-box error" style="display: none;"></div>
+
+        <div id="mainContent" style="display: none;">
+            <div class="customer-info card">
+                <h2>顧客情報</h2>
+                <p><strong>お名前:</strong> <span id="customerName"></span></p>
+                <p><strong>メールアドレス:</strong> <span id="customerEmail"></span></p>
+            </div>
+
+            <form id="approvalForm">
+                <div class="card">
+                    <h2>カード承認</h2>
+                    <p class="instruction">各カードについて、承認・拒否・保留のいずれかを選択してください。</p>
+
+                    <div id="cardsContainer">
+                        <!-- カード情報がここに表示される -->
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        回答を送信
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="completedMessage" class="message-box success" style="display: none;">
+            回答を送信しました。ありがとうございました。
+        </div>
+    </div>
+
+    <div id="messageBox" class="message-box"></div>
+
+    <script src="js/customer.js"></script>
+</body>
+</html>

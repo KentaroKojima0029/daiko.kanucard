@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSA代行買取承認システム - 管理者ダッシュボード</title>
+    <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>PSA代行買取承認システム</h1>
+            <p class="subtitle">管理者ダッシュボード</p>
+        </header>
+
+        <div class="main-content">
+            <!-- 承認申請フォーム -->
+            <section class="card">
+                <h2>新規承認申請</h2>
+                <form id="approvalForm">
+                    <div class="form-group">
+                        <label for="customerName">顧客名 *</label>
+                        <input type="text" id="customerName" name="customerName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">メールアドレス *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+
+                    <h3>カード情報</h3>
+                    <div id="cardsContainer">
+                        <!-- カード情報がここに追加される -->
+                    </div>
+
+                    <button type="button" id="addCardBtn" class="btn btn-secondary">
+                        カードを追加
+                    </button>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            承認申請を送信
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- 承認リスト -->
+            <section class="card">
+                <h2>承認リスト</h2>
+                <div class="table-responsive">
+                    <table id="approvalTable">
+                        <thead>
+                            <tr>
+                                <th>日時</th>
+                                <th>顧客名</th>
+                                <th>メール</th>
+                                <th>カード数</th>
+                                <th>ステータス</th>
+                                <th>承認キー</th>
+                            </tr>
+                        </thead>
+                        <tbody id="approvalTableBody">
+                            <!-- データがここに追加される -->
+                        </tbody>
+                    </table>
+                </div>
+                <button id="refreshBtn" class="btn btn-secondary">
+                    リストを更新
+                </button>
+            </section>
+        </div>
+    </div>
+
+    <div id="messageBox" class="message-box"></div>
+
+    <script src="/admin/js/admin.js"></script>
+</body>
+</html>

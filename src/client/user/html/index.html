@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSA代行サービス - 代行依頼フォーム</title>
+    <link rel="stylesheet" href="/user/css/style.css">
+</head>
+<body>
+    <div class="theme-toggle">
+        <button id="themeToggle" class="theme-btn" title="ダークモード切替">
+            <span class="theme-icon">🌙</span>
+        </button>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">PSA代行サービス</h1>
+                <p class="tagline">トレーディングカードのPSA鑑定代行をお手伝いします</p>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <section class="hero">
+                <h2>代行依頼フォーム</h2>
+                <p>お探しのカード情報をご入力ください。専門スタッフが迅速に対応いたします。</p>
+            </section>
+
+            <section class="card form-section">
+                <form id="agencyRequestForm">
+                    <div class="form-section-header">
+                        <h3>お客様情報</h3>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customerName">お名前 <span class="required">*</span></label>
+                            <input type="text" id="customerName" name="customerName" required
+                                   placeholder="山田 太郎">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">メールアドレス <span class="required">*</span></label>
+                            <input type="email" id="email" name="email" required
+                                   placeholder="example@email.com">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">電話番号</label>
+                            <input type="tel" id="phone" name="phone"
+                                   placeholder="090-1234-5678">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="budget">ご予算</label>
+                            <input type="text" id="budget" name="budget"
+                                   placeholder="例: 10,000円〜50,000円">
+                        </div>
+                    </div>
+
+                    <div class="form-section-header">
+                        <h3>カード情報</h3>
+                        <p class="section-description">お探しのカード情報をご入力ください</p>
+                    </div>
+
+                    <div id="cardsContainer">
+                        <!-- カード情報がここに追加される -->
+                    </div>
+
+                    <button type="button" id="addCardBtn" class="btn btn-secondary">
+                        <span class="btn-icon">➕</span> カードを追加
+                    </button>
+
+                    <div class="form-group">
+                        <label for="requirements">ご要望・備考</label>
+                        <textarea id="requirements" name="requirements" rows="4"
+                                  placeholder="その他ご要望やご質問がございましたらご記入ください"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-large">
+                            <span class="btn-icon">📧</span> 代行依頼を送信
+                        </button>
+                    </div>
+
+                    <div class="form-note">
+                        <p><strong>※ 送信後の流れ</strong></p>
+                        <ul>
+                            <li>ご入力いただいたメールアドレスに確認メールが届きます</li>
+                            <li>メールに記載されたマイページURLから進捗状況を確認できます</li>
+                            <li>専門スタッフが内容を確認後、ご連絡いたします</li>
+                        </ul>
+                    </div>
+                </form>
+            </section>
+
+            <section class="card features">
+                <h3>サービスの特徴</h3>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <h4>専門知識</h4>
+                        <p>PSA鑑定のプロフェッショナルが対応</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">⚡</div>
+                        <h4>迅速対応</h4>
+                        <p>24時間以内に初回ご連絡</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">💬</div>
+                        <h4>リアルタイム連絡</h4>
+                        <p>マイページでいつでも進捗確認</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🔒</div>
+                        <h4>安心安全</h4>
+                        <p>厳重な梱包と保険で大切なカードを保護</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2025 PSA代行サービス. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <div id="messageBox" class="message-box"></div>
+
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✅ 代行依頼を受け付けました</h3>
+            </div>
+            <div class="modal-body">
+                <p>ご依頼ありがとうございます。</p>
+                <p>確認メールをお送りしましたので、ご確認ください。</p>
+                <div class="mypage-info">
+                    <p><strong>マイページURL:</strong></p>
+                    <div class="url-box">
+                        <input type="text" id="mypageUrl" readonly>
+                        <button id="copyUrlBtn" class="btn btn-secondary">コピー</button>
+                    </div>
+                    <p class="note">このURLをブックマークして、進捗状況をご確認ください。</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="gotoMypageBtn" class="btn btn-primary">マイページへ</button>
+                <button id="closeModalBtn" class="btn btn-secondary">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/user/js/request.js"></script>
+</body>
+</html>

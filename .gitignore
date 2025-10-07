@@ -1,0 +1,33 @@
+# 依存関係
+node_modules/
+package-lock.json
+
+# 環境変数（機密情報）
+src/config/.env
+
+# SSL証明書（機密情報）
+src/config/server.key
+src/config/server.crt
+
+# バックアップディレクトリ（本番データを含む可能性）
+src/data/backups/*
+!src/data/backups/.gitkeep
+
+# ログファイル
+*.log
+npm-debug.log*
+
+# OS生成ファイル
+.DS_Store
+Thumbs.db
+
+# エディタ設定
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 一時ファイル
+*.tmp
+.temp/
