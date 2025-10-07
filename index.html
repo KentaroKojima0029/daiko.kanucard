@@ -12,11 +12,12 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
             min-height: 100vh;
             padding: 80px 20px 20px;
-            color: #2d3748;
+            color: #1e293b;
+            letter-spacing: 0.02em;
         }
 
         @media (max-width: 768px) {
@@ -32,8 +33,9 @@
             left: 0;
             right: 0;
             background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(203, 213, 225, 0.3);
             z-index: 1000;
             padding: 0;
         }
@@ -50,11 +52,12 @@
         .navbar-brand {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #4f46e5;
+            color: #0f172a;
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 8px;
+            letter-spacing: 0.05em;
         }
 
         .navbar-menu {
@@ -71,7 +74,7 @@
 
         .navbar-link {
             padding: 10px 20px;
-            color: #374151;
+            color: #475569;
             text-decoration: none;
             font-weight: 600;
             font-size: 15px;
@@ -81,14 +84,16 @@
         }
 
         .navbar-link:hover {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            background: linear-gradient(135deg, #1e40af, #1e3a8a);
             color: white;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
         }
 
         .navbar-link.active {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            background: linear-gradient(135deg, #1e40af, #1e3a8a);
             color: white;
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
         }
 
         .mobile-menu-button {
@@ -96,7 +101,7 @@
             background: none;
             border: none;
             font-size: 28px;
-            color: #4f46e5;
+            color: #1e40af;
             cursor: pointer;
             padding: 8px;
         }
@@ -163,10 +168,11 @@
         }
 
         .main-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(16px);
             border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(226, 232, 240, 0.5);
             overflow: hidden;
             margin-bottom: 30px;
         }
@@ -179,10 +185,23 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
             color: white;
             padding: 40px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
+            pointer-events: none;
         }
 
         @media (max-width: 768px) {
@@ -203,11 +222,17 @@
             font-size: 2rem;
             font-weight: 700;
             margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 0.05em;
         }
 
         .header p {
             font-size: 1rem;
             opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 0.03em;
         }
 
         .form-content {
@@ -221,19 +246,21 @@
         .section-title {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #1a202c;
+            color: #0f172a;
             margin-bottom: 24px;
             display: flex;
             align-items: center;
             gap: 12px;
+            letter-spacing: 0.03em;
         }
 
         .section-title::before {
             content: '';
             width: 5px;
             height: 28px;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
             border-radius: 3px;
+            box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);
         }
 
         .form-group {
@@ -379,10 +406,10 @@
 
         .choice-btn {
             padding: 16px;
-            border: 2px solid #e5e7eb;
+            border: 2px solid #e2e8f0;
             border-radius: 12px;
             background: white;
-            color: #374151;
+            color: #475569;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -391,22 +418,26 @@
         }
 
         .choice-btn:hover {
-            border-color: #4f46e5;
+            border-color: #1e40af;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.15);
         }
 
         .choice-btn.active {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            border-color: #4f46e5;
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            border-color: #1e40af;
             color: white;
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
         }
 
         .choice-btn.blue.active {
-            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            background: linear-gradient(135deg, #0284c7, #0ea5e9);
+            border-color: #0284c7;
         }
 
         .choice-btn.gray.active {
-            background: linear-gradient(135deg, #6b7280, #4b5563);
+            background: linear-gradient(135deg, #475569, #64748b);
+            border-color: #475569;
         }
 
         .btn {
@@ -450,19 +481,21 @@
         }
 
         .btn-submit {
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
             color: white;
             padding: 18px 40px;
             font-size: 18px;
             font-weight: 700;
             width: 100%;
             margin-top: 32px;
-            box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 8px 20px -4px rgba(30, 64, 175, 0.4);
+            letter-spacing: 0.05em;
         }
 
         .btn-submit:hover:not(:disabled) {
             transform: translateY(-3px);
-            box-shadow: 0 12px 25px -5px rgba(16, 185, 129, 0.5);
+            box-shadow: 0 12px 25px -5px rgba(30, 64, 175, 0.5);
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
         }
 
         .btn-submit:disabled {
@@ -810,7 +843,7 @@
     <nav class="navbar">
         <div class="navbar-container">
             <a href="/" class="navbar-brand">
-                🎴 PSA代行サービス
+                PSA代行サービス
             </a>
             <button class="mobile-menu-button" id="mobileMenuButton">
                 ☰
@@ -828,7 +861,7 @@
     <div class="container">
         <div class="main-card">
             <div class="header">
-                <h1>🎴 PSA代行サービス</h1>
+                <h1>PSA代行サービス</h1>
                 <p>トレーディングカードのPSA鑑定代行をお手伝いします</p>
             </div>
 
@@ -840,7 +873,7 @@
                     <form id="itemForm" class="card-form">
                         <div class="form-group">
                             <label class="form-label" for="searchItem">
-                                🎴 カード詳細情報<span class="required">*</span>
+                                カード詳細情報<span class="required">*</span>
                             </label>
                             <input
                                 type="text"
@@ -854,7 +887,7 @@
 
                         <div class="input-grid">
                             <div class="form-group">
-                                <label class="form-label" for="declaredValue">💰 申告額（1枚）<span class="required">*</span></label>
+                                <label class="form-label" for="declaredValue">申告額（1枚）<span class="required">*</span></label>
                                 <input
                                     type="number"
                                     id="declaredValue"
@@ -940,7 +973,7 @@
                     <form id="contactForm">
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label" for="plan">📋 代行プラン<span class="required">*</span></label>
+                                <label class="form-label" for="plan">代行プラン<span class="required">*</span></label>
                                 <select id="plan" class="form-select" required>
                                     <option value="normal">ノーマル 日本 (2.2%)</option>
                                     <option value="guarantee">70％保証 日本 (3.3%)</option>
@@ -964,7 +997,7 @@
                         </div>
 
                         <div class="choice-section">
-                            <div class="choice-label">💵 買取額の提示</div>
+                            <div class="choice-label">買取額の提示</div>
                             <div class="choice-buttons">
                                 <button type="button" class="choice-btn" data-option="purchaseOffer" data-value="希望する">
                                     希望する
@@ -977,7 +1010,7 @@
                         </div>
 
                         <div class="choice-section">
-                            <div class="choice-label">📮 返却方法</div>
+                            <div class="choice-label">返却方法</div>
                             <div class="choice-buttons">
                                 <button type="button" class="choice-btn" data-option="returnMethod" data-value="即時返送">
                                     即時返送（送料負担）
@@ -990,7 +1023,7 @@
                         </div>
 
                         <div class="choice-section">
-                            <div class="choice-label">🔍 無料検品</div>
+                            <div class="choice-label">無料検品</div>
                             <div class="choice-buttons">
                                 <button type="button" class="choice-btn" data-option="inspectionOption" data-value="希望する">
                                     希望する（推奨）
@@ -1004,7 +1037,7 @@
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label" for="contactName">👤 お名前<span class="required">*</span></label>
+                                <label class="form-label" for="contactName">お名前<span class="required">*</span></label>
                                 <input
                                     required
                                     id="contactName"
@@ -1014,7 +1047,7 @@
                                 >
                             </div>
                             <div class="form-group">
-                                <label class="form-label" for="contactEmail">📧 メールアドレス<span class="required">*</span></label>
+                                <label class="form-label" for="contactEmail">メールアドレス<span class="required">*</span></label>
                                 <input
                                     required
                                     id="contactEmail"
@@ -1036,7 +1069,7 @@
                         </div>
 
                         <button type="submit" class="btn btn-submit" id="submitBtn">
-                            📋 内容を確認する
+                            内容を確認する
                         </button>
 
                         <div class="note-box">
@@ -1058,7 +1091,7 @@
     <div class="modal" id="confirmationModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>📋 送信内容の最終確認</h3>
+                <h3>送信内容の最終確認</h3>
                 <p style="color: rgba(255, 255, 255, 0.9);">以下の内容で送信いたします</p>
             </div>
             <div class="modal-body">
@@ -1085,7 +1118,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" id="finalSubmitBtn">
-                    📧 送信する
+                    送信する
                 </button>
                 <button class="btn btn-danger" id="closeConfirmationBtn">
                     戻る
@@ -1442,7 +1475,7 @@
             `).join('');
 
             document.getElementById('confirmationDetails').innerHTML = `
-                <h4 style="margin-bottom: 16px; color: #1a202c; font-weight: 700;">📋 基本情報</h4>
+                <h4 style="margin-bottom: 16px; color: #1a202c; font-weight: 700;">基本情報</h4>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
                     <div><strong>お名前:</strong> ${document.getElementById('contactName').value}</div>
                     <div><strong>メール:</strong> ${document.getElementById('contactEmail').value}</div>
@@ -1454,11 +1487,11 @@
                     <div><strong>カード枚数:</strong> ${totalQuantity}枚</div>
                 </div>
 
-                <h4 style="margin-bottom: 16px; color: #1a202c; font-weight: 700;">🎴 カード一覧</h4>
+                <h4 style="margin-bottom: 16px; color: #1a202c; font-weight: 700;">カード一覧</h4>
                 ${cardsList}
 
                 ${document.getElementById('contactBody').value ? `
-                    <h4 style="margin: 24px 0 16px 0; color: #1a202c; font-weight: 700;">💬 メッセージ</h4>
+                    <h4 style="margin: 24px 0 16px 0; color: #1a202c; font-weight: 700;">メッセージ</h4>
                     <div style="padding: 12px; background: #f9fafb; border-radius: 8px;">
                         ${document.getElementById('contactBody').value}
                     </div>
@@ -1539,7 +1572,7 @@
                 alert('送信に失敗しました。もう一度お試しください。');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = '📧 送信する';
+                submitBtn.textContent = '送信する';
             }
         }
 
