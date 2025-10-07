@@ -9,7 +9,16 @@ const port = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname));
+
+// 静的ファイルの配信（優先）
+app.use(express.static(__dirname, {
+  maxAge: '1d',
+  setHeaders: (res, path) => {
+    if (path.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  }
+}));
 
 // Nodemailer設定
 const transporter = nodemailer.createTransport({
@@ -403,39 +412,20 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-// 管理者ページのルーティング
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'admin', 'index.html'));
-});
-
-// リッチフォームのルーティング
-app.get('/form', (req, res) => {
-  res.sendFile(path.join(__dirname, 'form.html'));
-});
-
-// 進捗確認ページ
-app.get('/status', (req, res) => {
-  res.sendFile(path.join(__dirname, 'status.html'));
-});
-
-// 買取承認ページ
-app.get('/approval', (req, res) => {
-  res.sendFile(path.join(__dirname, 'approval.html'));
-});
-
-// お問い合わせページ
-app.get('/contact', (req, res) => {
-  res.sendFile(path.join(__dirname, 'contact.html'));
-});
-
-// その他のルート（利用者向けページ）
+// SPAのフォールバック（HTMLファイルのみ）
 app.get('*', (req, res) => {
+  // 静的ファイルのリクエストは除外
+  if (req.path.includes('.')) {
+    return res.status(404).send('File not found');
+  }
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
   console.log(`- User page: http://localhost:${port}/`);
-  console.log(`- Rich form: http://localhost:${port}/form`);
-  console.log(`- Admin page: http://localhost:${port}/admin`);
+  console.log(`- Status: http://localhost:${port}/status`);
+  console.log(`- Approval: http://localhost:${port}/approval`);
+  console.log(`- Contact: http://localhost:${port}/contact`);
+  console.log(`- Admin: http://localhost:${port}/admin`);
 });
