@@ -2,10 +2,20 @@ const nodemailer = require('nodemailer');
 const database = require('./database');
 const { findCustomerByEmail } = require('./shopify-client');
 
+console.log('[Email Auth Init] nodemailer object:', {
+  type: typeof nodemailer,
+  isObject: typeof nodemailer === 'object',
+  keys: Object.keys(nodemailer || {}),
+  hasCreateTransporter: typeof nodemailer?.createTransporter,
+  nodemailer: nodemailer
+});
+
 // SMTP設定（遅延初期化）
 let transporter = null;
 function getTransporter() {
   if (!transporter) {
+    console.log('[Email Auth] Creating transporter, nodemailer type:', typeof nodemailer);
+    console.log('[Email Auth] nodemailer.createTransporter type:', typeof nodemailer.createTransporter);
     transporter = nodemailer.createTransporter({
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
