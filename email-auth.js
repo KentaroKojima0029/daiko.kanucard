@@ -16,14 +16,28 @@ function getTransporter() {
   if (!transporter) {
     console.log('[Email Auth] Creating transporter, nodemailer type:', typeof nodemailer);
     console.log('[Email Auth] nodemailer.createTransport type:', typeof nodemailer.createTransport);
+
+    const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
+    const useSSL = smtpPort === 465;
+
+    console.log('[Email Auth] SMTP config:', {
+      host: process.env.SMTP_HOST,
+      port: smtpPort,
+      secure: useSSL
+    });
+
     transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT,
-      secure: false,
+      port: smtpPort,
+      secure: useSSL, // true for port 465, false for other ports
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      // タイムアウトを延長
+      connectionTimeout: 60000, // 60秒
+      greetingTimeout: 30000, // 30秒
+      socketTimeout: 60000, // 60秒
     });
   }
   return transporter;
