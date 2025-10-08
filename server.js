@@ -692,6 +692,45 @@ app.get('/api/debug/customers', async (req, res) => {
   }
 });
 
+// メールアドレスで顧客を検索（デバッグ用）
+app.get('/api/debug/search-email', async (req, res) => {
+  try {
+    const email = req.query.email;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'emailパラメータが必要です'
+      });
+    }
+
+    console.log('[DEBUG API] Searching for email:', email);
+
+    const { findCustomerByEmail } = require('./shopify-client');
+    const customer = await findCustomerByEmail(email);
+
+    console.log('[DEBUG API] Search result:', {
+      found: !!customer,
+      email: customer?.email || 'N/A'
+    });
+
+    res.json({
+      success: true,
+      email: email,
+      found: !!customer,
+      customer: customer || null
+    });
+  } catch (error) {
+    console.error('[DEBUG API] Search error:', error);
+    logger.error('Email search error', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: '検索に失敗しました',
+      details: error.message
+    });
+  }
+});
+
 // ===== HTMLページルーティング =====
 
 // ログインページ
