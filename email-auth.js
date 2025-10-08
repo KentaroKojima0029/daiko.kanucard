@@ -2,16 +2,22 @@ const nodemailer = require('nodemailer');
 const { verificationQueries, userQueries } = require('./database');
 const { findCustomerByEmail } = require('./shopify-client');
 
-// SMTP設定
-const transporter = nodemailer.createTransporter({
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+// SMTP設定（遅延初期化）
+let transporter = null;
+function getTransporter() {
+  if (!transporter) {
+    transporter = nodemailer.createTransporter({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+  }
+  return transporter;
+}
 
 // 認証コード生成（6桁の数字）
 function generateCode() {
@@ -48,7 +54,7 @@ async function sendVerificationCode(email) {
 
     // メール送信
     try {
-      await transporter.sendMail({
+      await getTransporter().sendMail({
         from: `"PSA代行サービス" <${process.env.FROM_EMAIL}>`,
         to: email,
         subject: '【PSA代行サービス】認証コード',
