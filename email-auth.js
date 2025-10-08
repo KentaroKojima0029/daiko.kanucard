@@ -62,6 +62,15 @@ async function sendVerificationCode(email) {
 
     // メール送信
     try {
+      console.log('[Email Auth] Attempting to send email with config:', {
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        user: process.env.SMTP_USER,
+        from: process.env.FROM_EMAIL,
+        to: email,
+        hasPassword: !!process.env.SMTP_PASS
+      });
+
       await getTransporter().sendMail({
         from: `"PSA代行サービス" <${process.env.FROM_EMAIL}>`,
         to: email,
@@ -82,9 +91,17 @@ async function sendVerificationCode(email) {
         text: `【PSA代行サービス】認証コード: ${code}\n有効期限は10分間です。`,
       });
 
+      console.log('[Email Auth] Email sent successfully to:', email);
       return { success: true, message: 'メールに認証コードを送信しました' };
     } catch (mailError) {
-      console.error('メール送信エラー:', mailError);
+      console.error('[Email Auth] メール送信エラー:', {
+        error: mailError.message,
+        code: mailError.code,
+        command: mailError.command,
+        responseCode: mailError.responseCode,
+        response: mailError.response,
+        stack: mailError.stack
+      });
 
       // 開発環境ではメール送信失敗でもコンソールに表示されているので成功とする
       if (process.env.NODE_ENV === 'development' || process.env.MAIL_DEBUG === 'true') {
