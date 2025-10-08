@@ -18,7 +18,7 @@ function initShopify() {
     apiKey: process.env.SHOPIFY_API_KEY || 'not-needed-for-custom-app',
     apiSecretKey: process.env.SHOPIFY_API_SECRET || 'not-needed-for-custom-app',
     scopes: ['read_customers', 'read_orders'],
-    hostName: SHOPIFY_SHOP,
+    hostName: `${SHOPIFY_SHOP}.myshopify.com`,
     apiVersion: ApiVersion.October24,
     isEmbeddedApp: false,
     isCustomStoreApp: true,

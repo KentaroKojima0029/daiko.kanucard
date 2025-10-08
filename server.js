@@ -32,6 +32,9 @@ const {
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Render/プロキシ環境対応
+app.set('trust proxy', 1);
+
 // データベース初期化
 initDatabase();
 
