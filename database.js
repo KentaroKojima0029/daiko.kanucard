@@ -88,11 +88,17 @@ function initDatabase() {
   console.log('Database initialized successfully');
 }
 
-// テーブル作成を先に実行
-initDatabase();
+// クエリオブジェクトを初期化（遅延初期化）
+let userQueries = null;
+let verificationQueries = null;
+let submissionQueries = null;
+let sessionQueries = null;
+let contactQueries = null;
 
-// クエリオブジェクトを初期化（テーブル作成後）
-const userQueries = {
+function initQueries() {
+  if (userQueries) return; // Already initialized
+
+  userQueries = {
   findByEmail: db.prepare('SELECT * FROM users WHERE email = ?'),
   findById: db.prepare('SELECT * FROM users WHERE id = ?'),
   findByPhoneNumber: db.prepare('SELECT * FROM users WHERE phone_number = ?'),
@@ -105,10 +111,10 @@ const userQueries = {
     SET email = ?, name = ?, updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
   `),
-};
+  };
 
-// 認証コード操作
-const verificationQueries = {
+  // 認証コード操作
+  verificationQueries = {
   create: db.prepare(`
     INSERT INTO verification_codes (phone_number, code, expires_at)
     VALUES (?, ?, ?)
@@ -132,10 +138,10 @@ const verificationQueries = {
     DELETE FROM verification_codes
     WHERE expires_at <= datetime('now')
   `),
-};
+  };
 
-// 代行依頼操作
-const submissionQueries = {
+  // 代行依頼操作
+  submissionQueries = {
   findById: db.prepare('SELECT * FROM form_submissions WHERE id = ?'),
   findByEmail: db.prepare('SELECT * FROM form_submissions WHERE email = ? ORDER BY created_at DESC'),
   findByUserId: db.prepare('SELECT * FROM form_submissions WHERE user_id = ? ORDER BY created_at DESC'),
@@ -147,33 +153,41 @@ const submissionQueries = {
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `),
   updateStatus: db.prepare('UPDATE form_submissions SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'),
-};
+  };
 
-// セッション操作
-const sessionQueries = {
+  // セッション操作
+  sessionQueries = {
   findByToken: db.prepare("SELECT * FROM sessions WHERE token = ? AND expires_at > datetime('now')"),
   create: db.prepare('INSERT INTO sessions (id, user_id, token, expires_at) VALUES (?, ?, ?, ?)'),
   delete: db.prepare('DELETE FROM sessions WHERE token = ?'),
   deleteExpired: db.prepare("DELETE FROM sessions WHERE expires_at <= datetime('now')"),
-};
+  };
 
-// お問い合わせ操作
-const contactQueries = {
+  // お問い合わせ操作
+  contactQueries = {
   findById: db.prepare('SELECT * FROM contacts WHERE id = ?'),
   findByUserId: db.prepare('SELECT * FROM contacts WHERE user_id = ? ORDER BY created_at DESC'),
   create: db.prepare(`
     INSERT INTO contacts (user_id, name, email, subject, message)
     VALUES (?, ?, ?, ?, ?)
   `),
-  updateStatus: db.prepare('UPDATE contacts SET status = ? WHERE id = ?'),
-};
+    updateStatus: db.prepare('UPDATE contacts SET status = ? WHERE id = ?'),
+  };
+}
+
+// データベースとクエリを初期化
+function init() {
+  initDatabase();
+  initQueries();
+}
 
 module.exports = {
   db,
+  init,
   initDatabase,
-  userQueries,
-  verificationQueries,
-  submissionQueries,
-  sessionQueries,
-  contactQueries,
+  get userQueries() { return userQueries; },
+  get verificationQueries() { return verificationQueries; },
+  get submissionQueries() { return submissionQueries; },
+  get sessionQueries() { return sessionQueries; },
+  get contactQueries() { return contactQueries; },
 };

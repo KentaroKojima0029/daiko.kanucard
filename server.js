@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
-const { initDatabase, submissionQueries } = require('./database');
+const { init: initDatabase, submissionQueries } = require('./database');
 const { sendVerificationCode, verifyCode } = require('./email-auth');
 const { createSession, authenticate, optionalAuthenticate, logout } = require('./auth');
 const { getCustomerById, getCustomerOrders, listAllCustomers } = require('./shopify-client');
