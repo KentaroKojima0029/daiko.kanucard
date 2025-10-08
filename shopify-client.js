@@ -407,6 +407,9 @@ async function listAllCustomers(limit = 10) {
   }
 }
 
+// 初期化
+initShopify();
+
 module.exports = {
   findCustomerByEmail,
   findCustomerByPhone,
