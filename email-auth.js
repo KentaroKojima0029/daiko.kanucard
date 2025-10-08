@@ -15,8 +15,8 @@ let transporter = null;
 function getTransporter() {
   if (!transporter) {
     console.log('[Email Auth] Creating transporter, nodemailer type:', typeof nodemailer);
-    console.log('[Email Auth] nodemailer.createTransporter type:', typeof nodemailer.createTransporter);
-    transporter = nodemailer.createTransporter({
+    console.log('[Email Auth] nodemailer.createTransport type:', typeof nodemailer.createTransport);
+    transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
       secure: false,
