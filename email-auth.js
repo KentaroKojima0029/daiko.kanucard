@@ -27,10 +27,18 @@ function generateCode() {
 // メールで認証コードを送信
 async function sendVerificationCode(email) {
   try {
+    console.log('[Email Auth] Attempting to find Shopify customer for:', email);
+
     // Shopifyで顧客を検索
     const shopifyCustomer = await findCustomerByEmail(email);
 
+    console.log('[Email Auth] Shopify customer lookup result:', {
+      found: !!shopifyCustomer,
+      email: shopifyCustomer?.email || 'N/A'
+    });
+
     if (!shopifyCustomer) {
+      console.warn('[Email Auth] Customer not found in Shopify for email:', email);
       return {
         success: false,
         error: 'このメールアドレスはShopifyに登録されていません。先にShopifyでアカウントを作成してください。'

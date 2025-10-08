@@ -14,6 +14,8 @@ function initShopify() {
     return null;
   }
 
+  console.log('[Shopify Init] Initializing with shop:', SHOPIFY_SHOP);
+
   shopify = shopifyApi({
     apiKey: process.env.SHOPIFY_API_KEY || 'not-needed-for-custom-app',
     apiSecretKey: process.env.SHOPIFY_API_SECRET || 'not-needed-for-custom-app',
@@ -24,6 +26,8 @@ function initShopify() {
     isCustomStoreApp: true,
     adminApiAccessToken: SHOPIFY_ACCESS_TOKEN,
   });
+
+  console.log('[Shopify Init] Initialized successfully');
 
   return shopify;
 }
