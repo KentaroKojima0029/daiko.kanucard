@@ -34,12 +34,8 @@ function createGraphQLClient() {
     return null;
   }
 
-  const session = {
-    shop: `${SHOPIFY_SHOP}.myshopify.com`,
-    accessToken: SHOPIFY_ACCESS_TOKEN,
-    state: 'online',
-    isOnline: true,
-  };
+  const session = shopify.session.customAppSession(`${SHOPIFY_SHOP}.myshopify.com`);
+  session.accessToken = SHOPIFY_ACCESS_TOKEN;
 
   return new shopify.clients.Graphql({ session });
 }
@@ -82,10 +78,21 @@ async function findCustomerByEmail(email) {
       }
     `;
 
+    console.log('[Shopify Debug] GraphQL request details:', {
+      shop: `${SHOPIFY_SHOP}.myshopify.com`,
+      hasToken: !!SHOPIFY_ACCESS_TOKEN,
+      query: `email:${email}`
+    });
+
     const response = await client.request(query, {
       variables: {
         query: `email:${email}`,
       },
+    });
+
+    console.log('[Shopify Debug] GraphQL response received:', {
+      hasData: !!response.data,
+      customersCount: response.data?.customers?.edges?.length || 0
     });
 
     const customers = response.data.customers.edges;
