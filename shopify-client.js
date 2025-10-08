@@ -31,13 +31,23 @@ function initShopify() {
 // GraphQL クライアントの作成
 function createGraphQLClient() {
   if (!shopify || !SHOPIFY_SHOP || !SHOPIFY_ACCESS_TOKEN) {
+    console.warn('[Shopify] Client creation failed - missing credentials');
     return null;
   }
 
-  const session = shopify.session.customAppSession(`${SHOPIFY_SHOP}.myshopify.com`);
-  session.accessToken = SHOPIFY_ACCESS_TOKEN;
+  try {
+    const session = {
+      shop: `${SHOPIFY_SHOP}.myshopify.com`,
+      accessToken: SHOPIFY_ACCESS_TOKEN,
+    };
 
-  return new shopify.clients.Graphql({ session });
+    console.log('[Shopify] Creating GraphQL client for shop:', session.shop);
+
+    return new shopify.clients.Graphql({ session });
+  } catch (error) {
+    console.error('[Shopify] GraphQL client creation error:', error);
+    return null;
+  }
 }
 
 // メールアドレスで顧客を検索
