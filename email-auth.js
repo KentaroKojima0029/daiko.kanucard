@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const { verificationQueries, userQueries } = require('./database');
+const database = require('./database');
 const { findCustomerByEmail } = require('./shopify-client');
 
 // SMTP設定（遅延初期化）
@@ -49,7 +49,7 @@ async function sendVerificationCode(email) {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10分後に期限切れ
 
     // データベースに保存（phone_numberフィールドにemailを格納）
-    verificationQueries.create.run(email, code, expiresAt);
+    database.verificationQueries.create.run(email, code, expiresAt);
 
     // 開発環境ではコンソールに出力（メール送信しない）
     if (process.env.NODE_ENV === 'development' || process.env.MAIL_DEBUG === 'true') {
@@ -103,7 +103,7 @@ async function sendVerificationCode(email) {
 async function verifyCode(email, code) {
   try {
     // 最新の未検証コードを取得（phone_numberフィールドにemailが格納されている）
-    const verification = verificationQueries.findLatest.get(email);
+    const verification = database.verificationQueries.findLatest.get(email);
 
     if (!verification) {
       return { success: false, error: '認証コードが見つかりません' };
@@ -116,12 +116,12 @@ async function verifyCode(email, code) {
 
     // コードが一致しない場合
     if (verification.code !== code) {
-      verificationQueries.incrementAttempts.run(verification.id);
+      database.verificationQueries.incrementAttempts.run(verification.id);
       return { success: false, error: '認証コードが正しくありません' };
     }
 
     // 検証成功 - コードを検証済みとしてマーク
-    verificationQueries.markAsVerified.run(verification.id);
+    database.verificationQueries.markAsVerified.run(verification.id);
 
     // Shopifyから顧客情報を取得
     const shopifyCustomer = await findCustomerByEmail(email);
@@ -134,20 +134,20 @@ async function verifyCode(email, code) {
     }
 
     // ローカルデータベースでユーザーを検索または作成
-    let user = userQueries.findByPhoneNumber.get(email);
+    let user = database.userQueries.findByPhoneNumber.get(email);
     if (!user) {
       const fullName = `${shopifyCustomer.firstName || ''} ${shopifyCustomer.lastName || ''}`.trim();
-      const result = userQueries.create.run(
+      const result = database.userQueries.create.run(
         shopifyCustomer.email,
         email, // phone_numberフィールドにemailを格納
         fullName || null
       );
-      user = userQueries.findById.get(result.lastInsertRowid);
+      user = database.userQueries.findById.get(result.lastInsertRowid);
     } else {
       // 既存ユーザーの情報を更新
       const fullName = `${shopifyCustomer.firstName || ''} ${shopifyCustomer.lastName || ''}`.trim();
-      userQueries.update.run(shopifyCustomer.email, fullName, user.id);
-      user = userQueries.findById.get(user.id);
+      database.userQueries.update.run(shopifyCustomer.email, fullName, user.id);
+      user = database.userQueries.findById.get(user.id);
     }
 
     // Shopify顧客情報も返す
@@ -164,7 +164,7 @@ async function verifyCode(email, code) {
 
 // 期限切れコードのクリーンアップ
 function cleanupExpiredCodes() {
-  verificationQueries.deleteExpired.run();
+  database.verificationQueries.deleteExpired.run();
 }
 
 // 定期的にクリーンアップ（30分ごと）
