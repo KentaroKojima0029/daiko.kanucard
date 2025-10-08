@@ -88,7 +88,10 @@ function initDatabase() {
   console.log('Database initialized successfully');
 }
 
-// クエリオブジェクトを初期化（モジュールロード時に実行）
+// テーブル作成を先に実行
+initDatabase();
+
+// クエリオブジェクトを初期化（テーブル作成後）
 const userQueries = {
   findByEmail: db.prepare('SELECT * FROM users WHERE email = ?'),
   findById: db.prepare('SELECT * FROM users WHERE id = ?'),
