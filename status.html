@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>進捗確認 - PSA代行サービス</title>
+    <title>進捗状況 - PSA代行サービス</title>
     <style>
         * {
             margin: 0;
@@ -82,19 +82,6 @@
             box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
         }
 
-        .logout-btn {
-            border: none;
-            cursor: pointer;
-            background: transparent;
-        }
-
-        .logout-btn:hover {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-        }
-
         .mobile-menu-button {
             display: none;
             background: none;
@@ -108,6 +95,8 @@
         @media (max-width: 768px) {
             body {
                 padding-top: 70px;
+                padding-left: 10px;
+                padding-right: 10px;
             }
 
             .navbar-container {
@@ -144,8 +133,9 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
+            padding: 20px;
             animation: slideUp 0.8s ease-out;
         }
 
@@ -160,224 +150,205 @@
             }
         }
 
-        .main-card {
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: 0.05em;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .progress-card {
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(16px);
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(226, 232, 240, 0.5);
-            overflow: hidden;
-            margin-bottom: 30px;
+            padding: 60px 40px;
+            margin-bottom: 40px;
         }
 
-        .header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            padding: 40px;
-            text-align: center;
+        /* 進捗ステップバー */
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             position: relative;
-            overflow: hidden;
+            margin-bottom: 60px;
         }
 
-        .header::before {
-            content: '';
+        .progress-line {
+            position: absolute;
+            top: 30px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(5, 150, 105, 0.2);
+            z-index: 0;
+        }
+
+        .progress-line-fill {
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
-            pointer-events: none;
+            height: 100%;
+            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+            transition: width 0.8s ease;
+            width: 0%;
         }
 
-        .header h1 {
-            font-size: 2rem;
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+        }
+
+        .step-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(5, 150, 105, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: 700;
-            margin-bottom: 12px;
-            position: relative;
-            z-index: 1;
-            letter-spacing: 0.05em;
+            font-size: 20px;
+            transition: all 0.4s ease;
+            border: 4px solid transparent;
+            color: #64748b;
         }
 
-        .header p {
-            font-size: 1rem;
-            opacity: 0.95;
-            position: relative;
-            z-index: 1;
-            letter-spacing: 0.03em;
+        .step.active .step-circle {
+            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
+            transform: scale(1.15);
         }
 
-        .form-content {
-            padding: 40px;
+        .step.completed .step-circle {
+            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+            color: white;
+            border-color: #059669;
         }
 
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 12px;
+        .step-label {
+            font-size: 14px;
             font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 10px;
-            letter-spacing: 0.02em;
-            text-transform: uppercase;
-            opacity: 0.85;
+            text-align: center;
+            color: #64748b;
+            white-space: nowrap;
         }
 
-        .form-input {
-            width: 100%;
-            padding: 16px 20px;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
+        .step.active .step-label {
+            color: #059669;
+            font-weight: 700;
             font-size: 15px;
-            font-weight: 500;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: #ffffff;
-            color: #0f172a;
-            font-family: inherit;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
-        .form-input:focus {
-            outline: none;
-            border-color: #1e40af;
-            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.08), 0 4px 12px rgba(0, 0, 0, 0.1);
-            transform: translateY(-1px);
+        .step.completed .step-label {
+            color: #059669;
+            font-weight: 700;
         }
 
-        .form-input::placeholder {
-            color: #9ca3af;
+        .step-description {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-radius: 16px;
+            border-left: 5px solid #059669;
         }
 
-        .btn-submit {
+        .step-description h2 {
+            color: #059669;
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        .step-description p {
+            color: #064e3b;
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 14px 32px;
             background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
             color: white;
-            padding: 20px 48px;
-            font-size: 16px;
-            font-weight: 700;
-            width: 100%;
-            border: none;
+            text-decoration: none;
             border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-submit::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.6s;
-        }
-
-        .btn-submit:hover:not(:disabled)::before {
-            left: 100%;
-        }
-
-        .btn-submit:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
-        }
-
-        .btn-submit:active:not(:disabled) {
-            transform: translateY(0px);
-            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .status-card {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            border: 2px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .status-pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-processing {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .status-completed {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .info-row:last-child {
-            border-bottom: none;
-        }
-
-        .info-label {
             font-weight: 600;
-            color: #374151;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35);
         }
 
-        .info-value {
-            color: #6b7280;
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45);
         }
 
-        .note-box {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border-left: 5px solid #f59e0b;
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 24px;
-        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 10px;
+            }
 
-        .note-box strong {
-            color: #92400e;
-            font-size: 1.1rem;
-        }
+            .header h1 {
+                font-size: 1.8rem;
+            }
 
-        .note-box ul {
-            margin-top: 12px;
-            margin-left: 24px;
-            color: #78350f;
-        }
+            .header p {
+                font-size: 0.95rem;
+            }
 
-        .note-box li {
-            margin-bottom: 8px;
-            line-height: 1.6;
-        }
+            .progress-card {
+                padding: 40px 20px;
+            }
 
-        #resultContainer {
-            display: none;
+            .step-circle {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
+
+            .step.active .step-circle {
+                transform: scale(1.1);
+            }
+
+            .step-label {
+                font-size: 11px;
+            }
+
+            .step.active .step-label {
+                font-size: 12px;
+            }
+
+            .progress-line {
+                top: 20px;
+            }
+
+            .step-description h2 {
+                font-size: 1.2rem;
+            }
+
+            .step-description p {
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
@@ -397,69 +368,55 @@
                 <li><a href="/approval" class="navbar-link">買取承認</a></li>
                 <li><a href="/contact" class="navbar-link">お問い合わせ</a></li>
                 <li><a href="/admin" class="navbar-link">管理者</a></li>
-                <li><button onclick="handleLogout()" class="navbar-link logout-btn">ログアウト</button></li>
             </ul>
         </div>
     </nav>
 
     <div class="container">
-        <div class="main-card">
-            <div class="header">
-                <h1>進捗確認</h1>
-                <p>代行依頼の進捗状況を確認できます</p>
+        <div class="header">
+            <h1>進捗状況</h1>
+            <p>PSA代行買取承認システム</p>
+        </div>
+
+        <div class="progress-card">
+            <!-- 進捗ステップバー -->
+            <div class="progress-steps">
+                <div class="progress-line">
+                    <div class="progress-line-fill" id="progressFill"></div>
+                </div>
+                <div class="step active" id="step1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">受付</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">カードお預かり</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">代行料お支払い</div>
+                </div>
+                <div class="step" id="step4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">PSA社へ提出</div>
+                </div>
+                <div class="step" id="step5">
+                    <div class="step-circle">5</div>
+                    <div class="step-label">鑑定中</div>
+                </div>
+                <div class="step" id="step6">
+                    <div class="step-circle">6</div>
+                    <div class="step-label">ご返却</div>
+                </div>
             </div>
 
-            <div class="form-content">
-                <form id="statusForm">
-                    <div class="form-group">
-                        <label class="form-label" for="email">
-                            ご登録のメールアドレス
-                        </label>
-                        <input
-                            type="email"
-                            id="email"
-                            class="form-input"
-                            placeholder="example@email.com"
-                            required
-                        >
-                    </div>
+            <div class="step-description" id="stepDescription">
+                <h2>現在のステータス：受付</h2>
+                <p>お申し込みを受け付けました。カードのお預かりをお待ちしております。</p>
+            </div>
 
-                    <button type="submit" class="btn-submit" id="submitBtn">
-                        進捗を確認
-                    </button>
-                </form>
-
-                <div id="resultContainer">
-                    <div class="status-card">
-                        <span class="status-badge status-processing" id="statusBadge">処理中</span>
-
-                        <div class="info-row">
-                            <span class="info-label">申請日</span>
-                            <span class="info-value" id="requestDate">-</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">お名前</span>
-                            <span class="info-value" id="customerName">-</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">カード枚数</span>
-                            <span class="info-value" id="cardCount">-</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">現在のステータス</span>
-                            <span class="info-value" id="currentStatus">-</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="note-box">
-                    <strong>※ 進捗確認について</strong>
-                    <ul>
-                        <li>代行依頼時に登録したメールアドレスを入力してください</li>
-                        <li>進捗状況は随時更新されます</li>
-                        <li>ご不明な点がございましたら、お問い合わせページからご連絡ください</li>
-                    </ul>
-                </div>
+            <div style="text-align: center;">
+                <a href="/" class="back-link">← トップページに戻る</a>
             </div>
         </div>
     </div>
@@ -468,6 +425,7 @@
         // モバイルメニュー
         document.addEventListener('DOMContentLoaded', () => {
             setupMobileMenu();
+            updateProgress(currentStep);
         });
 
         function setupMobileMenu() {
@@ -485,7 +443,6 @@
                     }
                 });
 
-                // メニュー内のリンクをクリックしたらメニューを閉じる
                 const menuLinks = navbarMenu.querySelectorAll('.navbar-link');
                 menuLinks.forEach(link => {
                     link.addEventListener('click', () => {
@@ -495,70 +452,69 @@
             }
         }
 
-        // フォーム送信
-        document.getElementById('statusForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const submitBtn = document.getElementById('submitBtn');
-            const email = document.getElementById('email').value;
-
-            submitBtn.disabled = true;
-            submitBtn.textContent = '確認中...';
-
-            try {
-                // TODO: APIエンドポイントを実装
-                // const response = await fetch(`/api/status?email=${encodeURIComponent(email)}`);
-                // const data = await response.json();
-
-                // デモデータ（実際はAPIから取得）
-                setTimeout(() => {
-                    document.getElementById('resultContainer').style.display = 'block';
-                    document.getElementById('requestDate').textContent = '2025-10-07';
-                    document.getElementById('customerName').textContent = '山田 太郎';
-                    document.getElementById('cardCount').textContent = '15枚';
-                    document.getElementById('currentStatus').textContent = 'PSA社に鑑定依頼済み（到着待ち）';
-                    document.getElementById('statusBadge').textContent = '処理中';
-                    document.getElementById('statusBadge').className = 'status-badge status-processing';
-
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = '進捗を確認';
-                }, 1000);
-            } catch (error) {
-                alert('進捗情報の取得に失敗しました。もう一度お試しください。');
-                submitBtn.disabled = false;
-                submitBtn.textContent = '進捗を確認';
+        // ステップの説明
+        const stepDescriptions = {
+            1: {
+                title: '受付',
+                description: 'お申し込みを受け付けました。カードのお預かりをお待ちしております。'
+            },
+            2: {
+                title: 'カードお預かり',
+                description: 'カードをお預かりしました。代行料のお支払いをお願いいたします。'
+            },
+            3: {
+                title: '代行料お支払い',
+                description: '代行料のお支払いを確認いたしました。PSA社へ提出準備を進めております。'
+            },
+            4: {
+                title: 'PSA社へ提出',
+                description: 'カードをPSA社へ提出いたしました。鑑定完了までお待ちください。'
+            },
+            5: {
+                title: '鑑定中',
+                description: 'PSA社にて鑑定中です。鑑定完了までしばらくお待ちください。'
+            },
+            6: {
+                title: 'ご返却',
+                description: '鑑定が完了しました。カードをご返却いたします。'
             }
-        });
-    </script>
+        };
 
-    <!-- ログアウト機能 -->
-    <script>
-        async function handleLogout() {
-            if (!confirm('ログアウトしますか？')) {
-                return;
+        // 現在のステップ（この値をサーバーから取得することもできます）
+        let currentStep = 1;
+
+        // URLパラメータからステップを取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const stepParam = urlParams.get('step');
+        if (stepParam && stepParam >= 1 && stepParam <= 6) {
+            currentStep = parseInt(stepParam);
+        }
+
+        // 進捗状況を更新
+        function updateProgress(step) {
+            // すべてのステップをリセット
+            for (let i = 1; i <= 6; i++) {
+                const stepElement = document.getElementById(`step${i}`);
+                stepElement.classList.remove('active', 'completed');
             }
 
-            try {
-                const response = await fetch('/api/auth/logout', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-
-                if (response.ok) {
-                    window.location.href = '/login';
-                } else {
-                    alert('ログアウトに失敗しました');
-                }
-            } catch (error) {
-                console.error('Logout error:', error);
-                alert('ログアウトに失敗しました');
+            // 現在のステップまでを更新
+            for (let i = 1; i < step; i++) {
+                document.getElementById(`step${i}`).classList.add('completed');
             }
+            document.getElementById(`step${step}`).classList.add('active');
+
+            // プログレスバーの幅を更新
+            const progressWidth = ((step - 1) / 5) * 100;
+            document.getElementById('progressFill').style.width = `${progressWidth}%`;
+
+            // ステップの説明を更新
+            const desc = stepDescriptions[step];
+            document.getElementById('stepDescription').innerHTML = `
+                <h2>現在のステータス：${desc.title}</h2>
+                <p>${desc.description}</p>
+            `;
         }
     </script>
-
-    <!-- 認証チェック -->
-    <script src="/auth-check.js"></script>
 </body>
 </html>
