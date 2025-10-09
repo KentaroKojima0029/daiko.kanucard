@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="build-version" content="email-auth-v2.0">
     <title>ログイン - PSA代行サービス</title>
     <style>
         * {
@@ -204,18 +203,18 @@
                 <div id="errorMessage" class="error-message"></div>
                 <div id="codeSentMessage" class="code-sent-message"></div>
 
-                <!-- Step 1: メールアドレス入力 -->
-                <div id="emailStep" class="verification-step active">
-                    <form id="emailForm">
+                <!-- Step 1: 電話番号入力 -->
+                <div id="phoneStep" class="verification-step active">
+                    <form id="phoneForm">
                         <div class="form-group">
-                            <label class="form-label" for="email">
-                                メールアドレス
+                            <label class="form-label" for="phoneNumber">
+                                携帯電話番号
                             </label>
                             <input
-                                type="email"
-                                id="email"
+                                type="tel"
+                                id="phoneNumber"
                                 class="form-input"
-                                placeholder="example@email.com"
+                                placeholder="090-1234-5678"
                                 required
                             >
                         </div>
@@ -227,7 +226,8 @@
 
                     <div class="note-box">
                         <strong>ご注意</strong><br>
-                        Shopifyに登録されているメールアドレスを入力してください。認証コードがメールで送信されます。
+                        Shopifyに登録されている携帯電話番号を入力してください。<br>
+                        未登録の場合は、先にShopifyでアカウントを作成してください。
                     </div>
                 </div>
 
@@ -254,26 +254,26 @@
                         </button>
                     </form>
 
-                    <a href="#" class="back-link" id="backToEmail">← メールアドレス入力に戻る</a>
+                    <a href="#" class="back-link" id="backToPhone">← 電話番号入力に戻る</a>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const emailForm = document.getElementById('emailForm');
+        const phoneForm = document.getElementById('phoneForm');
         const codeForm = document.getElementById('codeForm');
-        const emailStep = document.getElementById('emailStep');
+        const phoneStep = document.getElementById('phoneStep');
         const codeStep = document.getElementById('codeStep');
-        const emailInput = document.getElementById('email');
+        const phoneNumberInput = document.getElementById('phoneNumber');
         const verificationCodeInput = document.getElementById('verificationCode');
         const sendCodeBtn = document.getElementById('sendCodeBtn');
         const verifyCodeBtn = document.getElementById('verifyCodeBtn');
         const errorMessage = document.getElementById('errorMessage');
         const codeSentMessage = document.getElementById('codeSentMessage');
-        const backToEmail = document.getElementById('backToEmail');
+        const backToPhone = document.getElementById('backToPhone');
 
-        let currentEmail = '';
+        let currentPhoneNumber = '';
 
         // エラー表示
         function showError(message) {
@@ -294,13 +294,13 @@
         }
 
         // Step 1: 認証コード送信
-        emailForm.addEventListener('submit', async (e) => {
+        phoneForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            currentEmail = emailInput.value.trim();
+            currentPhoneNumber = phoneNumberInput.value.trim();
 
-            if (!currentEmail) {
-                showError('メールアドレスを入力してください');
+            if (!currentPhoneNumber) {
+                showError('携帯電話番号を入力してください');
                 return;
             }
 
@@ -308,20 +308,14 @@
             sendCodeBtn.textContent = '送信中...';
 
             try {
-                // タイムアウト処理を追加（30秒）
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000);
-
                 const response = await fetch('/api/auth/send-code', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ email: currentEmail }),
-                    signal: controller.signal
+                    body: JSON.stringify({ phoneNumber: currentPhoneNumber })
                 });
 
-                clearTimeout(timeoutId);
                 const data = await response.json();
 
                 if (!response.ok) {
@@ -329,16 +323,12 @@
                 }
 
                 // 成功 - 認証コード入力画面へ
-                showSuccess(data.message || '認証コードをメールで送信しました');
-                emailStep.classList.remove('active');
+                showSuccess(data.message || '認証コードをSMSで送信しました');
+                phoneStep.classList.remove('active');
                 codeStep.classList.add('active');
                 verificationCodeInput.focus();
             } catch (error) {
-                if (error.name === 'AbortError') {
-                    showError('リクエストがタイムアウトしました。SMTPサーバーへの接続に問題があります。しばらく待ってから再度お試しください。');
-                } else {
-                    showError(error.message || '認証コードの送信に失敗しました');
-                }
+                showError(error.message);
             } finally {
                 sendCodeBtn.disabled = false;
                 sendCodeBtn.textContent = '認証コードを送信';
@@ -366,7 +356,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        email: currentEmail,
+                        phoneNumber: currentPhoneNumber,
                         code: code
                     })
                 });
@@ -386,11 +376,11 @@
             }
         });
 
-        // メールアドレス入力に戻る
-        backToEmail.addEventListener('click', (e) => {
+        // 電話番号入力に戻る
+        backToPhone.addEventListener('click', (e) => {
             e.preventDefault();
             codeStep.classList.remove('active');
-            emailStep.classList.add('active');
+            phoneStep.classList.add('active');
             verificationCodeInput.value = '';
         });
     </script>
