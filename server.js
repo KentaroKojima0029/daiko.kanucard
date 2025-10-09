@@ -40,6 +40,34 @@ initDatabase();
 app.use(securityHeaders);
 app.use(requestLogger);
 
+// CORS設定（外部管理画面用）
+app.use((req, res, next) => {
+  const allowedOrigins = [
+    'https://new-daiko-form.onrender.com',
+    'http://localhost:3000',
+    'http://localhost:3443',
+    'https://kanucard.com',
+    'https://www.kanucard.com',
+    'http://kanucard.com',
+    'http://www.kanucard.com',
+    process.env.ADMIN_ORIGIN // Xserverのドメインを環境変数で設定可能
+  ].filter(Boolean);
+
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin) || !origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  }
+
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Auth');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 // Middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
