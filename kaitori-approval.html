@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>買取承認 - PSA代行サービス</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #1e293b;
+            letter-spacing: 0.02em;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+        }
+
+        .header p {
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .card-info {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .card-image {
+            width: 100%;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .card-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .price-highlight {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid #f59e0b;
+            margin: 20px 0;
+        }
+
+        .price-highlight .label {
+            font-size: 0.9rem;
+            color: #78350f;
+            margin-bottom: 8px;
+        }
+
+        .price-highlight .amount {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #78350f;
+        }
+
+        .assessment-comment {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            color: #475569;
+            line-height: 1.6;
+            margin-top: 12px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 18px 24px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.05em;
+        }
+
+        .btn-approve {
+            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(5, 150, 105, 0.35);
+        }
+
+        .btn-approve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(5, 150, 105, 0.45);
+        }
+
+        .btn-reject {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f87171 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.35);
+        }
+
+        .btn-reject:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(220, 38, 38, 0.45);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .bank-form {
+            display: none;
+            margin-top: 24px;
+            padding: 24px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .bank-form.show {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #ffffff;
+            color: #0f172a;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1e40af;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.08);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+            color: white;
+            padding: 18px 48px;
+            font-size: 16px;
+            font-weight: 700;
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35);
+            letter-spacing: 0.05em;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45);
+        }
+
+        .message {
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message-error {
+            background: #fee2e2;
+            border-left: 4px solid #dc2626;
+            color: #991b1b;
+        }
+
+        .message-success {
+            background: #d1fae5;
+            border-left: 4px solid #059669;
+            color: #065f46;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #1e40af;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .note-box {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left: 5px solid #1e40af;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 24px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #1e3a8a;
+        }
+
+        @media (max-width: 768px) {
+            .card-info {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .content {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>買取承認</h1>
+                <p>カード査定結果をご確認ください</p>
+            </div>
+
+            <div class="content">
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 16px; color: #64748b;">読み込み中...</p>
+                </div>
+
+                <div id="errorMessage" class="message message-error"></div>
+                <div id="successMessage" class="message message-success"></div>
+
+                <div id="mainContent" style="display: none;">
+                    <!-- カード情報 -->
+                    <div class="section">
+                        <h2 class="section-title">カード情報</h2>
+                        <div class="card-info">
+                            <div>
+                                <img id="cardImage" class="card-image" src="" alt="カード画像">
+                            </div>
+                            <div class="card-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">カード名</span>
+                                    <span class="detail-value" id="cardName"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">コンディション</span>
+                                    <span class="detail-value" id="cardCondition"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 査定結果 -->
+                    <div class="section">
+                        <h2 class="section-title">査定結果</h2>
+                        <div class="price-highlight">
+                            <div class="label">買取査定価格</div>
+                            <div class="amount" id="assessmentPrice">¥0</div>
+                        </div>
+                        <div class="assessment-comment" id="assessmentComment"></div>
+                        <div style="margin-top: 12px; color: #64748b; font-size: 0.9rem;">
+                            査定者: <span id="assessorName"></span> | 査定日: <span id="assessmentDate"></span>
+                        </div>
+                    </div>
+
+                    <!-- 承認ボタン -->
+                    <div id="actionButtons" class="section">
+                        <div class="button-group">
+                            <button class="btn btn-approve" onclick="handleApprove()">承認する</button>
+                            <button class="btn btn-reject" onclick="handleReject()">拒否する</button>
+                        </div>
+                        <div class="note-box">
+                            <strong>ご注意</strong><br>
+                            承認された場合、指定の口座に買取金額を振り込みます。<br>
+                            拒否された場合、カードは返送となります。
+                        </div>
+                    </div>
+
+                    <!-- 振込先入力フォーム -->
+                    <div id="bankForm" class="bank-form">
+                        <h3 style="margin-bottom: 20px; color: #1e293b;">振込先情報</h3>
+                        <form id="bankInfoForm">
+                            <div class="form-group">
+                                <label class="form-label" for="bankName">銀行名</label>
+                                <input type="text" id="bankName" class="form-input" required placeholder="例: 三菱UFJ銀行">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="bankBranch">支店名</label>
+                                <input type="text" id="bankBranch" class="form-input" required placeholder="例: 新宿支店">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="accountNumber">口座番号</label>
+                                <input type="text" id="accountNumber" class="form-input" required placeholder="例: 1234567">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="accountHolder">口座名義</label>
+                                <input type="text" id="accountHolder" class="form-input" required placeholder="例: ヤマダ タロウ">
+                            </div>
+                            <button type="submit" class="btn-submit">確定する</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('id');
+        let requestData = null;
+
+        // ページ読み込み時
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!token) {
+                showError('無効なURLです');
+                return;
+            }
+            loadRequestData();
+        });
+
+        // データ読み込み
+        async function loadRequestData() {
+            const loading = document.getElementById('loading');
+            const mainContent = document.getElementById('mainContent');
+
+            loading.classList.add('show');
+
+            try {
+                const response = await fetch(`/api/kaitori/request/${token}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'データの取得に失敗しました');
+                }
+
+                requestData = data;
+                displayRequestData(data);
+
+                loading.classList.remove('show');
+                mainContent.style.display = 'block';
+            } catch (error) {
+                loading.classList.remove('show');
+                showError(error.message);
+            }
+        }
+
+        // データ表示
+        function displayRequestData(data) {
+            document.getElementById('cardImage').src = data.card_image_url || '/placeholder-card.png';
+            document.getElementById('cardName').textContent = data.card_name;
+            document.getElementById('cardCondition').textContent = data.card_condition || '未記入';
+            document.getElementById('assessmentPrice').textContent = `¥${Number(data.assessment_price).toLocaleString()}`;
+            document.getElementById('assessmentComment').textContent = data.assessment_comment || '特になし';
+            document.getElementById('assessorName').textContent = data.assessor_name || '担当者';
+            document.getElementById('assessmentDate').textContent = data.assessment_date ?
+                new Date(data.assessment_date).toLocaleDateString('ja-JP') : '未記入';
+
+            // すでに回答済みの場合
+            if (data.status !== 'pending') {
+                document.getElementById('actionButtons').innerHTML = `
+                    <div class="message message-success show">
+                        この買取依頼は既に回答済みです（${data.response_type === 'approved' ? '承認' : '拒否'}）
+                    </div>
+                `;
+            }
+        }
+
+        // 承認ボタン
+        function handleApprove() {
+            document.getElementById('actionButtons').style.display = 'none';
+            document.getElementById('bankForm').classList.add('show');
+        }
+
+        // 拒否ボタン
+        async function handleReject() {
+            if (!confirm('本当に拒否しますか？カードは返送となります。')) {
+                return;
+            }
+
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            try {
+                const response = await fetch('/api/kaitori/respond', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        token: token,
+                        responseType: 'rejected'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || '送信に失敗しました');
+                }
+
+                showSuccess('拒否しました。カードは返送いたします。');
+                setTimeout(() => {
+                    document.getElementById('actionButtons').innerHTML = `
+                        <div class="message message-success show">
+                            回答が完了しました。ご利用ありがとうございました。
+                        </div>
+                    `;
+                }, 2000);
+            } catch (error) {
+                showError(error.message);
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        }
+
+        // 振込先フォーム送信
+        document.getElementById('bankInfoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = e.target.querySelector('.btn-submit');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '送信中...';
+
+            try {
+                const response = await fetch('/api/kaitori/respond', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        token: token,
+                        responseType: 'approved',
+                        bankInfo: {
+                            bankName: document.getElementById('bankName').value,
+                            bankBranch: document.getElementById('bankBranch').value,
+                            accountNumber: document.getElementById('accountNumber').value,
+                            accountHolder: document.getElementById('accountHolder').value
+                        }
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || '送信に失敗しました');
+                }
+
+                showSuccess('承認しました。振込先情報を受け付けました。');
+                setTimeout(() => {
+                    document.getElementById('bankForm').innerHTML = `
+                        <div class="message message-success show">
+                            承認が完了しました。数日以内に指定の口座へ振り込みいたします。<br>
+                            ご利用ありがとうございました。
+                        </div>
+                    `;
+                }, 2000);
+            } catch (error) {
+                showError(error.message);
+                submitBtn.disabled = false;
+                submitBtn.textContent = '確定する';
+            }
+        });
+
+        // エラー表示
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 5000);
+        }
+
+        // 成功メッセージ表示
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = message;
+            successMessage.classList.add('show');
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

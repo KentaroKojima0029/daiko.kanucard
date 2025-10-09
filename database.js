@@ -172,6 +172,36 @@ function initDatabase() {
     )
   `);
 
+  // 買取依頼テーブル
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS kaitori_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      token TEXT NOT NULL UNIQUE,
+      card_name TEXT NOT NULL,
+      card_condition TEXT,
+      card_image_url TEXT,
+      assessment_price REAL,
+      assessment_comment TEXT,
+      assessor_name TEXT,
+      assessment_date DATETIME,
+      customer_name TEXT NOT NULL,
+      customer_email TEXT NOT NULL,
+      customer_phone TEXT,
+      status TEXT DEFAULT 'pending',
+      response_type TEXT,
+      response_date DATETIME,
+      bank_name TEXT,
+      bank_branch TEXT,
+      account_number TEXT,
+      account_holder TEXT,
+      return_method TEXT,
+      valid_until DATETIME,
+      notes TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   console.log('Database initialized successfully');
 }
 
@@ -185,6 +215,7 @@ let progressQueries = null;
 let paymentQueries = null;
 let progressHistoryQueries = null;
 let notificationQueries = null;
+let kaitoriQueries = null;
 
 function initQueries() {
   if (userQueries) return; // Already initialized
@@ -337,6 +368,37 @@ function initQueries() {
       WHERE id = ?
     `),
   };
+
+  // 買取依頼管理操作
+  kaitoriQueries = {
+    findByToken: db.prepare('SELECT * FROM kaitori_requests WHERE token = ?'),
+    findById: db.prepare('SELECT * FROM kaitori_requests WHERE id = ?'),
+    findAll: db.prepare('SELECT * FROM kaitori_requests ORDER BY created_at DESC'),
+    findByStatus: db.prepare('SELECT * FROM kaitori_requests WHERE status = ? ORDER BY created_at DESC'),
+    create: db.prepare(`
+      INSERT INTO kaitori_requests (
+        token, card_name, card_condition, card_image_url,
+        customer_name, customer_email, customer_phone, valid_until
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `),
+    updateAssessment: db.prepare(`
+      UPDATE kaitori_requests
+      SET assessment_price = ?, assessment_comment = ?,
+          assessor_name = ?, assessment_date = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `),
+    updateResponse: db.prepare(`
+      UPDATE kaitori_requests
+      SET status = ?, response_type = ?, response_date = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE token = ?
+    `),
+    updateBankInfo: db.prepare(`
+      UPDATE kaitori_requests
+      SET bank_name = ?, bank_branch = ?, account_number = ?, account_holder = ?,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE token = ?
+    `),
+  };
 }
 
 // データベースとクエリを初期化
@@ -358,4 +420,5 @@ module.exports = {
   get paymentQueries() { return paymentQueries; },
   get progressHistoryQueries() { return progressHistoryQueries; },
   get notificationQueries() { return notificationQueries; },
+  get kaitoriQueries() { return kaitoriQueries; },
 };

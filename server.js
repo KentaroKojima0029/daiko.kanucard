@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
-const { init: initDatabase, submissionQueries } = require('./database');
+const { init: initDatabase, submissionQueries, kaitoriQueries } = require('./database');
 const { getCustomerById, getCustomerOrders, listAllCustomers } = require('./shopify-client');
 const logger = require('./logger');
 const {
@@ -593,11 +593,202 @@ app.get('/api/debug/search-email', async (req, res) => {
   }
 });
 
+// ===== 買取管理API =====
+
+// 買取依頼作成
+app.post('/api/kaitori/create', async (req, res) => {
+  try {
+    const {
+      cardName,
+      cardCondition,
+      cardImageUrl,
+      customerName,
+      customerEmail,
+      customerPhone,
+      assessmentPrice,
+      assessmentComment,
+      assessorName
+    } = req.body;
+
+    // バリデーション
+    if (!cardName || !customerName || !customerEmail) {
+      return res.status(400).json({ error: '必須項目が不足しています' });
+    }
+
+    // トークン生成
+    const crypto = require('crypto');
+    const token = crypto.randomBytes(32).toString('hex');
+
+    // 有効期限（30日後）
+    const validUntil = new Date();
+    validUntil.setDate(validUntil.getDate() + 30);
+
+    // DB登録
+    const result = kaitoriQueries.create.run(
+      token,
+      cardName,
+      cardCondition || null,
+      cardImageUrl || null,
+      customerName,
+      customerEmail,
+      customerPhone || null,
+      validUntil.toISOString()
+    );
+
+    // 査定情報がある場合は更新
+    if (assessmentPrice) {
+      kaitoriQueries.updateAssessment.run(
+        assessmentPrice,
+        assessmentComment || null,
+        assessorName || null,
+        new Date().toISOString(),
+        result.lastInsertRowid
+      );
+    }
+
+    // 承認URL生成
+    const approvalUrl = `${req.protocol}://${req.get('host')}/kaitori/approval?id=${token}`;
+
+    logger.info('Kaitori request created', {
+      id: result.lastInsertRowid,
+      cardName,
+      customerEmail
+    });
+
+    res.json({
+      success: true,
+      message: '買取依頼を作成しました',
+      id: result.lastInsertRowid,
+      token,
+      approvalUrl
+    });
+  } catch (error) {
+    console.error('Kaitori create error:', error);
+    logger.error('Kaitori create error', { error: error.message });
+    res.status(500).json({ error: '作成に失敗しました' });
+  }
+});
+
+// 買取依頼一覧取得
+app.get('/api/kaitori/list', async (req, res) => {
+  try {
+    const requests = kaitoriQueries.findAll.all();
+    res.json({ success: true, requests });
+  } catch (error) {
+    console.error('Kaitori list error:', error);
+    logger.error('Kaitori list error', { error: error.message });
+    res.status(500).json({ error: 'データの取得に失敗しました' });
+  }
+});
+
+// 買取依頼詳細取得（ID）
+app.get('/api/kaitori/detail/:id', async (req, res) => {
+  try {
+    const request = kaitoriQueries.findById.get(req.params.id);
+    if (!request) {
+      return res.status(404).json({ error: '依頼が見つかりません' });
+    }
+    res.json({ success: true, request });
+  } catch (error) {
+    console.error('Kaitori detail error:', error);
+    logger.error('Kaitori detail error', { error: error.message });
+    res.status(500).json({ error: 'データの取得に失敗しました' });
+  }
+});
+
+// 買取依頼詳細取得（トークン）
+app.get('/api/kaitori/request/:token', async (req, res) => {
+  try {
+    const request = kaitoriQueries.findByToken.get(req.params.token);
+    if (!request) {
+      return res.status(404).json({ error: '依頼が見つかりません' });
+    }
+
+    // 有効期限チェック
+    if (new Date(request.valid_until) < new Date()) {
+      return res.status(400).json({ error: 'この依頼は有効期限切れです' });
+    }
+
+    res.json(request);
+  } catch (error) {
+    console.error('Kaitori request error:', error);
+    logger.error('Kaitori request error', { error: error.message });
+    res.status(500).json({ error: 'データの取得に失敗しました' });
+  }
+});
+
+// 買取承認/拒否
+app.post('/api/kaitori/respond', async (req, res) => {
+  try {
+    const { token, responseType, bankInfo } = req.body;
+
+    if (!token || !responseType) {
+      return res.status(400).json({ error: '必須項目が不足しています' });
+    }
+
+    // 依頼取得
+    const request = kaitoriQueries.findByToken.get(token);
+    if (!request) {
+      return res.status(404).json({ error: '依頼が見つかりません' });
+    }
+
+    if (request.status !== 'pending') {
+      return res.status(400).json({ error: 'この依頼は既に回答済みです' });
+    }
+
+    // ステータス更新
+    kaitoriQueries.updateResponse.run(
+      responseType === 'approved' ? 'approved' : 'rejected',
+      responseType,
+      new Date().toISOString(),
+      token
+    );
+
+    // 承認の場合は振込先情報も更新
+    if (responseType === 'approved' && bankInfo) {
+      kaitoriQueries.updateBankInfo.run(
+        bankInfo.bankName,
+        bankInfo.bankBranch,
+        bankInfo.accountNumber,
+        bankInfo.accountHolder,
+        token
+      );
+    }
+
+    logger.info('Kaitori response received', {
+      token,
+      responseType,
+      customerEmail: request.customer_email
+    });
+
+    // TODO: 管理者へメール通知
+
+    res.json({
+      success: true,
+      message: responseType === 'approved' ? '承認しました' : '拒否しました'
+    });
+  } catch (error) {
+    console.error('Kaitori respond error:', error);
+    logger.error('Kaitori respond error', { error: error.message });
+    res.status(500).json({ error: '送信に失敗しました' });
+  }
+});
+
 // ===== HTMLページルーティング =====
 
 // 進捗状況ページ
 app.get('/status', (req, res) => {
   res.sendFile(path.join(__dirname, 'status.html'));
+});
+
+// 買取管理ページ
+app.get('/kaitori/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'kaitori-admin.html'));
+});
+
+// 買取承認ページ
+app.get('/kaitori/approval', (req, res) => {
+  res.sendFile(path.join(__dirname, 'kaitori-approval.html'));
 });
 
 // SPAのフォールバック（HTMLファイルのみ）
