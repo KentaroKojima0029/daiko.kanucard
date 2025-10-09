@@ -85,6 +85,93 @@ function initDatabase() {
     )
   `);
 
+  // 注文進捗テーブル
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS order_progress (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      submission_id INTEGER NOT NULL UNIQUE,
+      current_step INTEGER DEFAULT 1,
+      step1_status TEXT DEFAULT 'completed',
+      step1_completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      step1_details TEXT,
+      step2_status TEXT DEFAULT 'pending',
+      step2_completed_at DATETIME,
+      step2_details TEXT,
+      step3_status TEXT DEFAULT 'pending',
+      step3_completed_at DATETIME,
+      step3_details TEXT,
+      step4_status TEXT DEFAULT 'pending',
+      step4_completed_at DATETIME,
+      step4_details TEXT,
+      step5_status TEXT DEFAULT 'pending',
+      step5_completed_at DATETIME,
+      step5_details TEXT,
+      step6_status TEXT DEFAULT 'pending',
+      step6_completed_at DATETIME,
+      step6_details TEXT,
+      tracking_number TEXT,
+      psa_submission_date DATETIME,
+      psa_tracking_number TEXT,
+      estimated_completion_date DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (submission_id) REFERENCES form_submissions(id)
+    )
+  `);
+
+  // 決済情報テーブル
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS payments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      submission_id INTEGER NOT NULL,
+      payment_type TEXT NOT NULL,
+      amount REAL NOT NULL,
+      status TEXT DEFAULT 'pending',
+      payment_method TEXT,
+      payment_date DATETIME,
+      receipt_url TEXT,
+      notes TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (submission_id) REFERENCES form_submissions(id)
+    )
+  `);
+
+  // 進捗履歴テーブル
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS progress_history (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      submission_id INTEGER NOT NULL,
+      step_number INTEGER NOT NULL,
+      old_status TEXT,
+      new_status TEXT NOT NULL,
+      changed_by TEXT,
+      notes TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (submission_id) REFERENCES form_submissions(id)
+    )
+  `);
+
+  // 通知履歴テーブル
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      submission_id INTEGER NOT NULL,
+      user_id INTEGER,
+      notification_type TEXT NOT NULL,
+      channel TEXT NOT NULL,
+      recipient TEXT NOT NULL,
+      subject TEXT,
+      message TEXT NOT NULL,
+      sent_at DATETIME,
+      status TEXT DEFAULT 'pending',
+      error_message TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (submission_id) REFERENCES form_submissions(id),
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )
+  `);
+
   console.log('Database initialized successfully');
 }
 
@@ -94,6 +181,10 @@ let verificationQueries = null;
 let submissionQueries = null;
 let sessionQueries = null;
 let contactQueries = null;
+let progressQueries = null;
+let paymentQueries = null;
+let progressHistoryQueries = null;
+let notificationQueries = null;
 
 function initQueries() {
   if (userQueries) return; // Already initialized
@@ -173,6 +264,79 @@ function initQueries() {
   `),
     updateStatus: db.prepare('UPDATE contacts SET status = ? WHERE id = ?'),
   };
+
+  // 進捗管理操作
+  progressQueries = {
+    findBySubmissionId: db.prepare('SELECT * FROM order_progress WHERE submission_id = ?'),
+    create: db.prepare(`
+      INSERT INTO order_progress (submission_id, current_step)
+      VALUES (?, ?)
+    `),
+    updateStep: db.prepare(`
+      UPDATE order_progress
+      SET current_step = ?,
+          step${1}_status = ?,
+          step${1}_completed_at = ?,
+          step${1}_details = ?,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE submission_id = ?
+    `),
+    updateTracking: db.prepare(`
+      UPDATE order_progress
+      SET tracking_number = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE submission_id = ?
+    `),
+    updatePSAInfo: db.prepare(`
+      UPDATE order_progress
+      SET psa_submission_date = ?, psa_tracking_number = ?, estimated_completion_date = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE submission_id = ?
+    `),
+  };
+
+  // 決済管理操作
+  paymentQueries = {
+    findById: db.prepare('SELECT * FROM payments WHERE id = ?'),
+    findBySubmissionId: db.prepare('SELECT * FROM payments WHERE submission_id = ? ORDER BY created_at DESC'),
+    create: db.prepare(`
+      INSERT INTO payments (submission_id, payment_type, amount, status, payment_method, notes)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `),
+    updateStatus: db.prepare(`
+      UPDATE payments
+      SET status = ?, payment_date = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `),
+    updateReceipt: db.prepare(`
+      UPDATE payments
+      SET receipt_url = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `),
+  };
+
+  // 進捗履歴操作
+  progressHistoryQueries = {
+    findBySubmissionId: db.prepare('SELECT * FROM progress_history WHERE submission_id = ? ORDER BY created_at DESC'),
+    create: db.prepare(`
+      INSERT INTO progress_history (submission_id, step_number, old_status, new_status, changed_by, notes)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `),
+  };
+
+  // 通知管理操作
+  notificationQueries = {
+    findById: db.prepare('SELECT * FROM notifications WHERE id = ?'),
+    findBySubmissionId: db.prepare('SELECT * FROM notifications WHERE submission_id = ? ORDER BY created_at DESC'),
+    findPending: db.prepare("SELECT * FROM notifications WHERE status = 'pending' ORDER BY created_at ASC LIMIT 10"),
+    create: db.prepare(`
+      INSERT INTO notifications (submission_id, user_id, notification_type, channel, recipient, subject, message)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `),
+    updateStatus: db.prepare(`
+      UPDATE notifications
+      SET status = ?, sent_at = ?, error_message = ?
+      WHERE id = ?
+    `),
+  };
 }
 
 // データベースとクエリを初期化
@@ -190,4 +354,8 @@ module.exports = {
   get submissionQueries() { return submissionQueries; },
   get sessionQueries() { return sessionQueries; },
   get contactQueries() { return contactQueries; },
+  get progressQueries() { return progressQueries; },
+  get paymentQueries() { return paymentQueries; },
+  get progressHistoryQueries() { return progressHistoryQueries; },
+  get notificationQueries() { return notificationQueries; },
 };

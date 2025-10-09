@@ -47,9 +47,6 @@
             font-weight: 700;
             color: #0f172a;
             text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
             letter-spacing: 0.05em;
         }
 
@@ -73,13 +70,11 @@
             background: linear-gradient(135deg, #1e40af, #1e3a8a);
             color: white;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
         }
 
         .navbar-link.active {
             background: linear-gradient(135deg, #1e40af, #1e3a8a);
             color: white;
-            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
         }
 
         .mobile-menu-button {
@@ -89,7 +84,6 @@
             font-size: 28px;
             color: #1e40af;
             cursor: pointer;
-            padding: 8px;
         }
 
         @media (max-width: 768px) {
@@ -97,10 +91,6 @@
                 padding-top: 70px;
                 padding-left: 10px;
                 padding-right: 10px;
-            }
-
-            .navbar-container {
-                padding: 12px 16px;
             }
 
             .navbar-brand {
@@ -125,10 +115,6 @@
 
             .navbar-menu.show {
                 display: flex;
-            }
-
-            .navbar-link {
-                padding: 14px 20px;
             }
         }
 
@@ -160,7 +146,6 @@
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 16px;
-            letter-spacing: 0.05em;
         }
 
         .header p {
@@ -215,6 +200,12 @@
             position: relative;
             z-index: 1;
             flex: 1;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover .step-circle {
+            transform: scale(1.05);
         }
 
         .step-circle {
@@ -246,7 +237,7 @@
         }
 
         .step-label {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             text-align: center;
             color: #64748b;
@@ -256,7 +247,7 @@
         .step.active .step-label {
             color: #059669;
             font-weight: 700;
-            font-size: 15px;
+            font-size: 14px;
         }
 
         .step.completed .step-label {
@@ -264,32 +255,168 @@
             font-weight: 700;
         }
 
-        .step-description {
+        /* 現在のステップ情報 */
+        .current-step-info {
             text-align: center;
-            margin-top: 40px;
             padding: 30px;
             background: linear-gradient(135deg, #f0fdf4, #dcfce7);
             border-radius: 16px;
             border-left: 5px solid #059669;
+            margin-bottom: 30px;
         }
 
-        .step-description h2 {
+        .current-step-info h2 {
             color: #059669;
             font-size: 1.5rem;
             margin-bottom: 12px;
         }
 
-        .step-description p {
+        .current-step-info p {
             color: #064e3b;
             font-size: 1rem;
             line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .next-action {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid #f59e0b;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 16px;
+        }
+
+        .next-action strong {
+            color: #92400e;
+            font-size: 1rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .next-action p {
+            color: #78350f;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* モーダル */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: modalSlide 0.3s ease-out;
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            padding: 30px;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .modal-header p {
+            opacity: 0.95;
+            font-size: 0.95rem;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-section {
+            margin-bottom: 24px;
+        }
+
+        .modal-section h4 {
+            color: #059669;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #d1fae5;
+        }
+
+        .modal-section p {
+            color: #374151;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .modal-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .modal-info-label {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .modal-info-value {
+            color: #6b7280;
+        }
+
+        .modal-close {
+            background: #e5e7eb;
+            color: #374151;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: #d1d5db;
         }
 
         .back-link {
             display: inline-block;
             margin-top: 30px;
             padding: 14px 32px;
-            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+            background: linear-gradient(135deg, #1e40af, #2563eb);
             color: white;
             text-decoration: none;
             border-radius: 12px;
@@ -304,18 +431,6 @@
         }
 
         @media (max-width: 768px) {
-            .container {
-                padding: 20px 10px;
-            }
-
-            .header h1 {
-                font-size: 1.8rem;
-            }
-
-            .header p {
-                font-size: 0.95rem;
-            }
-
             .progress-card {
                 padding: 40px 20px;
             }
@@ -331,23 +446,23 @@
             }
 
             .step-label {
-                font-size: 11px;
+                font-size: 10px;
             }
 
             .step.active .step-label {
-                font-size: 12px;
+                font-size: 11px;
             }
 
             .progress-line {
                 top: 20px;
             }
 
-            .step-description h2 {
+            .current-step-info h2 {
                 font-size: 1.2rem;
             }
 
-            .step-description p {
-                font-size: 0.9rem;
+            .modal-content {
+                max-height: 90vh;
             }
         }
     </style>
@@ -356,12 +471,8 @@
     <!-- ナビゲーションバー -->
     <nav class="navbar">
         <div class="navbar-container">
-            <a href="/" class="navbar-brand">
-                PSA代行サービス
-            </a>
-            <button class="mobile-menu-button" id="mobileMenuButton">
-                ☰
-            </button>
+            <a href="/" class="navbar-brand">PSA代行サービス</a>
+            <button class="mobile-menu-button" id="mobileMenuButton">☰</button>
             <ul class="navbar-menu" id="navbarMenu">
                 <li><a href="/" class="navbar-link">代行フォーム</a></li>
                 <li><a href="/status" class="navbar-link active">進捗確認</a></li>
@@ -384,35 +495,41 @@
                 <div class="progress-line">
                     <div class="progress-line-fill" id="progressFill"></div>
                 </div>
-                <div class="step active" id="step1">
+                <div class="step" id="step1" onclick="showStepDetails(1)">
                     <div class="step-circle">1</div>
-                    <div class="step-label">受付</div>
+                    <div class="step-label">お申し込み<br>受付</div>
                 </div>
-                <div class="step" id="step2">
+                <div class="step" id="step2" onclick="showStepDetails(2)">
                     <div class="step-circle">2</div>
-                    <div class="step-label">カードお預かり</div>
+                    <div class="step-label">カード受領<br>・検品</div>
                 </div>
-                <div class="step" id="step3">
+                <div class="step" id="step3" onclick="showStepDetails(3)">
                     <div class="step-circle">3</div>
-                    <div class="step-label">代行料お支払い</div>
+                    <div class="step-label">代行料<br>お支払い</div>
                 </div>
-                <div class="step" id="step4">
+                <div class="step" id="step4" onclick="showStepDetails(4)">
                     <div class="step-circle">4</div>
-                    <div class="step-label">PSA社へ提出</div>
+                    <div class="step-label">PSA<br>鑑定中</div>
                 </div>
-                <div class="step" id="step5">
+                <div class="step" id="step5" onclick="showStepDetails(5)">
                     <div class="step-circle">5</div>
-                    <div class="step-label">鑑定中</div>
+                    <div class="step-label">鑑定料<br>お支払い</div>
                 </div>
-                <div class="step" id="step6">
+                <div class="step" id="step6" onclick="showStepDetails(6)">
                     <div class="step-circle">6</div>
-                    <div class="step-label">ご返却</div>
+                    <div class="step-label">返送<br>・完了</div>
                 </div>
             </div>
 
-            <div class="step-description" id="stepDescription">
-                <h2>現在のステータス：受付</h2>
+            <!-- 現在のステップ情報 -->
+            <div class="current-step-info" id="currentStepInfo">
+                <h2>現在のステータス：お申し込み受付</h2>
                 <p>お申し込みを受け付けました。カードのお預かりをお待ちしております。</p>
+
+                <div class="next-action">
+                    <strong>次にすべきこと：</strong>
+                    <p>指定の住所にカードを発送してください。到着後、無料検品を行います。</p>
+                </div>
             </div>
 
             <div style="text-align: center;">
@@ -421,13 +538,109 @@
         </div>
     </div>
 
+    <!-- 詳細モーダル -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">ステップ詳細</h3>
+                <p id="modalSubtitle">詳細情報</p>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- JavaScriptで動的に生成 -->
+            </div>
+        </div>
+    </div>
+
     <script>
-        // モバイルメニュー
+        // ステップ定義
+        const stepData = {
+            1: {
+                title: 'お申し込み受付',
+                subtitle: '代行フォーム入力完了',
+                description: 'お申し込みを受け付けました。カードのお預かりをお待ちしております。',
+                nextAction: '指定の住所にカードを発送してください。到着後、無料検品を行います。',
+                details: {
+                    '申込日': '2025-10-09',
+                    '受付番号': 'PSA-2025-001',
+                    'プラン': 'レギュラー',
+                    'カード枚数': '15枚'
+                },
+                shippingAddress: '〒123-4567<br>東京都〇〇区〇〇 1-2-3<br>PSA代行サービス カード受付係'
+            },
+            2: {
+                title: 'カード受領・検品',
+                subtitle: '発送〜到着〜無料検品完了',
+                description: 'カードの到着をお待ちしております。到着後、PSA10見込み判定を含む無料検品を実施します。',
+                nextAction: 'カードを弊社指定住所へ発送してください。到着後24時間以内に検品結果をご連絡いたします。',
+                details: {
+                    '発送状況': '発送待ち',
+                    '追跡番号': '未設定',
+                    '到着予定': '発送後1-3日',
+                    '検品状況': '未着'
+                }
+            },
+            3: {
+                title: '代行料お支払い',
+                subtitle: '検品結果確認〜1回目決済',
+                description: '検品結果をご確認の上、代行料をお支払いください。',
+                nextAction: '検品結果をメールでお送りします。内容をご確認後、代行料をお支払いください。',
+                details: {
+                    '代行料': '未確定',
+                    '支払方法': '銀行振込 / クレジットカード',
+                    '支払期限': '検品完了後7日以内',
+                    '支払状況': '未払い'
+                }
+            },
+            4: {
+                title: 'PSA鑑定中',
+                subtitle: '提出〜鑑定期間〜結果確定',
+                description: 'PSA社への提出準備を進めております。',
+                nextAction: '鑑定完了までお待ちください。進捗は随時更新いたします。',
+                details: {
+                    'PSA提出日': '未提出',
+                    'PSA追跡番号': '未発行',
+                    '鑑定予定完了日': '提出後45-60日',
+                    '選択プラン': 'レギュラー'
+                }
+            },
+            5: {
+                title: '鑑定料お支払い',
+                subtitle: '結果通知〜2回目決済',
+                description: '鑑定結果をご確認の上、鑑定料と返送料をお支払いください。',
+                nextAction: '鑑定結果通知後、鑑定料と返送料をお支払いください。',
+                details: {
+                    '鑑定結果': '未確定',
+                    '鑑定料': '未確定',
+                    '返送料': '未確定',
+                    '支払状況': '未払い'
+                }
+            },
+            6: {
+                title: '返送・完了',
+                subtitle: '発送〜お客様受取完了',
+                description: 'カードの返送準備を進めております。',
+                nextAction: 'カードの発送後、追跡番号をお知らせします。',
+                details: {
+                    '返送方法': '未定',
+                    '発送日': '未発送',
+                    '追跡番号': '未発行',
+                    '到着予定': '発送後1-3日'
+                }
+            }
+        };
+
+        // 現在のステップ（URLパラメータまたはデフォルト）
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentStep = parseInt(urlParams.get('step')) || 1;
+        if (currentStep < 1 || currentStep > 6) currentStep = 1;
+
+        // 初期化
         document.addEventListener('DOMContentLoaded', () => {
             setupMobileMenu();
             updateProgress(currentStep);
         });
 
+        // モバイルメニュー
         function setupMobileMenu() {
             const mobileMenuButton = document.getElementById('mobileMenuButton');
             const navbarMenu = document.getElementById('navbarMenu');
@@ -442,52 +655,7 @@
                         navbarMenu.classList.remove('show');
                     }
                 });
-
-                const menuLinks = navbarMenu.querySelectorAll('.navbar-link');
-                menuLinks.forEach(link => {
-                    link.addEventListener('click', () => {
-                        navbarMenu.classList.remove('show');
-                    });
-                });
             }
-        }
-
-        // ステップの説明
-        const stepDescriptions = {
-            1: {
-                title: '受付',
-                description: 'お申し込みを受け付けました。カードのお預かりをお待ちしております。'
-            },
-            2: {
-                title: 'カードお預かり',
-                description: 'カードをお預かりしました。代行料のお支払いをお願いいたします。'
-            },
-            3: {
-                title: '代行料お支払い',
-                description: '代行料のお支払いを確認いたしました。PSA社へ提出準備を進めております。'
-            },
-            4: {
-                title: 'PSA社へ提出',
-                description: 'カードをPSA社へ提出いたしました。鑑定完了までお待ちください。'
-            },
-            5: {
-                title: '鑑定中',
-                description: 'PSA社にて鑑定中です。鑑定完了までしばらくお待ちください。'
-            },
-            6: {
-                title: 'ご返却',
-                description: '鑑定が完了しました。カードをご返却いたします。'
-            }
-        };
-
-        // 現在のステップ（この値をサーバーから取得することもできます）
-        let currentStep = 1;
-
-        // URLパラメータからステップを取得
-        const urlParams = new URLSearchParams(window.location.search);
-        const stepParam = urlParams.get('step');
-        if (stepParam && stepParam >= 1 && stepParam <= 6) {
-            currentStep = parseInt(stepParam);
         }
 
         // 進捗状況を更新
@@ -508,13 +676,82 @@
             const progressWidth = ((step - 1) / 5) * 100;
             document.getElementById('progressFill').style.width = `${progressWidth}%`;
 
-            // ステップの説明を更新
-            const desc = stepDescriptions[step];
-            document.getElementById('stepDescription').innerHTML = `
-                <h2>現在のステータス：${desc.title}</h2>
-                <p>${desc.description}</p>
+            // 現在のステップ情報を更新
+            const data = stepData[step];
+            document.getElementById('currentStepInfo').innerHTML = `
+                <h2>現在のステータス：${data.title}</h2>
+                <p>${data.description}</p>
+
+                <div class="next-action">
+                    <strong>次にすべきこと：</strong>
+                    <p>${data.nextAction}</p>
+                </div>
             `;
         }
+
+        // ステップ詳細を表示
+        function showStepDetails(stepNumber) {
+            const data = stepData[stepNumber];
+            const modal = document.getElementById('detailModal');
+
+            document.getElementById('modalTitle').textContent = data.title;
+            document.getElementById('modalSubtitle').textContent = data.subtitle;
+
+            let detailsHTML = `
+                <div class="modal-section">
+                    <h4>概要</h4>
+                    <p>${data.description}</p>
+                </div>
+
+                <div class="modal-section">
+                    <h4>次にすべきこと</h4>
+                    <p>${data.nextAction}</p>
+                </div>
+
+                <div class="modal-section">
+                    <h4>詳細情報</h4>
+            `;
+
+            for (const [label, value] of Object.entries(data.details)) {
+                detailsHTML += `
+                    <div class="modal-info-row">
+                        <span class="modal-info-label">${label}</span>
+                        <span class="modal-info-value">${value}</span>
+                    </div>
+                `;
+            }
+
+            detailsHTML += `</div>`;
+
+            // 発送先住所（ステップ1のみ）
+            if (stepNumber === 1 && data.shippingAddress) {
+                detailsHTML += `
+                    <div class="modal-section">
+                        <h4>カード発送先</h4>
+                        <p>${data.shippingAddress}</p>
+                    </div>
+                `;
+            }
+
+            detailsHTML += `
+                <button class="modal-close" onclick="closeModal()">閉じる</button>
+            `;
+
+            document.getElementById('modalBody').innerHTML = detailsHTML;
+            modal.classList.add('show');
+        }
+
+        // モーダルを閉じる
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('show');
+        }
+
+        // モーダル外クリックで閉じる
+        document.getElementById('detailModal').addEventListener('click', (e) => {
+            if (e.target.id === 'detailModal') {
+                closeModal();
+            }
+        });
     </script>
 </body>
 </html>
