@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>買取承認 - PSA代行サービス</title>
+    <title>承認システム - PSA代行サービス</title>
     <style>
         * {
             margin: 0;
@@ -15,136 +15,13 @@
             font-family: 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
             min-height: 100vh;
-            padding: 80px 20px 20px;
+            padding: 20px;
             color: #1e293b;
             letter-spacing: 0.02em;
         }
 
-        /* ナビゲーションバー */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(16px);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-            border-bottom: 1px solid rgba(203, 213, 225, 0.3);
-            z-index: 1000;
-        }
-
-        .navbar-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 24px;
-        }
-
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #0f172a;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            letter-spacing: 0.05em;
-        }
-
-        .navbar-menu {
-            display: flex;
-            gap: 8px;
-            list-style: none;
-        }
-
-        .navbar-link {
-            padding: 10px 20px;
-            color: #475569;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 15px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .navbar-link:hover {
-            background: linear-gradient(135deg, #1e40af, #1e3a8a);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
-        }
-
-        .navbar-link.active {
-            background: linear-gradient(135deg, #1e40af, #1e3a8a);
-            color: white;
-            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
-        }
-
-        .logout-btn {
-            border: none;
-            cursor: pointer;
-            background: transparent;
-        }
-
-        .logout-btn:hover {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-        }
-
-        .mobile-menu-button {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 28px;
-            color: #1e40af;
-            cursor: pointer;
-            padding: 8px;
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding-top: 70px;
-            }
-
-            .navbar-container {
-                padding: 12px 16px;
-            }
-
-            .navbar-brand {
-                font-size: 1.2rem;
-            }
-
-            .mobile-menu-button {
-                display: block;
-            }
-
-            .navbar-menu {
-                display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: white;
-                flex-direction: column;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                padding: 8px;
-            }
-
-            .navbar-menu.show {
-                display: flex;
-            }
-
-            .navbar-link {
-                padding: 14px 20px;
-            }
-        }
-
         .container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
             animation: slideUp 0.8s ease-out;
         }
@@ -160,14 +37,14 @@
             }
         }
 
-        .main-card {
+        .card {
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(16px);
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(226, 232, 240, 0.5);
             overflow: hidden;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .header {
@@ -175,467 +52,610 @@
             color: white;
             padding: 40px;
             text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
-            pointer-events: none;
         }
 
         .header h1 {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 700;
-            margin-bottom: 12px;
-            position: relative;
-            z-index: 1;
+            margin-bottom: 8px;
             letter-spacing: 0.05em;
         }
 
         .header p {
-            font-size: 1rem;
+            font-size: 0.95rem;
             opacity: 0.95;
-            position: relative;
-            z-index: 1;
-            letter-spacing: 0.03em;
         }
 
-        .form-content {
+        .content {
             padding: 40px;
         }
 
-        .card-item {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            border: 2px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
+        /* 認証キー入力画面 */
+        .auth-section {
+            display: block;
         }
 
-        .card-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 5px;
-            height: 100%;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        .auth-section.hidden {
+            display: none;
         }
 
-        .card-item-header {
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #e5e7eb;
+        .form-group {
+            margin-bottom: 24px;
         }
 
-        .card-item-header h4 {
-            font-size: 1.1rem;
-            color: #1a202c;
-            font-weight: 700;
-        }
-
-        .card-info {
-            margin-bottom: 16px;
-        }
-
-        .card-info p {
-            margin-bottom: 8px;
-            color: #374151;
-        }
-
-        .card-info strong {
-            color: #1a202c;
-        }
-
-        .price-box {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            padding: 16px;
-            border-radius: 12px;
-            margin: 16px 0;
-        }
-
-        .price-label {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 4px;
-        }
-
-        .price-value {
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        .choice-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-top: 16px;
-        }
-
-        .choice-btn {
-            padding: 18px 24px;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            background: linear-gradient(to bottom, #ffffff, #f8fafc);
-            color: #475569;
+        .form-label {
+            display: block;
             font-size: 14px;
             font-weight: 600;
-            cursor: pointer;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #ffffff;
+            color: #0f172a;
+            font-family: inherit;
             text-align: center;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            letter-spacing: 0.02em;
+            letter-spacing: 0.1em;
         }
 
-        .choice-btn:hover {
+        .form-input:focus {
+            outline: none;
             border-color: #1e40af;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(30, 64, 175, 0.15);
-            background: linear-gradient(to bottom, #ffffff, #f1f5f9);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.08);
         }
 
-        .choice-btn.selected {
-            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
-            border-color: #1e40af;
-            color: white;
-            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        .form-input.error {
+            border-color: #dc2626;
         }
 
-        .choice-btn.approve.selected {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            border-color: #10b981;
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        .choice-btn.reject.selected {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            border-color: #ef4444;
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        .choice-btn.pending.selected {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            border-color: #f59e0b;
-            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-submit {
-            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
-            color: white;
-            padding: 20px 48px;
+        .btn {
+            padding: 18px 48px;
             font-size: 16px;
             font-weight: 700;
-            width: 100%;
             border: none;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            margin-top: 32px;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-submit::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
+            letter-spacing: 0.05em;
             width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.6s;
         }
 
-        .btn-submit:hover:not(:disabled)::before {
-            left: 100%;
+        .btn-primary {
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35);
         }
 
-        .btn-submit:hover:not(:disabled) {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
+            box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45);
         }
 
-        .btn-submit:active:not(:disabled) {
-            transform: translateY(0px);
-            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-submit:disabled {
+        .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            transform: none !important;
         }
 
-        .note-box {
+        /* 承認画面 */
+        .approval-section {
+            display: none;
+        }
+
+        .approval-section.show {
+            display: block;
+        }
+
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .card-info {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .card-image {
+            width: 100%;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .card-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .price-highlight {
             background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border-left: 5px solid #f59e0b;
             padding: 20px;
             border-radius: 12px;
-            margin-top: 24px;
+            border-left: 5px solid #f59e0b;
+            margin: 20px 0;
         }
 
-        .note-box strong {
-            color: #92400e;
-            font-size: 1.1rem;
+        .price-highlight .label {
+            font-size: 0.9rem;
+            color: #78350f;
+            margin-bottom: 8px;
         }
 
-        .note-box ul {
-            margin-top: 12px;
-            margin-left: 24px;
+        .price-highlight .amount {
+            font-size: 2rem;
+            font-weight: 700;
             color: #78350f;
         }
 
-        .note-box li {
-            margin-bottom: 8px;
+        .assessment-comment {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            color: #475569;
             line-height: 1.6;
+            margin-top: 12px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .btn-approve {
+            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(5, 150, 105, 0.35);
+        }
+
+        .btn-approve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(5, 150, 105, 0.45);
+        }
+
+        .btn-reject {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f87171 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.35);
+        }
+
+        .btn-reject:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(220, 38, 38, 0.45);
+        }
+
+        .bank-form {
+            display: none;
+            margin-top: 24px;
+            padding: 24px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .bank-form.show {
+            display: block;
+        }
+
+        .message {
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message-error {
+            background: #fee2e2;
+            border-left: 4px solid #dc2626;
+            color: #991b1b;
+        }
+
+        .message-success {
+            background: #d1fae5;
+            border-left: 4px solid #059669;
+            color: #065f46;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #1e40af;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .note-box {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left: 5px solid #1e40af;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 24px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #1e3a8a;
         }
 
         @media (max-width: 768px) {
-            .choice-buttons {
+            .card-info {
                 grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .content {
+                padding: 24px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- ナビゲーションバー -->
-    <nav class="navbar">
-        <div class="navbar-container">
-            <a href="/" class="navbar-brand">
-                PSA代行サービス
-            </a>
-            <button class="mobile-menu-button" id="mobileMenuButton">
-                ☰
-            </button>
-            <ul class="navbar-menu" id="navbarMenu">
-                <li><a href="/" class="navbar-link">代行フォーム</a></li>
-                <li><a href="/status" class="navbar-link">進捗確認</a></li>
-                <li><a href="/approval" class="navbar-link active">買取承認</a></li>
-                <li><a href="/contact" class="navbar-link">お問い合わせ</a></li>
-                <li><a href="/admin" class="navbar-link">管理者</a></li>
-                <li><button onclick="handleLogout()" class="navbar-link logout-btn">ログアウト</button></li>
-            </ul>
-        </div>
-    </nav>
-
     <div class="container">
-        <div class="main-card">
+        <div class="card">
             <div class="header">
-                <h1>買取承認</h1>
-                <p>カードごとに買取額をご確認の上、承認・拒否をお選びください</p>
+                <h1>承認システム</h1>
+                <p>買取査定承認</p>
             </div>
 
-            <div class="form-content">
-                <div id="cardsContainer">
-                    <!-- デモカード1 -->
-                    <div class="card-item">
-                        <div class="card-item-header">
-                            <h4>カード 1</h4>
-                        </div>
-                        <div class="card-info">
-                            <p><strong>選手名:</strong> 大谷翔平</p>
-                            <p><strong>カード名:</strong> Topps Chrome Rookie Auto</p>
-                            <p><strong>年:</strong> 2018</p>
-                            <p><strong>番号:</strong> #1/10</p>
-                        </div>
-                        <div class="price-box">
-                            <div class="price-label">買取提示額</div>
-                            <div class="price-value">¥150,000</div>
-                        </div>
-                        <div class="choice-buttons">
-                            <button class="choice-btn approve" data-card="1" data-choice="approve">
-                                承認
-                            </button>
-                            <button class="choice-btn reject" data-card="1" data-choice="reject">
-                                拒否
-                            </button>
-                            <button class="choice-btn pending" data-card="1" data-choice="pending">
-                                保留
-                            </button>
-                        </div>
-                    </div>
+            <div class="content">
+                <div id="errorMessage" class="message message-error"></div>
+                <div id="successMessage" class="message message-success"></div>
 
-                    <!-- デモカード2 -->
-                    <div class="card-item">
-                        <div class="card-item-header">
-                            <h4>カード 2</h4>
+                <!-- 認証キー入力セクション -->
+                <div id="authSection" class="auth-section">
+                    <form id="authForm">
+                        <div class="form-group">
+                            <label class="form-label" for="authKey">認証キー</label>
+                            <input
+                                type="text"
+                                id="authKey"
+                                class="form-input"
+                                placeholder="認証キーを入力してください"
+                                autocomplete="off"
+                                spellcheck="false"
+                            >
+                            <p style="margin-top: 12px; color: #64748b; font-size: 0.9rem; text-align: center;">
+                                メールで受信した認証キーを入力してください
+                            </p>
                         </div>
-                        <div class="card-info">
-                            <p><strong>選手名:</strong> ピカチュウ</p>
-                            <p><strong>カード名:</strong> ブラッキーVMAX HR</p>
-                            <p><strong>年:</strong> 2021</p>
-                            <p><strong>番号:</strong> 095/069</p>
-                        </div>
-                        <div class="price-box">
-                            <div class="price-label">買取提示額</div>
-                            <div class="price-value">¥80,000</div>
-                        </div>
-                        <div class="choice-buttons">
-                            <button class="choice-btn approve" data-card="2" data-choice="approve">
-                                承認
-                            </button>
-                            <button class="choice-btn reject" data-card="2" data-choice="reject">
-                                拒否
-                            </button>
-                            <button class="choice-btn pending" data-card="2" data-choice="pending">
-                                保留
-                            </button>
-                        </div>
-                    </div>
+                        <button type="submit" class="btn btn-primary">認証する</button>
+                    </form>
                 </div>
 
-                <button class="btn-submit" id="submitBtn">
-                    承認結果を送信
-                </button>
+                <!-- ローディング -->
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 16px; color: #64748b;">読み込み中...</p>
+                </div>
 
-                <div class="note-box">
-                    <strong>※ 買取承認について</strong>
-                    <ul>
-                        <li>各カードごとに「承認」「拒否」「保留」をお選びください</li>
-                        <li>承認したカードは当社が買取いたします</li>
-                        <li>拒否したカードは返却いたします</li>
-                        <li>保留の場合は、別途ご相談させていただきます</li>
-                        <li>すべてのカードの選択が完了してから送信してください</li>
-                    </ul>
+                <!-- 承認セクション -->
+                <div id="approvalSection" class="approval-section">
+                    <!-- カード情報 -->
+                    <div class="section">
+                        <h2 class="section-title">カード情報</h2>
+                        <div class="card-info">
+                            <div>
+                                <img id="cardImage" class="card-image" src="" alt="カード画像">
+                            </div>
+                            <div class="card-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">カード名</span>
+                                    <span class="detail-value" id="cardName"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">コンディション</span>
+                                    <span class="detail-value" id="cardCondition"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 査定結果 -->
+                    <div class="section">
+                        <h2 class="section-title">査定結果</h2>
+                        <div class="price-highlight">
+                            <div class="label">買取査定価格</div>
+                            <div class="amount" id="assessmentPrice">¥0</div>
+                        </div>
+                        <div class="assessment-comment" id="assessmentComment"></div>
+                        <div style="margin-top: 12px; color: #64748b; font-size: 0.9rem;">
+                            査定者: <span id="assessorName"></span> | 査定日: <span id="assessmentDate"></span>
+                        </div>
+                    </div>
+
+                    <!-- 承認ボタン -->
+                    <div id="actionButtons" class="section">
+                        <div class="button-group">
+                            <button class="btn btn-approve" onclick="handleApprove()">承認する</button>
+                            <button class="btn btn-reject" onclick="handleReject()">拒否する</button>
+                        </div>
+                        <div class="note-box">
+                            <strong>ご注意</strong><br>
+                            承認された場合、指定の口座に買取金額を振り込みます。<br>
+                            拒否された場合、カードは返送となります。
+                        </div>
+                    </div>
+
+                    <!-- 振込先入力フォーム -->
+                    <div id="bankForm" class="bank-form">
+                        <h3 style="margin-bottom: 20px; color: #1e293b;">振込先情報</h3>
+                        <form id="bankInfoForm">
+                            <div class="form-group">
+                                <label class="form-label" for="bankName">銀行名</label>
+                                <input type="text" id="bankName" class="form-input" required placeholder="例: 三菱UFJ銀行" style="text-align: left;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="bankBranch">支店名</label>
+                                <input type="text" id="bankBranch" class="form-input" required placeholder="例: 新宿支店" style="text-align: left;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="accountNumber">口座番号</label>
+                                <input type="text" id="accountNumber" class="form-input" required placeholder="例: 1234567" style="text-align: left;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="accountHolder">口座名義</label>
+                                <input type="text" id="accountHolder" class="form-input" required placeholder="例: ヤマダ タロウ" style="text-align: left;">
+                            </div>
+                            <button type="submit" class="btn btn-primary">確定する</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // 選択状態を保存
-        const selections = {};
+        let currentToken = null;
+        let requestData = null;
 
-        // モバイルメニュー
-        document.addEventListener('DOMContentLoaded', () => {
-            setupMobileMenu();
-            setupChoiceButtons();
-        });
+        // 認証フォーム送信
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-        function setupMobileMenu() {
-            const mobileMenuButton = document.getElementById('mobileMenuButton');
-            const navbarMenu = document.getElementById('navbarMenu');
-
-            if (mobileMenuButton) {
-                mobileMenuButton.addEventListener('click', () => {
-                    navbarMenu.classList.toggle('show');
-                });
-
-                document.addEventListener('click', (e) => {
-                    if (!mobileMenuButton.contains(e.target) && !navbarMenu.contains(e.target)) {
-                        navbarMenu.classList.remove('show');
-                    }
-                });
-
-                // メニュー内のリンクをクリックしたらメニューを閉じる
-                const menuLinks = navbarMenu.querySelectorAll('.navbar-link');
-                menuLinks.forEach(link => {
-                    link.addEventListener('click', () => {
-                        navbarMenu.classList.remove('show');
-                    });
-                });
-            }
-        }
-
-        function setupChoiceButtons() {
-            document.querySelectorAll('.choice-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const cardId = this.dataset.card;
-                    const choice = this.dataset.choice;
-
-                    // 同じカードの他のボタンの選択を解除
-                    document.querySelectorAll(`[data-card="${cardId}"]`).forEach(btn => {
-                        btn.classList.remove('selected');
-                    });
-
-                    // このボタンを選択状態にする
-                    this.classList.add('selected');
-
-                    // 選択を保存
-                    selections[cardId] = choice;
-                });
-            });
-        }
-
-        // フォーム送信
-        document.getElementById('submitBtn').addEventListener('click', async () => {
-            const submitBtn = document.getElementById('submitBtn');
-
-            // すべてのカードが選択されているか確認
-            const totalCards = document.querySelectorAll('.card-item').length;
-            const selectedCards = Object.keys(selections).length;
-
-            if (selectedCards < totalCards) {
-                alert(`すべてのカード（${totalCards}枚）の承認状態を選択してください。現在${selectedCards}枚選択済みです。`);
+            const authKey = document.getElementById('authKey').value.trim();
+            if (!authKey) {
+                showError('認証キーを入力してください');
                 return;
             }
 
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '認証中...';
+
+            // 認証キーをトークンとして使用
+            currentToken = authKey;
+            await loadRequestData();
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = '認証する';
+        });
+
+        // データ読み込み
+        async function loadRequestData() {
+            const authSection = document.getElementById('authSection');
+            const approvalSection = document.getElementById('approvalSection');
+            const loading = document.getElementById('loading');
+
+            authSection.classList.add('hidden');
+            loading.classList.add('show');
+
+            try {
+                const response = await fetch(`/api/kaitori/request/${currentToken}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || '認証キーが無効です');
+                }
+
+                requestData = data;
+                displayRequestData(data);
+
+                loading.classList.remove('show');
+                approvalSection.classList.add('show');
+            } catch (error) {
+                loading.classList.remove('show');
+                authSection.classList.remove('hidden');
+                showError(error.message);
+                document.getElementById('authKey').classList.add('error');
+            }
+        }
+
+        // データ表示
+        function displayRequestData(data) {
+            document.getElementById('cardImage').src = data.card_image_url || '/placeholder-card.png';
+            document.getElementById('cardName').textContent = data.card_name;
+            document.getElementById('cardCondition').textContent = data.card_condition || '未記入';
+            document.getElementById('assessmentPrice').textContent = `¥${Number(data.assessment_price).toLocaleString()}`;
+            document.getElementById('assessmentComment').textContent = data.assessment_comment || '特になし';
+            document.getElementById('assessorName').textContent = data.assessor_name || '担当者';
+            document.getElementById('assessmentDate').textContent = data.assessment_date ?
+                new Date(data.assessment_date).toLocaleDateString('ja-JP') : '未記入';
+
+            // すでに回答済みの場合
+            if (data.status !== 'pending') {
+                document.getElementById('actionButtons').innerHTML = `
+                    <div class="message message-success show">
+                        この買取依頼は既に回答済みです（${data.response_type === 'approved' ? '承認' : '拒否'}）
+                    </div>
+                `;
+            }
+        }
+
+        // 承認ボタン
+        function handleApprove() {
+            document.getElementById('actionButtons').style.display = 'none';
+            document.getElementById('bankForm').classList.add('show');
+        }
+
+        // 拒否ボタン
+        async function handleReject() {
+            if (!confirm('本当に拒否しますか？カードは返送となります。')) {
+                return;
+            }
+
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            try {
+                const response = await fetch('/api/kaitori/respond', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        token: currentToken,
+                        responseType: 'rejected'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || '送信に失敗しました');
+                }
+
+                showSuccess('拒否しました。カードは返送いたします。');
+                setTimeout(() => {
+                    document.getElementById('actionButtons').innerHTML = `
+                        <div class="message message-success show">
+                            回答が完了しました。ご利用ありがとうございました。
+                        </div>
+                    `;
+                }, 2000);
+            } catch (error) {
+                showError(error.message);
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        }
+
+        // 振込先フォーム送信
+        document.getElementById('bankInfoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = e.target.querySelector('.btn-primary');
             submitBtn.disabled = true;
             submitBtn.textContent = '送信中...';
 
             try {
-                // TODO: APIエンドポイントを実装
-                // const response = await fetch('/api/approval-submit', {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify(selections)
-                // });
-
-                // デモ処理
-                setTimeout(() => {
-                    alert('承認結果を送信しました。ご回答ありがとうございました。');
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = '承認結果を送信';
-                }, 1000);
-            } catch (error) {
-                alert('送信に失敗しました。もう一度お試しください。');
-                submitBtn.disabled = false;
-                submitBtn.textContent = '承認結果を送信';
-            }
-        });
-    </script>
-
-    <!-- ログアウト機能 -->
-    <script>
-        async function handleLogout() {
-            if (!confirm('ログアウトしますか？')) {
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/auth/logout', {
+                const response = await fetch('/api/kaitori/respond', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                    }
+                    },
+                    body: JSON.stringify({
+                        token: currentToken,
+                        responseType: 'approved',
+                        bankInfo: {
+                            bankName: document.getElementById('bankName').value,
+                            bankBranch: document.getElementById('bankBranch').value,
+                            accountNumber: document.getElementById('accountNumber').value,
+                            accountHolder: document.getElementById('accountHolder').value
+                        }
+                    })
                 });
 
-                if (response.ok) {
-                    window.location.href = '/login';
-                } else {
-                    alert('ログアウトに失敗しました');
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || '送信に失敗しました');
                 }
+
+                showSuccess('承認しました。振込先情報を受け付けました。');
+                setTimeout(() => {
+                    document.getElementById('bankForm').innerHTML = `
+                        <div class="message message-success show">
+                            承認が完了しました。数日以内に指定の口座へ振り込みいたします。<br>
+                            ご利用ありがとうございました。
+                        </div>
+                    `;
+                }, 2000);
             } catch (error) {
-                console.error('Logout error:', error);
-                alert('ログアウトに失敗しました');
+                showError(error.message);
+                submitBtn.disabled = false;
+                submitBtn.textContent = '確定する';
             }
+        });
+
+        // エラー表示
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 5000);
+        }
+
+        // 成功メッセージ表示
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = message;
+            successMessage.classList.add('show');
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 5000);
         }
     </script>
-
-    <!-- 認証チェック -->
-    <script src="/auth-check.js"></script>
 </body>
 </html>

@@ -781,6 +781,11 @@ app.get('/status', (req, res) => {
   res.sendFile(path.join(__dirname, 'status.html'));
 });
 
+// 承認ページ（認証キー入力）
+app.get('/approval', (req, res) => {
+  res.sendFile(path.join(__dirname, 'approval.html'));
+});
+
 // 買取管理ページ
 app.get('/kaitori/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'kaitori-admin.html'));
