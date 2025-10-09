@@ -595,11 +595,6 @@ app.get('/api/debug/search-email', async (req, res) => {
 
 // ===== HTMLページルーティング =====
 
-// ログインページ
-app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'login.html'));
-});
-
 // SPAのフォールバック（HTMLファイルのみ）
 app.get('*', (req, res) => {
   // 静的ファイルのリクエストは除外
