@@ -2,13 +2,9 @@ const express = require('express');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const cookieParser = require('cookie-parser');
-const session = require('express-session');
 require('dotenv').config();
 
 const { init: initDatabase, submissionQueries } = require('./database');
-const { sendVerificationCode, verifyCode } = require('./email-auth');
-const { passport, initGoogleStrategy } = require('./google-auth');
-const { createSession, authenticate, optionalAuthenticate, logout } = require('./auth');
 const { getCustomerById, getCustomerOrders, listAllCustomers } = require('./shopify-client');
 const logger = require('./logger');
 const {
@@ -40,10 +36,6 @@ app.set('trust proxy', 1);
 // データベース初期化
 initDatabase();
 
-// Google OAuth初期化
-const googleAuthEnabled = initGoogleStrategy();
-logger.info('Google OAuth status', { enabled: googleAuthEnabled });
-
 // セキュリティヘッダーとロギング（最優先）
 app.use(securityHeaders);
 app.use(requestLogger);
@@ -52,22 +44,6 @@ app.use(requestLogger);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
-
-// Session設定（Passport用）
-app.use(session({
-  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET || 'your-secret-key-change-in-production',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-  }
-}));
-
-// Passport初期化
-app.use(passport.initialize());
-app.use(passport.session());
 
 logger.info('Server initializing', {
   nodeEnv: process.env.NODE_ENV,
@@ -506,199 +482,6 @@ app.post('/api/contact', async (req, res) => {
     res.status(500).json({
       error: 'メール送信に失敗しました。もう一度お試しください。'
     });
-  }
-});
-
-// ===== 認証API =====
-
-// 認証コード送信
-app.post(
-  '/api/auth/send-code',
-  authLimiter,
-  validateEmail,
-  handleValidationErrors,
-  async (req, res) => {
-    try {
-      const { email } = req.body;
-
-      logger.info('Send verification code request', { email: email.substring(0, 3) + '***' });
-
-      const result = await sendVerificationCode(email);
-
-      if (!result.success) {
-        logger.warn('Failed to send verification code', { error: result.error });
-        return res.status(400).json({ error: result.error });
-      }
-
-      logger.info('Verification code sent successfully');
-      res.json({ success: true, message: result.message || '認証コードを送信しました' });
-    } catch (error) {
-      logger.error('Send code error', { error: error.message, stack: error.stack });
-      res.status(500).json({ error: '認証コードの送信に失敗しました' });
-    }
-  }
-);
-
-// 認証コード検証
-app.post(
-  '/api/auth/verify-code',
-  verifyLimiter,
-  [...validateEmail, ...validateVerificationCode],
-  handleValidationErrors,
-  async (req, res) => {
-    try {
-      const { email, code } = req.body;
-
-      logger.info('Verify code request', { email: email.substring(0, 3) + '***' });
-
-      const result = await verifyCode(email, code);
-
-      if (!result.success) {
-        logger.security('Failed verification attempt', {
-          email: email.substring(0, 3) + '***',
-          error: result.error
-        });
-        return res.status(400).json({ error: result.error });
-      }
-
-      // セッション作成
-      const token = createSession(result.user.id);
-
-      // クッキーに保存
-      res.cookie('auth_token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        sameSite: 'strict'
-      });
-
-      logger.info('User logged in successfully', { userId: result.user.id });
-
-      res.json({
-        success: true,
-        user: {
-          id: result.user.id,
-          name: result.user.name,
-          email: result.user.email,
-          phoneNumber: result.user.phone_number
-        },
-        shopifyCustomer: result.shopifyCustomer
-      });
-    } catch (error) {
-      logger.error('Verify code error', { error: error.message, stack: error.stack });
-      res.status(500).json({ error: '認証に失敗しました' });
-    }
-  }
-);
-
-// ログアウト
-app.post('/api/auth/logout', (req, res) => {
-  const token = req.cookies.auth_token;
-
-  if (token) {
-    logout(token);
-  }
-
-  res.clearCookie('auth_token');
-
-  // Passportセッションもクリア
-  if (req.logout) {
-    req.logout(() => {
-      res.json({ success: true, message: 'ログアウトしました' });
-    });
-  } else {
-    res.json({ success: true, message: 'ログアウトしました' });
-  }
-});
-
-// Google OAuth認証開始
-app.get('/auth/google',
-  authLimiter,
-  (req, res, next) => {
-    if (!googleAuthEnabled) {
-      return res.status(503).json({
-        error: 'Google認証は現在利用できません。環境変数を確認してください。'
-      });
-    }
-    next();
-  },
-  passport.authenticate('google', {
-    scope: ['profile', 'email']
-  })
-);
-
-// Google OAuthコールバック
-app.get('/auth/google/callback',
-  passport.authenticate('google', {
-    failureRedirect: '/login.html?error=google_auth_failed',
-    session: true
-  }),
-  async (req, res) => {
-    try {
-      logger.info('Google OAuth successful', { userId: req.user.id });
-
-      // JWTトークンも作成（既存システムとの互換性のため）
-      const token = createSession(req.user.id);
-
-      // クッキーに保存
-      res.cookie('auth_token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        sameSite: 'strict'
-      });
-
-      // ホームページにリダイレクト
-      res.redirect('/');
-    } catch (error) {
-      logger.error('Google OAuth callback error', {
-        error: error.message,
-        stack: error.stack
-      });
-      res.redirect('/login.html?error=callback_error');
-    }
-  }
-);
-
-// 現在のユーザー情報取得
-app.get('/api/auth/me', authenticate, async (req, res) => {
-  try {
-    const shopifyCustomer = await getCustomerById(req.user.shopify_customer_id);
-
-    res.json({
-      user: {
-        id: req.user.id,
-        name: req.user.name,
-        email: req.user.email,
-        phoneNumber: req.user.phone_number
-      },
-      shopifyCustomer
-    });
-  } catch (error) {
-    console.error('Get user error:', error);
-    res.status(500).json({ error: 'ユーザー情報の取得に失敗しました' });
-  }
-});
-
-// 顧客の代行依頼一覧取得
-app.get('/api/submissions', authenticate, (req, res) => {
-  try {
-    const submissions = submissionQueries.findByUserId.all(req.user.id);
-    res.json({ submissions });
-  } catch (error) {
-    console.error('Get submissions error:', error);
-    res.status(500).json({ error: '代行依頼の取得に失敗しました' });
-  }
-});
-
-// 顧客のShopify注文履歴取得
-app.get('/api/orders', authenticate, async (req, res) => {
-  try {
-    const orders = await getCustomerOrders(req.user.shopify_customer_id);
-    res.json({ orders });
-  } catch (error) {
-    console.error('Get orders error:', error);
-    res.status(500).json({ error: '注文履歴の取得に失敗しました' });
   }
 });
 
