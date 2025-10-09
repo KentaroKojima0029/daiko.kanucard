@@ -610,7 +610,7 @@
             margin-top: 24px;
         }
 
-        /* 固定ヘッダー - 代行料合計表示 */
+        /* 固定ヘッダー - 進捗状況と代行料合計表示 */
         .fixed-summary {
             position: fixed;
             top: 70px;
@@ -618,19 +618,106 @@
             right: 0;
             background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
             color: white;
-            padding: 16px 20px;
+            padding: 20px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
             z-index: 999;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .fixed-summary-content {
+        .fixed-summary-container {
             max-width: 1000px;
             margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* 進捗ステップバー */
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            z-index: 0;
+        }
+
+        .progress-line-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: white;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .step.active .step-circle {
+            background: white;
+            color: #059669;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.4);
+            transform: scale(1.1);
+        }
+
+        .step.completed .step-circle {
+            background: white;
+            color: #059669;
+        }
+
+        .step-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            opacity: 0.8;
+            white-space: nowrap;
+        }
+
+        .step.active .step-label,
+        .step.completed .step-label {
+            opacity: 1;
+            font-weight: 700;
+        }
+
+        .fixed-summary-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 16px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .fixed-summary-item {
@@ -655,13 +742,28 @@
         @media (max-width: 768px) {
             .fixed-summary {
                 top: 60px;
-                padding: 8px;
+                padding: 12px 8px;
+            }
+
+            .step-circle {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+
+            .step-label {
+                font-size: 9px;
+            }
+
+            .step.active .step-circle {
+                transform: scale(1.05);
             }
 
             .fixed-summary-content {
                 flex-direction: row;
                 gap: 8px;
                 justify-content: center;
+                padding-top: 8px;
             }
 
             .fixed-summary-item {
@@ -1782,16 +1884,50 @@
         }
     </script>
 
-    <!-- 固定フッター：代行料合計表示 -->
+    <!-- 固定フッター：進捗状況と代行料合計表示 -->
     <div class="fixed-summary">
-        <div class="fixed-summary-content">
-            <div class="fixed-summary-item">
-                <div class="fixed-summary-label">カード枚数</div>
-                <div class="fixed-summary-value" id="fixedTotalQuantity">0枚</div>
+        <div class="fixed-summary-container">
+            <!-- 進捗ステップバー -->
+            <div class="progress-steps">
+                <div class="progress-line">
+                    <div class="progress-line-fill"></div>
+                </div>
+                <div class="step active">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">受付</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">カードお預かり</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">代行料お支払い</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">PSA社へ提出</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">5</div>
+                    <div class="step-label">鑑定中</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">6</div>
+                    <div class="step-label">ご返却</div>
+                </div>
             </div>
-            <div class="fixed-summary-item">
-                <div class="fixed-summary-label">代行料合計</div>
-                <div class="fixed-summary-value" id="fixedTotalFee">¥0</div>
+
+            <!-- カード枚数と代行料合計 -->
+            <div class="fixed-summary-content">
+                <div class="fixed-summary-item">
+                    <div class="fixed-summary-label">カード枚数</div>
+                    <div class="fixed-summary-value" id="fixedTotalQuantity">0枚</div>
+                </div>
+                <div class="fixed-summary-item">
+                    <div class="fixed-summary-label">代行料合計</div>
+                    <div class="fixed-summary-value" id="fixedTotalFee">¥0</div>
+                </div>
             </div>
         </div>
     </div>
