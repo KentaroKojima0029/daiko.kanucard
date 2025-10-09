@@ -308,14 +308,20 @@
             sendCodeBtn.textContent = '送信中...';
 
             try {
+                // タイムアウト処理を追加（30秒）
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000);
+
                 const response = await fetch('/api/auth/send-code', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ email: currentEmail })
+                    body: JSON.stringify({ email: currentEmail }),
+                    signal: controller.signal
                 });
 
+                clearTimeout(timeoutId);
                 const data = await response.json();
 
                 if (!response.ok) {
@@ -328,7 +334,11 @@
                 codeStep.classList.add('active');
                 verificationCodeInput.focus();
             } catch (error) {
-                showError(error.message);
+                if (error.name === 'AbortError') {
+                    showError('リクエストがタイムアウトしました。SMTPサーバーへの接続に問題があります。しばらく待ってから再度お試しください。');
+                } else {
+                    showError(error.message || '認証コードの送信に失敗しました');
+                }
             } finally {
                 sendCodeBtn.disabled = false;
                 sendCodeBtn.textContent = '認証コードを送信';
