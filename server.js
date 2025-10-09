@@ -2,10 +2,12 @@ const express = require('express');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const cookieParser = require('cookie-parser');
+const session = require('express-session');
 require('dotenv').config();
 
 const { init: initDatabase, submissionQueries } = require('./database');
 const { sendVerificationCode, verifyCode } = require('./email-auth');
+const { passport, initGoogleStrategy } = require('./google-auth');
 const { createSession, authenticate, optionalAuthenticate, logout } = require('./auth');
 const { getCustomerById, getCustomerOrders, listAllCustomers } = require('./shopify-client');
 const logger = require('./logger');
@@ -38,6 +40,10 @@ app.set('trust proxy', 1);
 // データベース初期化
 initDatabase();
 
+// Google OAuth初期化
+const googleAuthEnabled = initGoogleStrategy();
+logger.info('Google OAuth status', { enabled: googleAuthEnabled });
+
 // セキュリティヘッダーとロギング（最優先）
 app.use(securityHeaders);
 app.use(requestLogger);
@@ -46,6 +52,22 @@ app.use(requestLogger);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+
+// Session設定（Passport用）
+app.use(session({
+  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET || 'your-secret-key-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  }
+}));
+
+// Passport初期化
+app.use(passport.initialize());
+app.use(passport.session());
 
 logger.info('Server initializing', {
   nodeEnv: process.env.NODE_ENV,
@@ -578,8 +600,65 @@ app.post('/api/auth/logout', (req, res) => {
   }
 
   res.clearCookie('auth_token');
-  res.json({ success: true, message: 'ログアウトしました' });
+
+  // Passportセッションもクリア
+  if (req.logout) {
+    req.logout(() => {
+      res.json({ success: true, message: 'ログアウトしました' });
+    });
+  } else {
+    res.json({ success: true, message: 'ログアウトしました' });
+  }
 });
+
+// Google OAuth認証開始
+app.get('/auth/google',
+  authLimiter,
+  (req, res, next) => {
+    if (!googleAuthEnabled) {
+      return res.status(503).json({
+        error: 'Google認証は現在利用できません。環境変数を確認してください。'
+      });
+    }
+    next();
+  },
+  passport.authenticate('google', {
+    scope: ['profile', 'email']
+  })
+);
+
+// Google OAuthコールバック
+app.get('/auth/google/callback',
+  passport.authenticate('google', {
+    failureRedirect: '/login.html?error=google_auth_failed',
+    session: true
+  }),
+  async (req, res) => {
+    try {
+      logger.info('Google OAuth successful', { userId: req.user.id });
+
+      // JWTトークンも作成（既存システムとの互換性のため）
+      const token = createSession(req.user.id);
+
+      // クッキーに保存
+      res.cookie('auth_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        sameSite: 'strict'
+      });
+
+      // ホームページにリダイレクト
+      res.redirect('/');
+    } catch (error) {
+      logger.error('Google OAuth callback error', {
+        error: error.message,
+        stack: error.stack
+      });
+      res.redirect('/login.html?error=callback_error');
+    }
+  }
+);
 
 // 現在のユーザー情報取得
 app.get('/api/auth/me', authenticate, async (req, res) => {
