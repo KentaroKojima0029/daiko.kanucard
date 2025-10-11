@@ -824,6 +824,20 @@ app.get('/kaitori/approval', (req, res) => {
   res.sendFile(path.join(__dirname, 'kaitori-approval.html'));
 });
 
+// メッセージ/チャットページ
+app.get('/chat', (req, res) => {
+  res.sendFile(path.join(__dirname, 'chat.html'));
+});
+
+app.get('/messages', (req, res) => {
+  res.sendFile(path.join(__dirname, 'chat.html'));
+});
+
+// お問い合わせページ
+app.get('/contact', (req, res) => {
+  res.sendFile(path.join(__dirname, 'contact.html'));
+});
+
 // SPAのフォールバック（HTMLファイルのみ）
 app.get('*', (req, res) => {
   // 静的ファイルのリクエストは除外
