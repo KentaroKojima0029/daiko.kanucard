@@ -833,9 +833,9 @@ app.get('/messages', (req, res) => {
   res.sendFile(path.join(__dirname, 'chat.html'));
 });
 
-// お問い合わせページ
+// お問い合わせページ（メッセージページへリダイレクト）
 app.get('/contact', (req, res) => {
-  res.sendFile(path.join(__dirname, 'contact.html'));
+  res.redirect('/chat');
 });
 
 // SPAのフォールバック（HTMLファイルのみ）
@@ -864,8 +864,8 @@ app.listen(port, () => {
   console.log(`- User page: http://localhost:${port}/`);
   console.log(`- Login: http://localhost:${port}/login`);
   console.log(`- Status: http://localhost:${port}/status`);
+  console.log(`- Messages: http://localhost:${port}/chat`);
   console.log(`- Approval: http://localhost:${port}/approval`);
-  console.log(`- Contact: http://localhost:${port}/contact`);
   console.log(`- Admin: http://localhost:${port}/admin`);
   console.log(`- Health Check: http://localhost:${port}/api/health`);
   console.log(`- Shopify Test: http://localhost:${port}/api/test/shopify`);

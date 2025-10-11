@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メッセージ - PSA代行サービス</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ヘッダー */
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .btn-back svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        /* メインコンテンツ */
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        /* チャットエリア */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 80px);
+        }
+
+        /* チャットヘッダー */
+        .chat-header {
+            background: white;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .support-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+
+        .support-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .support-name {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .support-status {
+            font-size: 12px;
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* メッセージエリア */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 20px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .message.support .message-content {
+            background: white;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .message.support .message-time {
+            color: #64748b;
+        }
+
+        .message.user .message-time {
+            color: rgba(255, 255, 255, 0.9);
+            text-align: right;
+        }
+
+        /* 日付区切り */
+        .date-separator {
+            text-align: center;
+            margin: 24px 0;
+            position: relative;
+        }
+
+        .date-separator::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        .date-separator span {
+            background: #f8fafc;
+            padding: 0 16px;
+            font-size: 12px;
+            color: #64748b;
+            position: relative;
+        }
+
+        /* 入力エリア */
+        .input-container {
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            padding: 16px 20px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .message-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 24px;
+            font-size: 15px;
+            resize: none;
+            font-family: inherit;
+            line-height: 1.4;
+            max-height: 120px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+        }
+
+        .input-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-attach {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #64748b;
+        }
+
+        .btn-attach:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            color: #475569;
+        }
+
+        .btn-send {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-send:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-send svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* タイピングインジケーター */
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            border-bottom-left-radius: 4px;
+            max-width: 80px;
+        }
+
+        .typing-indicator.show {
+            display: flex;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #64748b;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* 画像メッセージ */
+        .message-image {
+            max-width: 300px;
+            border-radius: 12px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        /* ログインモーダル */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .login-modal.show {
+            display: flex;
+        }
+
+        .login-content {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .login-description {
+            color: #64748b;
+            margin-bottom: 24px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            .main-container {
+                max-width: 100%;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .header-title {
+                font-size: 1rem;
+            }
+
+            .header-user {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="https://new-daiko-form.onrender.com" class="btn-back">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                    戻る
+                </a>
+                <h1 class="header-title">メッセージ</h1>
+            </div>
+            <div class="header-user">
+                <span id="userName">ゲスト</span>
+                <div class="user-avatar" id="userAvatar">G</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="main-container">
+        <div class="chat-container">
+            <!-- チャットヘッダー -->
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <div class="support-avatar">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+                        </svg>
+                    </div>
+                    <div class="support-info">
+                        <div class="support-name">PSA代行サポート</div>
+                        <div class="support-status">
+                            <span class="status-dot"></span>
+                            オンライン
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- メッセージエリア -->
+            <div class="messages-container" id="messagesContainer">
+                <!-- 日付区切り -->
+                <div class="date-separator">
+                    <span>今日</span>
+                </div>
+
+                <!-- サポートからの初期メッセージ -->
+                <div class="message support">
+                    <div class="message-content">
+                        こんにちは！PSA代行サービスのサポートです。
+                        <br>ご相談や買取のお問い合わせなど、お気軽にメッセージをお送りください。
+                        <div class="message-time">10:00</div>
+                    </div>
+                </div>
+
+                <!-- タイピングインジケーター -->
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+
+            <!-- 入力エリア -->
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <div class="message-input-wrapper">
+                        <textarea
+                            class="message-input"
+                            id="messageInput"
+                            placeholder="メッセージを入力..."
+                            rows="1"
+                        ></textarea>
+                    </div>
+                    <div class="input-actions">
+                        <button class="btn-attach" id="btnAttach" title="ファイルを添付">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+                            </svg>
+                        </button>
+                        <input type="file" id="fileInput" style="display: none;" accept="image/*">
+                        <button class="btn-send" id="btnSend" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ログインモーダル -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-content">
+            <h2 class="login-title">ログイン</h2>
+            <p class="login-description">
+                Shopifyアカウントでログインしてください
+            </p>
+            <form class="login-form" id="loginForm">
+                <input
+                    type="email"
+                    class="form-input"
+                    id="loginEmail"
+                    placeholder="メールアドレス"
+                    required
+                >
+                <input
+                    type="password"
+                    class="form-input"
+                    id="loginPassword"
+                    placeholder="パスワード"
+                    required
+                >
+                <button type="submit" class="btn-login">ログイン</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // グローバル変数
+        let currentUser = null;
+        let messages = [];
+
+        // DOM要素の取得
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageInput = document.getElementById('messageInput');
+        const btnSend = document.getElementById('btnSend');
+        const btnAttach = document.getElementById('btnAttach');
+        const fileInput = document.getElementById('fileInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const loginModal = document.getElementById('loginModal');
+        const loginForm = document.getElementById('loginForm');
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            initializeEventListeners();
+            loadMessages();
+        });
+
+        // 認証チェック
+        function checkAuth() {
+            const savedUser = localStorage.getItem('chatUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                updateUserDisplay();
+            } else {
+                // 未ログインの場合はモーダル表示
+                setTimeout(() => {
+                    loginModal.classList.add('show');
+                }, 1000);
+            }
+        }
+
+        // イベントリスナーの初期化
+        function initializeEventListeners() {
+            // メッセージ入力
+            messageInput.addEventListener('input', () => {
+                adjustTextareaHeight();
+                btnSend.disabled = !messageInput.value.trim();
+            });
+
+            // Enterキーで送信（Shift+Enterで改行）
+            messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (messageInput.value.trim()) {
+                        sendMessage();
+                    }
+                }
+            });
+
+            // 送信ボタン
+            btnSend.addEventListener('click', sendMessage);
+
+            // ファイル添付ボタン
+            btnAttach.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // ファイル選択
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    sendImage(e.target.files[0]);
+                }
+            });
+
+            // ログインフォーム
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleLogin();
+            });
+        }
+
+        // テキストエリアの高さ調整
+        function adjustTextareaHeight() {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
+        }
+
+        // メッセージ送信
+        async function sendMessage() {
+            if (!currentUser) {
+                loginModal.classList.add('show');
+                return;
+            }
+
+            const messageText = messageInput.value.trim();
+            if (!messageText) return;
+
+            // UIをリセット
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            btnSend.disabled = true;
+
+            // メッセージを追加
+            addMessage({
+                id: Date.now(),
+                text: messageText,
+                sender: 'user',
+                timestamp: new Date(),
+                userName: currentUser.name
+            });
+
+            // サーバーに送信（バックエンドが実装されたら）
+            try {
+                await sendMessageToServer(messageText);
+                // サポートからの自動返信（デモ用）
+                simulateSupportReply();
+            } catch (error) {
+                console.error('メッセージ送信エラー:', error);
+            }
+        }
+
+        // 画像送信
+        async function sendImage(file) {
+            if (!currentUser) {
+                loginModal.classList.add('show');
+                return;
+            }
+
+            // 画像をBase64に変換
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                addMessage({
+                    id: Date.now(),
+                    image: e.target.result,
+                    sender: 'user',
+                    timestamp: new Date(),
+                    userName: currentUser.name
+                });
+
+                // サポートからの自動返信（デモ用）
+                simulateSupportReply('画像を確認しました。');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // メッセージをUIに追加
+        function addMessage(message) {
+            messages.push(message);
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.sender}`;
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+
+            if (message.text) {
+                contentDiv.innerHTML = `
+                    ${message.text.replace(/\n/g, '<br>')}
+                    <div class="message-time">${formatTime(message.timestamp)}</div>
+                `;
+            }
+
+            if (message.image) {
+                contentDiv.innerHTML = `
+                    <img src="${message.image}" class="message-image" onclick="openImage('${message.image}')" alt="送信画像">
+                    <div class="message-time">${formatTime(message.timestamp)}</div>
+                `;
+            }
+
+            messageDiv.appendChild(contentDiv);
+
+            // タイピングインジケーターの前に挿入
+            messagesContainer.insertBefore(messageDiv, typingIndicator);
+
+            // スクロールを最下部へ
+            scrollToBottom();
+        }
+
+        // サポートからの返信をシミュレート
+        function simulateSupportReply(customMessage) {
+            // タイピングインジケーターを表示
+            typingIndicator.classList.add('show');
+            scrollToBottom();
+
+            setTimeout(() => {
+                typingIndicator.classList.remove('show');
+
+                const replies = customMessage ? [customMessage] : [
+                    'ご連絡ありがとうございます。確認させていただきます。',
+                    'お問い合わせありがとうございます。詳細を確認いたします。',
+                    'メッセージを受け取りました。少々お待ちください。',
+                    'ご質問について確認中です。しばらくお待ちください。'
+                ];
+
+                const replyText = customMessage || replies[Math.floor(Math.random() * replies.length)];
+
+                addMessage({
+                    id: Date.now(),
+                    text: replyText,
+                    sender: 'support',
+                    timestamp: new Date()
+                });
+            }, 1500);
+        }
+
+        // ログイン処理
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // 実際の実装ではShopify APIと連携
+            // デモ用の処理
+            currentUser = {
+                id: Date.now(),
+                email: email,
+                name: email.split('@')[0],
+                shopifyId: 'demo_' + Date.now()
+            };
+
+            // ローカルストレージに保存
+            localStorage.setItem('chatUser', JSON.stringify(currentUser));
+
+            // UIを更新
+            updateUserDisplay();
+            loginModal.classList.remove('show');
+
+            // ウェルカムメッセージ
+            addMessage({
+                id: Date.now(),
+                text: `${currentUser.name}様、こんにちは！\nどのようなご用件でしょうか？`,
+                sender: 'support',
+                timestamp: new Date()
+            });
+        }
+
+        // ユーザー表示の更新
+        function updateUserDisplay() {
+            if (currentUser) {
+                userName.textContent = currentUser.name;
+                userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
+            }
+        }
+
+        // メッセージ履歴の読み込み
+        async function loadMessages() {
+            // バックエンドから履歴を取得（実装後）
+            // デモ用データは初期メッセージのみ
+        }
+
+        // サーバーへメッセージ送信
+        async function sendMessageToServer(text) {
+            const response = await fetch('/api/chat/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text: text,
+                    userId: currentUser.id,
+                    shopifyId: currentUser.shopifyId,
+                    userName: currentUser.name
+                })
+            });
+            return response.json();
+        }
+
+        // 時間フォーマット
+        function formatTime(date) {
+            const d = new Date(date);
+            return d.getHours().toString().padStart(2, '0') + ':' +
+                   d.getMinutes().toString().padStart(2, '0');
+        }
+
+        // 画像を開く
+        function openImage(src) {
+            window.open(src, '_blank');
+        }
+
+        // 最下部へスクロール
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
