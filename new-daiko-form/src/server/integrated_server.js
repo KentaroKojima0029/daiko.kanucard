@@ -593,7 +593,147 @@ app.post('/api/approval/:key/response', async (req, res) => {
 // メッセージAPI
 // ============================================
 
-// メッセージ送信
+// チャットメッセージ送信（Shopifyベース）
+app.post('/api/chat/messages', async (req, res) => {
+  try {
+    const { userId, shopifyId, userName, text, image } = req.body;
+
+    if (!userId || !text) {
+      return res.status(400).json({ error: '必須項目が不足しています' });
+    }
+
+    // Shopifyユーザー専用のチャットキーを作成
+    const chatKey = `chat_${shopifyId || userId}`;
+    const messageId = uuidv4();
+
+    if (!messages[chatKey]) {
+      messages[chatKey] = [];
+    }
+
+    messages[chatKey].push({
+      messageId,
+      userId,
+      shopifyId,
+      userName,
+      text,
+      image,
+      sender: 'user',
+      timestamp: new Date().toISOString(),
+      read: false
+    });
+
+    saveData();
+
+    // 管理者への通知
+    await transporter.sendMail({
+      from: process.env.FROM_EMAIL,
+      to: process.env.ADMIN_EMAIL,
+      subject: `新しいチャットメッセージ - ${userName}様より`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">新しいチャットメッセージ</h2>
+          <p><strong>送信者:</strong> ${userName}</p>
+          <p><strong>Shopify ID:</strong> ${shopifyId || '未設定'}</p>
+          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 4px; margin: 20px 0;">
+            ${text}
+          </div>
+          <p style="margin: 30px 0;">
+            <a href="${req.protocol}://${req.get('host')}/admin"
+               style="display: inline-block; padding: 12px 24px; background-color: #007bff;
+                      color: white; text-decoration: none; border-radius: 4px;">
+              管理画面で返信
+            </a>
+          </p>
+        </div>
+      `
+    });
+
+    // 自動応答（デモ用）
+    setTimeout(() => {
+      messages[chatKey].push({
+        messageId: uuidv4(),
+        text: 'ご連絡ありがとうございます。担当者が確認次第、返信させていただきます。',
+        sender: 'support',
+        timestamp: new Date().toISOString(),
+        read: false
+      });
+      saveData();
+    }, 1000);
+
+    res.json({ success: true, messageId });
+
+  } catch (error) {
+    console.error('チャットメッセージ送信エラー:', error);
+    res.status(500).json({ error: 'メッセージ送信に失敗しました' });
+  }
+});
+
+// チャットメッセージ取得（Shopifyベース）
+app.get('/api/chat/messages/:userId', (req, res) => {
+  const { userId } = req.params;
+  const chatKey = `chat_${userId}`;
+  res.json(messages[chatKey] || []);
+});
+
+// サポートから返信（管理者用）
+app.post('/api/chat/reply', basicAuth, async (req, res) => {
+  try {
+    const { userId, shopifyId, text, customerEmail } = req.body;
+
+    if (!userId || !text) {
+      return res.status(400).json({ error: '必須項目が不足しています' });
+    }
+
+    const chatKey = `chat_${shopifyId || userId}`;
+    const messageId = uuidv4();
+
+    if (!messages[chatKey]) {
+      messages[chatKey] = [];
+    }
+
+    messages[chatKey].push({
+      messageId,
+      text,
+      sender: 'support',
+      timestamp: new Date().toISOString(),
+      read: false
+    });
+
+    saveData();
+
+    // 顧客へのメール通知
+    if (customerEmail) {
+      await transporter.sendMail({
+        from: process.env.FROM_EMAIL,
+        to: customerEmail,
+        subject: 'PSA代行サービス - サポートからの返信',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">サポートからの返信</h2>
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 4px; margin: 20px 0;">
+              ${text}
+            </div>
+            <p style="margin: 30px 0;">
+              <a href="${req.protocol}://${req.get('host')}/chat"
+                 style="display: inline-block; padding: 12px 24px; background-color: #007bff;
+                        color: white; text-decoration: none; border-radius: 4px;">
+                チャットで確認
+              </a>
+            </p>
+          </div>
+        `
+      });
+    }
+
+    res.json({ success: true, messageId });
+
+  } catch (error) {
+    console.error('返信エラー:', error);
+    res.status(500).json({ error: '返信に失敗しました' });
+  }
+});
+
+// メッセージ送信（既存の依頼ベース）
 app.post('/api/messages', async (req, res) => {
   try {
     const { requestId, requestType, sender, senderName, message } = req.body;
@@ -682,6 +822,20 @@ app.patch('/api/messages/:requestId/read', (req, res) => {
   }
 
   res.json({ success: true });
+});
+
+// ============================================
+// チャット/メッセージルート
+// ============================================
+
+// チャットページ
+app.get('/chat', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../chat.html'));
+});
+
+// メッセージページ（エイリアス）
+app.get('/messages', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../chat.html'));
 });
 
 // ============================================
