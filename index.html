@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PSA代行サービス - 代行依頼フォーム</title>
+    <title>PSA代行サービス - ホーム</title>
     <style>
         * {
             margin: 0;
@@ -15,164 +15,20 @@
             font-family: 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
             min-height: 100vh;
-            padding: 160px 20px 20px;
+            padding: 20px;
             color: #1e293b;
-            letter-spacing: 0.02em;
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 130px 4px 20px;
-            }
-        }
-
-        /* ナビゲーションバー */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(16px);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-            border-bottom: 1px solid rgba(203, 213, 225, 0.3);
-            z-index: 1000;
-            padding: 0;
-        }
-
-        .navbar-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 24px;
-        }
-
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #0f172a;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            letter-spacing: 0.05em;
-        }
-
-        .navbar-menu {
-            display: flex;
-            gap: 8px;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .navbar-menu li {
-            margin: 0;
-        }
-
-        .navbar-link {
-            padding: 10px 20px;
-            color: #475569;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 15px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            display: block;
-        }
-
-        .navbar-link:hover {
-            background: linear-gradient(135deg, #1e40af, #1e3a8a);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
-        }
-
-        .navbar-link.active {
-            background: linear-gradient(135deg, #1e40af, #1e3a8a);
-            color: white;
-            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
-        }
-
-        .logout-btn {
-            border: none;
-            cursor: pointer;
-            background: transparent;
-        }
-
-        .logout-btn:hover {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-        }
-
-        .mobile-menu-button {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 28px;
-            color: #1e40af;
-            cursor: pointer;
-            padding: 8px;
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding-top: 70px;
-            }
-
-            .navbar-container {
-                padding: 12px 16px;
-            }
-
-            .navbar-brand {
-                font-size: 1.2rem;
-            }
-
-            .mobile-menu-button {
-                display: block;
-            }
-
-            .navbar-menu {
-                display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: white;
-                flex-direction: column;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                padding: 8px;
-            }
-
-            .navbar-menu.show {
-                display: flex;
-            }
-
-            .navbar-link {
-                padding: 14px 20px;
-            }
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
-            animation: slideUp 0.8s ease-out;
+            animation: fadeIn 0.6s ease-out;
         }
 
-        @media (max-width: 768px) {
-            .container {
-                margin: 0;
-            }
-        }
-
-        @keyframes slideUp {
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
@@ -180,1722 +36,646 @@
             }
         }
 
-        .main-card {
+        /* ヘッダー */
+        .header {
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(16px);
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(226, 232, 240, 0.5);
-            overflow: hidden;
+            border-radius: 20px;
+            padding: 30px;
             margin-bottom: 30px;
-        }
-
-        @media (max-width: 768px) {
-            .main-card {
-                border-radius: 0;
-                margin-bottom: 0;
-            }
-        }
-
-        .header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            padding: 40px;
             text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        /* カウントダウンセクション */
+        .countdown-section {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .countdown-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .countdown-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .countdown-card {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            border-radius: 16px;
+            padding: 20px;
             position: relative;
             overflow: hidden;
         }
 
-        .header::before {
+        .countdown-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+        }
+
+        .countdown-card.usa::before {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .countdown-card.japan::before {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .country-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 12px;
+        }
+
+        .countdown-time {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .countdown-date {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        /* サービスボタングリッド */
+        .services-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .service-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .service-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
-            pointer-events: none;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        @media (max-width: 768px) {
-            .header {
-                padding: 24px 16px;
-            }
-
-            .header h1 {
-                font-size: 1.5rem;
-            }
-
-            .header p {
-                font-size: 0.9rem;
-            }
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
 
-        .header h1 {
-            font-size: 2rem;
+        .service-card:hover::before {
+            opacity: 0.05;
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .service-title {
+            font-size: 1.3rem;
             font-weight: 700;
-            margin-bottom: 12px;
-            position: relative;
-            z-index: 1;
-            letter-spacing: 0.05em;
-        }
-
-        .header p {
-            font-size: 1rem;
-            opacity: 0.95;
-            position: relative;
-            z-index: 1;
-            letter-spacing: 0.03em;
-        }
-
-        .form-content {
-            padding: 40px;
-        }
-
-        .section {
-            margin-bottom: 40px;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            letter-spacing: 0.03em;
-        }
-
-        .section-title::before {
-            content: '';
-            width: 5px;
-            height: 28px;
-            background: linear-gradient(135deg, #1e40af, #3b82f6);
-            border-radius: 3px;
-            box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
             color: #1e293b;
-            margin-bottom: 10px;
-            letter-spacing: 0.02em;
-            text-transform: uppercase;
-            font-size: 12px;
-            opacity: 0.85;
+            margin-bottom: 8px;
         }
 
-        .required {
-            color: #ef4444;
-            margin-left: 4px;
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: 16px 20px;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 500;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: #ffffff;
-            color: #0f172a;
-            font-family: inherit;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: #1e40af;
-            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.08), 0 4px 12px rgba(0, 0, 0, 0.1);
-            transform: translateY(-1px);
-        }
-
-        .form-input::placeholder,
-        .form-textarea::placeholder {
-            color: #9ca3af;
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-
-        .input-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .card-name-cell {
-            max-width: 200px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            line-height: 1.4;
-            font-size: 14px;
-        }
-
-        .input-hint {
-            font-size: 11px;
+        .service-description {
+            font-size: 0.9rem;
             color: #64748b;
-            margin-top: 6px;
-            font-weight: 500;
-            letter-spacing: 0.01em;
+            line-height: 1.4;
+            margin-bottom: 16px;
         }
 
-        .card-form {
-            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-            border: 1px solid #cbd5e1;
-            border-radius: 12px;
-            padding: 28px;
-            margin-bottom: 24px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        }
-
-        .table-container {
-            overflow-x: auto;
-            margin: 20px 0;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .modern-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-
-        .modern-table thead {
-            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
-            color: white;
-            text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 0.05em;
-        }
-
-        .modern-table th,
-        .modern-table td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .modern-table tbody tr:hover {
-            background: #f9fafb;
-        }
-
-        .modern-table tfoot {
-            background: #f3f4f6;
-            font-weight: 700;
-        }
-
-        .choice-section {
-            margin-bottom: 24px;
-        }
-
-        .choice-label {
-            font-size: 15px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 12px;
-        }
-
-        .choice-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-        }
-
-        .choice-btn {
-            padding: 18px 24px;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            background: linear-gradient(to bottom, #ffffff, #f8fafc);
-            color: #475569;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-align: center;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            letter-spacing: 0.02em;
-        }
-
-        .choice-btn:hover {
-            border-color: #1e40af;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(30, 64, 175, 0.15);
-            background: linear-gradient(to bottom, #ffffff, #f1f5f9);
-        }
-
-        .choice-btn.active {
-            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
-            border-color: #1e40af;
-            color: white;
-            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
-        }
-
-        .choice-btn.blue.active {
-            background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 50%, #38bdf8 100%);
-            border-color: #0284c7;
-            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        .choice-btn.gray.active {
-            background: linear-gradient(135deg, #475569 0%, #64748b 50%, #94a3b8 100%);
-            border-color: #475569;
-            box-shadow: 0 6px 20px rgba(71, 85, 105, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        .btn {
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        .service-cta {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
+            gap: 6px;
+            color: #3b82f6;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .service-cta svg {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .service-card:hover .service-cta svg {
+            transform: translateX(4px);
+        }
+
+        /* ステータスセクション */
+        .status-section {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .status-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
             gap: 10px;
-            padding: 14px 28px;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            color: white;
-            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
-            width: 100%;
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px -3px rgba(79, 70, 229, 0.4);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-            padding: 10px 18px;
-            font-size: 14px;
-            box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
-        }
-
-        .btn-danger:hover {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px -3px rgba(239, 68, 68, 0.4);
-        }
-
-        .btn-submit {
-            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
-            color: white;
-            padding: 20px 48px;
-            font-size: 16px;
-            font-weight: 700;
-            width: 100%;
-            margin-top: 32px;
-            box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-submit::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.6s;
-        }
-
-        .btn-submit:hover:not(:disabled)::before {
-            left: 100%;
-        }
-
-        .btn-submit:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
-        }
-
-        .btn-submit:active:not(:disabled) {
-            transform: translateY(0px);
-            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .button-container {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
-        }
-
-        .action-btn {
-            padding: 9px 18px;
-            font-size: 13px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            letter-spacing: 0.02em;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .action-btn.edit {
-            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-            color: white;
-        }
-
-        .action-btn.edit:hover {
-            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-
-        .action-btn.delete {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-        }
-
-        .action-btn.delete:hover {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .action-btn:active {
-            transform: translateY(0px);
-        }
-
-        .note-box {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border-left: 5px solid #f59e0b;
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 24px;
-        }
-
-        /* 固定ヘッダー - 進捗状況と代行料合計表示 */
-        .fixed-summary {
-            position: fixed;
-            top: 70px;
-            left: 0;
-            right: 0;
-            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
-            color: white;
-            padding: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            z-index: 999;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .fixed-summary-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        /* 進捗ステップバー */
-        .progress-steps {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-            margin-bottom: 8px;
-        }
-
-        .progress-line {
-            position: absolute;
-            top: 20px;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: rgba(255, 255, 255, 0.3);
-            z-index: 0;
-        }
-
-        .progress-line-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            background: white;
-            transition: width 0.5s ease;
-            width: 0%;
-        }
-
-        .step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-            z-index: 1;
-            flex: 1;
-        }
-
-        .step-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            border: 3px solid transparent;
-        }
-
-        .step.active .step-circle {
-            background: white;
-            color: #059669;
-            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.4);
-            transform: scale(1.1);
-        }
-
-        .step.completed .step-circle {
-            background: white;
-            color: #059669;
-        }
-
-        .step-label {
-            font-size: 12px;
-            font-weight: 600;
-            text-align: center;
-            opacity: 0.8;
-            white-space: nowrap;
-        }
-
-        .step.active .step-label,
-        .step.completed .step-label {
-            opacity: 1;
-            font-weight: 700;
-        }
-
-        .fixed-summary-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .fixed-summary-item {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .fixed-summary-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            opacity: 0.9;
-        }
-
-        .fixed-summary-value {
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: 0.02em;
-        }
-
-        @media (max-width: 768px) {
-            .fixed-summary {
-                top: 60px;
-                padding: 12px 8px;
-            }
-
-            .step-circle {
-                width: 28px;
-                height: 28px;
-                font-size: 12px;
-            }
-
-            .step-label {
-                font-size: 9px;
-            }
-
-            .step.active .step-circle {
-                transform: scale(1.05);
-            }
-
-            .fixed-summary-content {
-                flex-direction: row;
-                gap: 8px;
-                justify-content: center;
-                padding-top: 8px;
-            }
-
-            .fixed-summary-item {
-                flex-direction: row;
-                gap: 6px;
-                align-items: center;
-            }
-
-            .fixed-summary-label {
-                font-size: 11px;
-            }
-
-            .fixed-summary-value {
-                font-size: 14px;
-            }
-        }
-
-        .note-box strong {
-            color: #92400e;
-            font-size: 1.1rem;
-        }
-
-        .note-box ul {
-            margin-top: 12px;
-            margin-left: 24px;
-            color: #78350f;
-        }
-
-        .note-box li {
-            margin-bottom: 8px;
-            line-height: 1.6;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 24px;
-            max-width: 800px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            animation: slideUpModal 0.4s ease-out;
-        }
-
-        @keyframes slideUpModal {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .modal-header {
-            padding: 32px;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            color: white;
-        }
-
-        .modal-header h3 {
-            font-size: 1.8rem;
-            font-weight: 800;
-            margin: 0 0 8px 0;
-        }
-
-        .modal-body {
-            padding: 32px;
-        }
-
-        .modal-body p {
-            margin-bottom: 16px;
-            line-height: 1.8;
-            color: #374151;
-        }
-
-        .fee-summary-card {
+        .status-item {
             background: linear-gradient(135deg, #f8fafc, #f1f5f9);
             border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-
-        .fee-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .fee-row:last-child {
-            border-bottom: none;
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: #1a202c;
-        }
-
-        .confirmation-details {
-            background: white;
-            border-radius: 12px;
             padding: 20px;
-            border: 2px solid #e5e7eb;
+            text-align: center;
         }
 
-        .modal-footer {
-            padding: 24px 32px;
-            border-top: 2px solid #e5e7eb;
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
+        .status-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3b82f6;
+            margin-bottom: 8px;
         }
 
-        .modal-footer .btn {
-            flex: 1;
+        .status-label {
+            font-size: 0.9rem;
+            color: #64748b;
         }
 
+        /* 通知バッジ */
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ef4444;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 12px;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        /* レスポンシブ対応 */
         @media (max-width: 768px) {
-            .form-content {
-                padding: 12px 8px;
-            }
-
-            .card-form {
+            body {
                 padding: 12px;
             }
 
-            .section {
+            .header {
+                padding: 20px;
+                border-radius: 16px;
                 margin-bottom: 20px;
             }
 
-            .section-title {
-                font-size: 1.2rem;
-                margin-bottom: 16px;
+            .logo {
+                font-size: 1.5rem;
             }
 
-            .table-container {
-                margin: 12px 0;
+            .countdown-section,
+            .status-section {
+                padding: 20px;
+                border-radius: 16px;
+                margin-bottom: 20px;
             }
 
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .form-group {
-                margin-bottom: 16px;
-            }
-
-            .input-grid {
-                grid-template-columns: 1fr 1fr 80px;
-                gap: 8px;
-            }
-
-            .input-grid .form-input {
-                font-size: 14px;
-                padding: 12px 10px;
-            }
-
-            .input-grid .form-label {
-                font-size: 13px;
-            }
-
-            .input-hint {
-                font-size: 11px;
-            }
-
-            .choice-buttons {
+            .services-section {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
+                gap: 12px;
             }
 
-            .button-container {
-                flex-direction: column;
+            .service-card {
+                padding: 20px;
+                min-height: 160px;
+                border-radius: 16px;
             }
 
-            .modal-footer {
-                flex-direction: column;
+            .service-icon {
+                font-size: 2rem;
+                margin-bottom: 12px;
             }
 
-            /* モバイル用テーブル2行表示 */
-            .modern-table thead {
+            .service-title {
+                font-size: 1rem;
+            }
+
+            .service-description {
                 display: none;
             }
 
-            .modern-table tbody {
-                display: block;
+            .countdown-time {
+                font-size: 1.4rem;
             }
 
-            .modern-table tbody tr {
-                display: block;
-                border: 2px solid #e5e7eb;
-                border-radius: 12px;
-                margin-bottom: 12px;
-                padding: 12px;
-                background: white;
+            .status-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
             }
 
-            .modern-table tbody tr td {
-                border: none;
-                display: block;
-                padding: 0;
+            .status-item {
+                padding: 15px;
             }
 
-            .modern-table tbody tr td:nth-child(1) {
-                display: none; /* No列を非表示 */
+            .status-number {
+                font-size: 1.5rem;
             }
+        }
 
-            /* 1行目：カード名 */
-            .modern-table tbody tr td:nth-child(2) {
-                font-weight: 700;
-                font-size: 14px;
-                padding-bottom: 8px;
-                border-bottom: 1px solid #e5e7eb;
-                margin-bottom: 8px;
-                line-height: 1.4;
-            }
-
-            .modern-table tbody tr td:nth-child(2)::before {
-                content: 'カード名: ';
-                font-weight: 600;
-                color: #6b7280;
-            }
-
-            /* 2行目：数量・申告額・取得額を横並びに */
-            .modern-table tbody tr td:nth-child(3),
-            .modern-table tbody tr td:nth-child(4),
-            .modern-table tbody tr td:nth-child(5) {
-                display: inline-block;
-                font-size: 13px;
-                margin-right: 8px;
-            }
-
-            .modern-table tbody tr td:nth-child(3)::before {
-                content: '数量: ';
-                font-weight: 600;
-                color: #6b7280;
-            }
-
-            .modern-table tbody tr td:nth-child(4)::before {
-                content: '申告額: ';
-                font-weight: 600;
-                color: #6b7280;
-            }
-
-            .modern-table tbody tr td:nth-child(5)::before {
-                content: '取得額: ';
-                font-weight: 600;
-                color: #6b7280;
-            }
-
-            /* 操作ボタン */
-            .modern-table tbody tr td:nth-child(6) {
-                margin-top: 8px;
-                padding-top: 8px;
-                border-top: 1px solid #e5e7eb;
-                text-align: right;
-            }
-
-            .modern-table tfoot {
-                display: block;
-                background: white;
-                border-radius: 12px;
-                padding: 12px;
-            }
-
-            .modern-table tfoot tr {
-                display: block;
-            }
-
-            .modern-table tfoot td {
-                display: block;
-                padding: 4px 0;
-                border: none;
-                text-align: left;
-            }
-
-            .card-name-cell {
-                max-width: none;
-                font-size: 14px;
-                -webkit-line-clamp: 2;
-            }
-
-            .action-btn {
-                padding: 6px 12px;
-                font-size: 12px;
-                margin-right: 6px;
+        @media (max-width: 480px) {
+            .status-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
 </head>
 <body>
-    <!-- ナビゲーションバー -->
-    <nav class="navbar">
-        <div class="navbar-container">
-            <a href="/" class="navbar-brand">
-                PSA代行サービス
-            </a>
-            <button class="mobile-menu-button" id="mobileMenuButton">
-                ☰
-            </button>
-            <ul class="navbar-menu" id="navbarMenu">
-                <li><a href="/" class="navbar-link active">代行フォーム</a></li>
-                <li><a href="/status" class="navbar-link">進捗確認</a></li>
-                <li><a href="/chat" class="navbar-link">メッセージ</a></li>
-                <li><a href="/approval" class="navbar-link">買取承認</a></li>
-            </ul>
-        </div>
-    </nav>
-
     <div class="container">
-        <div class="main-card">
-            <div class="header">
-                <h1>PSA代行サービス</h1>
-                <p>トレーディングカードのPSA鑑定代行をお手伝いします</p>
-            </div>
+        <!-- ヘッダー -->
+        <header class="header">
+            <div class="logo">PSA代行サービス</div>
+            <div class="subtitle">トレーディングカードのPSA鑑定代行</div>
+        </header>
 
-            <div class="form-content">
-                <!-- カード情報入力セクション -->
-                <div class="section">
-                    <div class="section-title">カード情報入力</div>
-
-                    <form id="itemForm" class="card-form">
-                        <div class="form-group">
-                            <label class="form-label" for="searchItem">
-                                カード詳細情報<span class="required">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                id="searchItem"
-                                class="form-input"
-                                placeholder="例：ブラッキーVMAX 2021 095/069 HR"
-                                required
-                            >
-                            <div class="input-hint">カード名・製造年・番号・レアリティを入力してください</div>
-                        </div>
-
-                        <div class="input-grid">
-                            <div class="form-group">
-                                <label class="form-label" for="declaredValue">申告額（1枚）<span class="required">*</span></label>
-                                <input
-                                    type="number"
-                                    id="declaredValue"
-                                    class="form-input"
-                                    placeholder="150000"
-                                    required
-                                    min="0"
-                                    step="any"
-                                >
-                                <div class="input-hint">1枚あたりの申告額</div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="acquisitionValue">取得額</label>
-                                <input
-                                    type="number"
-                                    id="acquisitionValue"
-                                    class="form-input"
-                                    placeholder="200000"
-                                    min="0"
-                                    step="any"
-                                >
-                                <div class="input-hint">関税15％計算用の荷物価格</div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="quantity">数量<span class="required">*</span></label>
-                                <input
-                                    type="number"
-                                    id="quantity"
-                                    class="form-input"
-                                    min="1"
-                                    required
-                                    placeholder="1"
-                                    value="1"
-                                >
-                                <div class="input-hint">カードの枚数</div>
-                            </div>
-                        </div>
-
-                        <div class="button-container">
-                            <button class="btn btn-primary" type="submit">
-                                カードを保存
-                            </button>
-                            <button class="btn btn-danger" id="deleteDataButton" type="button">
-                                全削除
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- カード一覧セクション -->
-                <div class="section">
-                    <div class="section-title">カード一覧</div>
-                    <div class="table-container">
-                        <table class="modern-table" id="itemsTable">
-                            <thead>
-                                <tr>
-                                    <th style="width: 8%;">No</th>
-                                    <th style="width: 35%;">カード名</th>
-                                    <th style="width: 10%;">数量</th>
-                                    <th style="width: 15%;">申告額</th>
-                                    <th style="width: 15%;">取得額</th>
-                                    <th style="width: 17%;">操作</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="2">合計</td>
-                                    <td id="totalQuantity">0枚</td>
-                                    <td colspan="3">代行料: <span id="totalFee">0円</span></td>
-                                </tr>
-                            </tfoot>
-                        </table>
+        <!-- カウントダウンセクション -->
+        <section class="countdown-section">
+            <h2 class="countdown-title">
+                🚀 次回発送スケジュール
+            </h2>
+            <div class="countdown-grid">
+                <div class="countdown-card usa">
+                    <div class="country-label">
+                        <span>🇺🇸</span>
+                        <span>アメリカ発送</span>
+                    </div>
+                    <div class="countdown-time" id="usaCountdown">計算中...</div>
+                    <div class="countdown-date" id="usaDate"></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="usaProgress"></div>
                     </div>
                 </div>
-
-                <!-- サービス設定セクション -->
-                <div class="section">
-                    <div class="section-title">サービス設定</div>
-
-                    <form id="contactForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label" for="plan">代行プラン<span class="required">*</span></label>
-                                <select id="plan" class="form-select" required>
-                                    <option value="normal">ノーマル 日本 (2.2%)</option>
-                                    <option value="guarantee">70％保証 日本 (3.3%)</option>
-                                    <option value="normal_usa">ノーマル アメリカ (3.3%)</option>
-                                    <option value="guarantee_usa">70％保証 アメリカ (5.0%)</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="serviceOption">PSA社プラン<span class="required">*</span></label>
-                                <select id="serviceOption" class="form-select" required>
-                                    <option value="バリューバルク">バリューバルク</option>
-                                    <option value="バリュー">バリュー</option>
-                                    <option value="バリュープラス">バリュープラス</option>
-                                    <option value="レギュラー">レギュラー</option>
-                                    <option value="パック・雑誌鑑定">パック・雑誌鑑定</option>
-                                    <option value="特殊鑑定">特殊鑑定</option>
-                                    <option value="それ以外">それ以外</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="choice-section">
-                            <div class="choice-label">買取額の提示</div>
-                            <div class="choice-buttons">
-                                <button type="button" class="choice-btn" data-option="purchaseOffer" data-value="希望する">
-                                    希望する
-                                </button>
-                                <button type="button" class="choice-btn gray" data-option="purchaseOffer" data-value="希望しない">
-                                    希望しない
-                                </button>
-                            </div>
-                            <input type="hidden" id="purchaseOffer" value="">
-                        </div>
-
-                        <div class="choice-section">
-                            <div class="choice-label">返却方法</div>
-                            <div class="choice-buttons">
-                                <button type="button" class="choice-btn" data-option="returnMethod" data-value="即時返送">
-                                    即時返送（送料負担）
-                                </button>
-                                <button type="button" class="choice-btn blue" data-option="returnMethod" data-value="鑑定品と一緒に返送">
-                                    鑑定品と一緒に返送
-                                </button>
-                            </div>
-                            <input type="hidden" id="returnMethod" value="">
-                        </div>
-
-                        <div class="choice-section">
-                            <div class="choice-label">無料検品</div>
-                            <div class="choice-buttons">
-                                <button type="button" class="choice-btn" data-option="inspectionOption" data-value="希望する">
-                                    希望する（推奨）
-                                </button>
-                                <button type="button" class="choice-btn gray" data-option="inspectionOption" data-value="希望しない">
-                                    希望しない
-                                </button>
-                            </div>
-                            <input type="hidden" id="inspectionOption" value="">
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label" for="contactName">お名前<span class="required">*</span></label>
-                                <input
-                                    required
-                                    id="contactName"
-                                    type="text"
-                                    class="form-input"
-                                    placeholder="山田太郎"
-                                >
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="contactEmail">メールアドレス<span class="required">*</span></label>
-                                <input
-                                    required
-                                    id="contactEmail"
-                                    type="email"
-                                    class="form-input"
-                                    placeholder="example@email.com"
-                                >
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="contactBody">メッセージ</label>
-                            <textarea
-                                rows="4"
-                                id="contactBody"
-                                class="form-textarea"
-                                placeholder="ご質問やご要望がございましたらご記入ください"
-                            ></textarea>
-                        </div>
-
-                        <button type="submit" class="btn btn-submit" id="submitBtn">
-                            内容を確認する
-                        </button>
-
-                        <div class="note-box">
-                            <strong>※ 送信前に必ずご確認ください</strong>
-                            <ul>
-                                <li>カード情報を1枚以上登録してください</li>
-                                <li>70％保証プランは10枚以上のカード登録が必要です</li>
-                                <li>確認画面で料金の見積もりをご確認いただけます</li>
-                                <li>送信後、確認メールが届きます</li>
-                            </ul>
-                        </div>
-                    </form>
+                <div class="countdown-card japan">
+                    <div class="country-label">
+                        <span>🇯🇵</span>
+                        <span>日本発送</span>
+                    </div>
+                    <div class="countdown-time" id="japanCountdown">計算中...</div>
+                    <div class="countdown-date" id="japanDate"></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="japanProgress"></div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <!-- 確認モーダル -->
-    <div class="modal" id="confirmationModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>送信内容の最終確認</h3>
-                <p style="color: rgba(255, 255, 255, 0.9);">以下の内容で送信いたします</p>
-            </div>
-            <div class="modal-body">
-                <div class="fee-summary-card">
-                    <h4 style="margin-bottom: 16px; color: #1e40af; font-weight: 700;">お支払いについて</h4>
-
-                    <div style="background: linear-gradient(135deg, #f0f9ff, #dbeafe); padding: 16px; border-radius: 12px; margin-bottom: 16px; border-left: 4px solid #1e40af;">
-                        <h5 style="font-weight: 700; color: #1e293b; margin-bottom: 12px;">1回目のお支払い（サービス開始時）</h5>
-                        <div class="fee-row">
-                            <span>代行手数料</span>
-                            <span id="confirmAgencyFee" style="font-weight: 700; color: #1e40af;">0円</span>
-                        </div>
-                        <div class="fee-row" style="border-top: 2px solid #1e40af; padding-top: 8px; margin-top: 8px;">
-                            <span style="font-weight: 700;">小計</span>
-                            <span id="confirmFirstPayment" style="font-weight: 700; font-size: 1.1rem; color: #1e40af;">0円</span>
-                        </div>
-                    </div>
-
-                    <div style="background: linear-gradient(135deg, #fefce8, #fef08a); padding: 16px; border-radius: 12px; margin-bottom: 16px; border-left: 4px solid #ca8a04;">
-                        <h5 style="font-weight: 700; color: #1e293b; margin-bottom: 12px;">2回目のお支払い（カード受取時）</h5>
-                        <div class="fee-row">
-                            <span>鑑定料</span>
-                            <span id="confirmEstimatedGradingFee" style="font-weight: 700; color: #ca8a04;">設定してください</span>
-                        </div>
-                        <div class="fee-row">
-                            <span>輸出入送料</span>
-                            <span style="font-weight: 700; color: #ca8a04;">実費精算</span>
-                        </div>
-                        <div class="fee-row" id="taxRow">
-                            <span>関税（発生時のみ）</span>
-                            <span id="confirmEstimatedTax" style="font-weight: 700; color: #ca8a04;">0円</span>
-                        </div>
-                        <div class="fee-row">
-                            <span>その他諸費用</span>
-                            <span style="font-weight: 700; color: #ca8a04;">実費精算</span>
-                        </div>
-                        <div class="fee-row" style="border-top: 2px solid #ca8a04; padding-top: 8px; margin-top: 8px;">
-                            <span style="font-weight: 700;">小計（見込）</span>
-                            <span id="confirmSecondPayment" style="font-weight: 700; font-size: 1.1rem; color: #ca8a04;">0円</span>
-                        </div>
-                    </div>
-
-                    <div style="background: linear-gradient(135deg, #1e40af, #2563eb); padding: 16px; border-radius: 12px; color: white;">
-                        <div class="fee-row" style="border-bottom: none;">
-                            <span style="font-weight: 700; font-size: 1.1rem;">総額（見込）</span>
-                            <span id="confirmTotalEstimatedFee" style="font-weight: 700; font-size: 1.3rem;">0円</span>
-                        </div>
-                    </div>
-
-                    <p style="font-size: 0.9rem; color: #64748b; margin-top: 12px; line-height: 1.6;">
-                        ※ 2回目のお支払いは実際の費用確定後にご請求いたします。<br>
-                        ※ 関税は発生しない場合もございます。
-                    </p>
+        <!-- サービスボタン -->
+        <section class="services-section">
+            <a href="/form" class="service-card">
+                <span class="badge" id="newBadge" style="display: none;">NEW</span>
+                <div class="service-icon">📝</div>
+                <div class="service-title">代行申込</div>
+                <div class="service-description">PSA鑑定の代行申込フォーム</div>
+                <div class="service-cta">
+                    開始する
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
                 </div>
+            </a>
 
-                <div class="confirmation-details" id="confirmationDetails"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" id="finalSubmitBtn">
-                    送信する
-                </button>
-                <button class="btn btn-danger" id="closeConfirmationBtn">
-                    戻る
-                </button>
-            </div>
-        </div>
-    </div>
+            <a href="/status" class="service-card">
+                <div class="service-icon">📊</div>
+                <div class="service-title">進捗確認</div>
+                <div class="service-description">申込状況をリアルタイムで確認</div>
+                <div class="service-cta">
+                    確認する
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                </div>
+            </a>
 
-    <!-- 成功モーダル -->
-    <div class="modal" id="successModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>✅ 代行依頼を受け付けました</h3>
+            <a href="/chat" class="service-card">
+                <span class="badge" id="messageBadge" style="display: none;">0</span>
+                <div class="service-icon">💬</div>
+                <div class="service-title">メッセージ</div>
+                <div class="service-description">お問い合わせ・サポート対応</div>
+                <div class="service-cta">
+                    開く
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                </div>
+            </a>
+
+            <a href="/approval" class="service-card">
+                <span class="badge" id="approvalBadge" style="display: none;">0</span>
+                <div class="service-icon">✅</div>
+                <div class="service-title">買取承認</div>
+                <div class="service-description">査定結果の確認と承認</div>
+                <div class="service-cta">
+                    確認する
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                </div>
+            </a>
+        </section>
+
+        <!-- ステータスセクション -->
+        <section class="status-section">
+            <h2 class="status-title">
+                📊 サービス利用状況
+            </h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-number" id="pendingCount">15</div>
+                    <div class="status-label">受付中</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-number" id="gradingCount">28</div>
+                    <div class="status-label">鑑定中</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-number" id="shippingCount">8</div>
+                    <div class="status-label">発送準備</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-number" id="completedCount">156</div>
+                    <div class="status-label">完了</div>
+                </div>
             </div>
-            <div class="modal-body">
-                <p style="font-size: 1.1rem; font-weight: 600; color: #1a202c;">ご依頼ありがとうございます。</p>
-                <p>確認メールをお送りしましたので、ご確認ください。</p>
-                <p>マイページで進捗状況を確認できます。</p>
-            </div>
-            <div class="modal-footer">
-                <button id="closeSuccessBtn" class="btn btn-primary">閉じる</button>
-            </div>
-        </div>
+        </section>
     </div>
 
     <script>
-        // グローバル変数
-        let items = [];
-        let editIndex = null;
+        // カウントダウン機能
+        function updateCountdowns() {
+            const now = new Date();
 
-        // ページ読み込み時
-        document.addEventListener('DOMContentLoaded', () => {
-            loadItems();
-            setupChoiceButtons();
-            setupEventListeners();
-            setupMobileMenu();
-        });
-
-        // モバイルメニュー設定
-        function setupMobileMenu() {
-            const mobileMenuButton = document.getElementById('mobileMenuButton');
-            const navbarMenu = document.getElementById('navbarMenu');
-
-            if (mobileMenuButton) {
-                mobileMenuButton.addEventListener('click', () => {
-                    navbarMenu.classList.toggle('show');
-                });
-
-                // メニュー外をクリックしたら閉じる
-                document.addEventListener('click', (e) => {
-                    if (!mobileMenuButton.contains(e.target) && !navbarMenu.contains(e.target)) {
-                        navbarMenu.classList.remove('show');
-                    }
-                });
-
-                // メニュー内のリンクをクリックしたらメニューを閉じる
-                const menuLinks = navbarMenu.querySelectorAll('.navbar-link');
-                menuLinks.forEach(link => {
-                    link.addEventListener('click', () => {
-                        navbarMenu.classList.remove('show');
-                    });
-                });
-            }
-        }
-
-        // イベントリスナー設定
-        function setupEventListeners() {
-            document.getElementById('itemForm').addEventListener('submit', handleItemSubmit);
-            document.getElementById('contactForm').addEventListener('submit', handleContactSubmit);
-            document.getElementById('deleteDataButton').addEventListener('click', deleteAllData);
-            document.getElementById('plan').addEventListener('change', updateTotalSummary);
-            document.getElementById('serviceOption').addEventListener('change', updateTotalSummary);
-            document.getElementById('closeConfirmationBtn').addEventListener('click', closeConfirmationModal);
-            document.getElementById('finalSubmitBtn').addEventListener('click', sendEmail);
-            document.getElementById('closeSuccessBtn').addEventListener('click', closeSuccessModal);
-
-            // Enterキーでフィールド間を移動
-            setupEnterKeyNavigation();
-        }
-
-        // Enterキーでフィールド間を移動する機能
-        function setupEnterKeyNavigation() {
-            const searchItem = document.getElementById('searchItem');
-            const declaredValue = document.getElementById('declaredValue');
-            const acquisitionValue = document.getElementById('acquisitionValue');
-            const quantity = document.getElementById('quantity');
-
-            searchItem.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    declaredValue.focus();
-                }
-            });
-
-            declaredValue.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    acquisitionValue.focus();
-                }
-            });
-
-            acquisitionValue.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    quantity.focus();
-                }
-            });
-
-            quantity.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    // フォームを送信
-                    document.getElementById('itemForm').dispatchEvent(new Event('submit', { cancelable: true }));
-                }
-            });
-        }
-
-        // 選択ボタンの設定
-        function setupChoiceButtons() {
-            document.querySelectorAll('.choice-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const option = this.dataset.option;
-                    const value = this.dataset.value;
-                    const hiddenInput = document.getElementById(option);
-
-                    document.querySelectorAll(`[data-option="${option}"]`).forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-
-                    this.classList.add('active');
-                    hiddenInput.value = value;
-                    saveFormData();
-                });
-            });
-        }
-
-        // カード追加フォーム送信
-        function handleItemSubmit(event) {
-            event.preventDefault();
-
-            const itemName = document.getElementById('searchItem').value;
-            const quantity = parseInt(document.getElementById('quantity').value);
-            const declaredValue = parseFloat(document.getElementById('declaredValue').value);
-            const acquisitionValue = parseFloat(document.getElementById('acquisitionValue').value) || 0;
-
-            const item = { itemName, quantity, declaredValue, acquisitionValue };
-
-            if (editIndex !== null) {
-                items[editIndex] = item;
-                editIndex = null;
-            } else {
-                items.push(item);
-            }
-
-            saveItems();
-            renderTable();
-            updateTotalSummary();
-            document.getElementById('itemForm').reset();
-            document.getElementById('quantity').value = 1;
-
-            // カード情報入力欄に自動的にフォーカスを移動
-            setTimeout(() => {
-                document.getElementById('searchItem').focus();
-            }, 100);
-        }
-
-        // テーブル表示
-        function renderTable() {
-            const tbody = document.querySelector('#itemsTable tbody');
-            tbody.innerHTML = '';
-
-            items.forEach((item, index) => {
-                const row = tbody.insertRow();
-
-                // カード名を30文字に制限
-                const displayName = item.itemName.length > 30
-                    ? item.itemName.substring(0, 30) + '...'
-                    : item.itemName;
-
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td><div class="card-name-cell" title="${item.itemName}">${item.itemName}</div></td>
-                    <td><span style="background: #f3f4f6; padding: 4px 8px; border-radius: 6px; font-weight: 600;">${item.quantity}</span></td>
-                    <td><span style="color: #059669; font-weight: 700;">¥${Number(item.declaredValue).toLocaleString()}</span></td>
-                    <td><span style="color: #0ea5e9; font-weight: 700;">${item.acquisitionValue ? '¥' + Number(item.acquisitionValue).toLocaleString() : '-'}</span></td>
-                    <td>
-                        <button class="action-btn edit" onclick="editItem(${index})">編集</button>
-                        <button class="action-btn delete" onclick="deleteItem(${index})">削除</button>
-                    </td>
-                `;
-            });
-        }
-
-        // 編集
-        function editItem(index) {
-            const item = items[index];
-            document.getElementById('searchItem').value = item.itemName;
-            document.getElementById('quantity').value = item.quantity;
-            document.getElementById('declaredValue').value = item.declaredValue;
-            document.getElementById('acquisitionValue').value = item.acquisitionValue || '';
-            editIndex = index;
-            document.getElementById('searchItem').focus();
-        }
-
-        // 削除
-        function deleteItem(index) {
-            if (confirm('このカードを削除しますか？')) {
-                items.splice(index, 1);
-                saveItems();
-                renderTable();
-                updateTotalSummary();
-            }
-        }
-
-        // 全削除
-        function deleteAllData() {
-            if (confirm('全てのカードデータを削除しますか？')) {
-                items = [];
-                localStorage.removeItem('items');
-                renderTable();
-                updateTotalSummary();
-            }
-        }
-
-        // 合計計算
-        function updateTotalSummary() {
-            let totalQuantity = 0;
-            let totalDeclaredValue = 0;
-
-            items.forEach(item => {
-                totalQuantity += item.quantity;
-                totalDeclaredValue += item.declaredValue * item.quantity;
-            });
-
-            const plan = document.getElementById('plan').value;
-            const serviceOption = document.getElementById('serviceOption').value;
-            const feePercentage = getFeePercentage(plan, serviceOption);
-            const totalFee = totalDeclaredValue * feePercentage;
-
-            document.getElementById('totalQuantity').textContent = totalQuantity + '枚';
-            document.getElementById('totalFee').textContent = '¥' + Math.round(totalFee).toLocaleString();
-
-            // 固定フッターも更新
-            document.getElementById('fixedTotalQuantity').textContent = totalQuantity + '枚';
-            document.getElementById('fixedTotalFee').textContent = '¥' + Math.round(totalFee).toLocaleString();
-        }
-
-        // 手数料率取得
-        function getFeePercentage(plan, serviceOption) {
-            if (plan === 'normal') return 0.022;
-            if (plan === 'guarantee') return 0.033;
-            if (plan === 'normal_usa') {
-                if (serviceOption === 'パック・雑誌鑑定' || serviceOption === '特殊鑑定') {
-                    return 0.05;
-                }
-                return 0.033;
-            }
-            if (plan === 'guarantee_usa') return 0.05;
-            return 0;
-        }
-
-        // 鑑定料計算
-        function calculateGradingFee(serviceOption, totalQuantity, plan) {
-            const isUSA = plan.includes('usa');
-            const fees = {
-                'バリューバルク': isUSA ? 19 : 2100,
-                'バリュー': isUSA ? 25 : 2800,
-                'バリュープラス': isUSA ? 40 : 4500,
-                'レギュラー': isUSA ? 75 : 8400,
-                'パック・雑誌鑑定': isUSA ? 25 : 2800,
-                '特殊鑑定': isUSA ? 25 : 2800,
+            // 次回発送日の設定（例: アメリカは毎週火曜、日本は毎月15日）
+            const getNextUSAShipping = () => {
+                const next = new Date();
+                const dayOfWeek = next.getDay();
+                const daysUntilTuesday = (2 - dayOfWeek + 7) % 7 || 7;
+                next.setDate(next.getDate() + daysUntilTuesday);
+                next.setHours(12, 0, 0, 0);
+                return next;
             };
 
-            const fee = fees[serviceOption];
-            if (!fee) return null;
-
-            return isUSA ? fee * totalQuantity * 150 : fee * totalQuantity;
-        }
-
-        // 確認フォーム送信
-        function handleContactSubmit(event) {
-            event.preventDefault();
-
-            if (items.length === 0) {
-                alert('カード情報を1枚以上追加してください。');
-                return;
-            }
-
-            // サービス設定の選択チェック
-            const purchaseOffer = document.getElementById('purchaseOffer').value;
-            const returnMethod = document.getElementById('returnMethod').value;
-            const inspectionOption = document.getElementById('inspectionOption').value;
-
-            if (!purchaseOffer) {
-                alert('買取額の提示を選択してください。');
-                return;
-            }
-            if (!returnMethod) {
-                alert('返却方法を選択してください。');
-                return;
-            }
-            if (!inspectionOption) {
-                alert('無料検品を選択してください。');
-                return;
-            }
-
-            const plan = document.getElementById('plan').value;
-            const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
-
-            if ((plan === 'guarantee' || plan === 'guarantee_usa') && totalQuantity < 10) {
-                alert('70％保証プランをご利用の場合、カードは10枚以上の入力が必要です。');
-                return;
-            }
-
-            showConfirmationModal();
-        }
-
-        // 確認モーダル表示
-        function showConfirmationModal() {
-            const plan = document.getElementById('plan').value;
-            const serviceOption = document.getElementById('serviceOption').value;
-
-            let totalQuantity = 0;
-            let totalDeclaredValue = 0;
-            let totalAcquisitionValue = 0;
-
-            items.forEach(item => {
-                totalQuantity += item.quantity;
-                totalDeclaredValue += item.declaredValue * item.quantity;
-                totalAcquisitionValue += (item.acquisitionValue || 0) * item.quantity;
-            });
-
-            const feePercentage = getFeePercentage(plan, serviceOption);
-            const totalFee = totalDeclaredValue * feePercentage;
-            const gradingFee = calculateGradingFee(serviceOption, totalQuantity, plan);
-            const estimatedTax = totalAcquisitionValue * 0.15;
-
-            // 1回目の支払い（代行手数料のみ）
-            const firstPayment = Math.round(totalFee);
-            document.getElementById('confirmAgencyFee').textContent = '¥' + firstPayment.toLocaleString();
-            document.getElementById('confirmFirstPayment').textContent = '¥' + firstPayment.toLocaleString();
-
-            // 2回目の支払い（鑑定料 + 関税）
-            document.getElementById('confirmEstimatedTax').textContent = '¥' + Math.round(estimatedTax).toLocaleString();
-
-            if (gradingFee !== null) {
-                const secondPayment = Math.round(gradingFee + estimatedTax);
-                document.getElementById('confirmEstimatedGradingFee').textContent = '¥' + gradingFee.toLocaleString();
-                document.getElementById('confirmSecondPayment').textContent = '¥' + secondPayment.toLocaleString() + ' +実費';
-                document.getElementById('confirmTotalEstimatedFee').textContent = '¥' + Math.round(totalFee + gradingFee + estimatedTax).toLocaleString() + ' +実費';
-            } else {
-                document.getElementById('confirmEstimatedGradingFee').textContent = '別途見積もり';
-                document.getElementById('confirmSecondPayment').textContent = '見積もり後に表示';
-                document.getElementById('confirmTotalEstimatedFee').textContent = '見積もり後に表示';
-            }
-
-            const planText = document.getElementById('plan').options[document.getElementById('plan').selectedIndex].text;
-
-            let cardsList = items.map((item, index) => `
-                <div style="padding: 12px; background: #f9fafb; border-radius: 8px; margin-bottom: 8px;">
-                    <strong>${index + 1}. ${item.itemName}</strong><br>
-                    <span>数量: ${item.quantity}枚</span> |
-                    <span>申告額: ¥${Number(item.declaredValue).toLocaleString()}</span>
-                    ${item.acquisitionValue ? ` | <span>取得額: ¥${Number(item.acquisitionValue).toLocaleString()}</span>` : ''}
-                </div>
-            `).join('');
-
-            document.getElementById('confirmationDetails').innerHTML = `
-                <h4 style="margin-bottom: 16px; color: #1a202c; font-weight: 700;">基本情報</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
-                    <div><strong>お名前:</strong> ${document.getElementById('contactName').value}</div>
-                    <div><strong>メール:</strong> ${document.getElementById('contactEmail').value}</div>
-                    <div><strong>PSAプラン:</strong> ${serviceOption}</div>
-                    <div><strong>代行プラン:</strong> ${planText}</div>
-                    <div><strong>買取額提示:</strong> ${document.getElementById('purchaseOffer').value}</div>
-                    <div><strong>返却方法:</strong> ${document.getElementById('returnMethod').value}</div>
-                    <div><strong>無料検品:</strong> ${document.getElementById('inspectionOption').value}</div>
-                    <div><strong>カード枚数:</strong> ${totalQuantity}枚</div>
-                </div>
-
-                <h4 style="margin-bottom: 16px; color: #1a202c; font-weight: 700;">カード一覧</h4>
-                ${cardsList}
-
-                ${document.getElementById('contactBody').value ? `
-                    <h4 style="margin: 24px 0 16px 0; color: #1a202c; font-weight: 700;">メッセージ</h4>
-                    <div style="padding: 12px; background: #f9fafb; border-radius: 8px;">
-                        ${document.getElementById('contactBody').value}
-                    </div>
-                ` : ''}
-            `;
-
-            document.getElementById('confirmationModal').classList.add('show');
-        }
-
-        // 確認モーダルを閉じる
-        function closeConfirmationModal() {
-            document.getElementById('confirmationModal').classList.remove('show');
-        }
-
-        // メール送信
-        async function sendEmail() {
-            const submitBtn = document.getElementById('finalSubmitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = '送信中...';
-
-            try {
-                const plan = document.getElementById('plan').value;
-                const serviceOption = document.getElementById('serviceOption').value;
-
-                let totalQuantity = 0;
-                let totalDeclaredValue = 0;
-                let totalAcquisitionValue = 0;
-
-                items.forEach(item => {
-                    totalQuantity += item.quantity;
-                    totalDeclaredValue += item.declaredValue * item.quantity;
-                    totalAcquisitionValue += (item.acquisitionValue || 0) * item.quantity;
-                });
-
-                const feePercentage = getFeePercentage(plan, serviceOption);
-                const totalFee = totalDeclaredValue * feePercentage;
-                const gradingFee = calculateGradingFee(serviceOption, totalQuantity, plan);
-                const estimatedTax = totalAcquisitionValue * 0.15;
-
-                const response = await fetch('/api/rich-form-submit', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        contactName: document.getElementById('contactName').value,
-                        contactEmail: document.getElementById('contactEmail').value,
-                        items: items,
-                        plan: document.getElementById('plan').options[document.getElementById('plan').selectedIndex].text,
-                        serviceOption: serviceOption,
-                        purchaseOffer: document.getElementById('purchaseOffer').value,
-                        returnMethod: document.getElementById('returnMethod').value,
-                        inspectionOption: document.getElementById('inspectionOption').value,
-                        contactBody: document.getElementById('contactBody').value,
-                        totalFee: Math.round(totalFee),
-                        estimatedGradingFee: gradingFee,
-                        estimatedTax: Math.round(estimatedTax),
-                        totalQuantity: totalQuantity
-                    })
-                });
-
-                if (response.ok) {
-                    closeConfirmationModal();
-                    document.getElementById('successModal').classList.add('show');
-
-                    // フォームリセット
-                    items = [];
-                    localStorage.removeItem('items');
-                    document.getElementById('contactForm').reset();
-                    document.getElementById('itemForm').reset();
-                    renderTable();
-                    updateTotalSummary();
-                } else {
-                    throw new Error('送信に失敗しました');
+            const getNextJapanShipping = () => {
+                const next = new Date();
+                if (next.getDate() > 15) {
+                    next.setMonth(next.getMonth() + 1);
                 }
-            } catch (error) {
-                console.error('エラー:', error);
-                alert('送信に失敗しました。もう一度お試しください。');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = '送信する';
+                next.setDate(15);
+                next.setHours(12, 0, 0, 0);
+                return next;
+            };
+
+            const usaShipping = getNextUSAShipping();
+            const japanShipping = getNextJapanShipping();
+
+            // カウントダウン計算
+            const calculateCountdown = (targetDate) => {
+                const diff = targetDate - now;
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+                return {
+                    days,
+                    hours,
+                    minutes,
+                    total: diff
+                };
+            };
+
+            // アメリカ発送カウントダウン
+            const usaCountdown = calculateCountdown(usaShipping);
+            const usaElement = document.getElementById('usaCountdown');
+            const usaDateElement = document.getElementById('usaDate');
+            const usaProgressElement = document.getElementById('usaProgress');
+
+            if (usaCountdown.total > 0) {
+                usaElement.textContent = `${usaCountdown.days}日 ${usaCountdown.hours}時間 ${usaCountdown.minutes}分`;
+                usaDateElement.textContent = usaShipping.toLocaleDateString('ja-JP', {
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'short',
+                    hour: 'numeric',
+                    minute: 'numeric'
+                });
+
+                // プログレスバー（7日間を100%として）
+                const progress = Math.max(0, 100 - (usaCountdown.total / (7 * 24 * 60 * 60 * 1000) * 100));
+                usaProgressElement.style.width = progress + '%';
+
+                // 締切が近い場合の色変更
+                if (usaCountdown.days < 1) {
+                    usaElement.style.color = '#dc2626';
+                    usaProgressElement.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                } else if (usaCountdown.days < 3) {
+                    usaElement.style.color = '#f59e0b';
+                    usaProgressElement.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+                }
+            }
+
+            // 日本発送カウントダウン
+            const japanCountdown = calculateCountdown(japanShipping);
+            const japanElement = document.getElementById('japanCountdown');
+            const japanDateElement = document.getElementById('japanDate');
+            const japanProgressElement = document.getElementById('japanProgress');
+
+            if (japanCountdown.total > 0) {
+                japanElement.textContent = `${japanCountdown.days}日 ${japanCountdown.hours}時間 ${japanCountdown.minutes}分`;
+                japanDateElement.textContent = japanShipping.toLocaleDateString('ja-JP', {
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric'
+                });
+
+                // プログレスバー（30日を100%として）
+                const progress = Math.max(0, 100 - (japanCountdown.total / (30 * 24 * 60 * 60 * 1000) * 100));
+                japanProgressElement.style.width = progress + '%';
+
+                // 締切が近い場合の色変更
+                if (japanCountdown.days < 3) {
+                    japanElement.style.color = '#dc2626';
+                    japanProgressElement.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                } else if (japanCountdown.days < 7) {
+                    japanElement.style.color = '#f59e0b';
+                    japanProgressElement.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+                }
             }
         }
 
-        // 成功モーダルを閉じる
-        function closeSuccessModal() {
-            document.getElementById('successModal').classList.remove('show');
-        }
+        // 通知バッジの更新（デモ用）
+        function updateBadges() {
+            // ローカルストレージから未読数を取得（実際はAPIから取得）
+            const unreadMessages = localStorage.getItem('unreadMessages') || 0;
+            const pendingApprovals = localStorage.getItem('pendingApprovals') || 0;
 
-        // LocalStorage保存/読み込み
-        function saveItems() {
-            localStorage.setItem('items', JSON.stringify(items));
-        }
+            const messageBadge = document.getElementById('messageBadge');
+            const approvalBadge = document.getElementById('approvalBadge');
 
-        function loadItems() {
-            const saved = localStorage.getItem('items');
-            if (saved) {
-                items = JSON.parse(saved);
-                renderTable();
-                updateTotalSummary();
+            if (unreadMessages > 0) {
+                messageBadge.textContent = unreadMessages;
+                messageBadge.style.display = 'block';
+            }
+
+            if (pendingApprovals > 0) {
+                approvalBadge.textContent = pendingApprovals;
+                approvalBadge.style.display = 'block';
             }
         }
 
-        function saveFormData() {
-            // フォームデータも保存できる
+        // ステータス更新（デモ用）
+        function updateStatus() {
+            // 実際はAPIから取得
+            const statuses = {
+                pending: Math.floor(Math.random() * 30) + 5,
+                grading: Math.floor(Math.random() * 40) + 10,
+                shipping: Math.floor(Math.random() * 15) + 3,
+                completed: Math.floor(Math.random() * 200) + 100
+            };
+
+            document.getElementById('pendingCount').textContent = statuses.pending;
+            document.getElementById('gradingCount').textContent = statuses.grading;
+            document.getElementById('shippingCount').textContent = statuses.shipping;
+            document.getElementById('completedCount').textContent = statuses.completed;
         }
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCountdowns();
+            updateBadges();
+            updateStatus();
+
+            // 1分ごとにカウントダウン更新
+            setInterval(updateCountdowns, 60000);
+
+            // 5分ごとにステータス更新
+            setInterval(updateStatus, 300000);
+        });
+
+        // サービスカードのクリックアニメーション
+        document.querySelectorAll('.service-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // リップル効果
+                const ripple = document.createElement('span');
+                ripple.style.position = 'absolute';
+                ripple.style.borderRadius = '50%';
+                ripple.style.background = 'rgba(59, 130, 246, 0.3)';
+                ripple.style.width = '100px';
+                ripple.style.height = '100px';
+                ripple.style.transform = 'translate(-50%, -50%)';
+                ripple.style.pointerEvents = 'none';
+                ripple.style.animation = 'ripple 0.6s ease-out';
+
+                const rect = this.getBoundingClientRect();
+                ripple.style.left = (e.clientX - rect.left) + 'px';
+                ripple.style.top = (e.clientY - rect.top) + 'px';
+
+                this.appendChild(ripple);
+
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // リップルアニメーション
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: translate(-50%, -50%) scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
-
-    <!-- 固定フッター：代行料合計表示 -->
-    <div class="fixed-summary">
-        <div class="fixed-summary-content">
-            <div class="fixed-summary-item">
-                <div class="fixed-summary-label">カード枚数</div>
-                <div class="fixed-summary-value" id="fixedTotalQuantity">0枚</div>
-            </div>
-            <div class="fixed-summary-item">
-                <div class="fixed-summary-label">代行料合計</div>
-                <div class="fixed-summary-value" id="fixedTotalFee">¥0</div>
-            </div>
-        </div>
-    </div>
-
 </body>
 </html>

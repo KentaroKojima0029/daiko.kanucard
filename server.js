@@ -804,6 +804,11 @@ app.post('/api/kaitori/respond', async (req, res) => {
 
 // ===== HTMLページルーティング =====
 
+// 代行申込フォームページ
+app.get('/form', (req, res) => {
+  res.sendFile(path.join(__dirname, 'form.html'));
+});
+
 // 進捗状況ページ
 app.get('/status', (req, res) => {
   res.sendFile(path.join(__dirname, 'status.html'));
@@ -861,8 +866,8 @@ app.listen(port, () => {
     nodeEnv: process.env.NODE_ENV
   });
   console.log(`Server running on port ${port}`);
-  console.log(`- User page: http://localhost:${port}/`);
-  console.log(`- Login: http://localhost:${port}/login`);
+  console.log(`- Home: http://localhost:${port}/`);
+  console.log(`- Form: http://localhost:${port}/form`);
   console.log(`- Status: http://localhost:${port}/status`);
   console.log(`- Messages: http://localhost:${port}/chat`);
   console.log(`- Approval: http://localhost:${port}/approval`);
