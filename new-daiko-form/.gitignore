@@ -1,0 +1,19 @@
+# Environment variables
+.env
+.env.render
+
+# Database
+*.db
+daiko.db
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db

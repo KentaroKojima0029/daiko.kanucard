@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>PSA代行サービス - カード入力フォーム</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #2d3748;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px 8px;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .main-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      animation: slideUp 0.8s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-content {
+      padding: 32px 12px;
+    }
+
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 20px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border-radius: 2px;
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: 4fr 4fr 2fr;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 500;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: #ffffff;
+      color: #1f2937;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      min-width: 0;
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 14px 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 500;
+      background: #ffffff;
+      color: #1f2937;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      min-width: 0;
+    }
+
+    .form-row .input-group,
+    .choice-section,
+    .input-group {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .choice-buttons {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .choice-btn {
+      flex: 1;
+      padding: 16px 12px;
+      border: none;
+      border-radius: 12px;
+      background: #ffffff;
+      color: #374151;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-align: center;
+      line-height: 1.4;
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      min-width: 0;
+    }
+
+    .form-input:focus {
+      outline: none;
+      box-shadow: 
+        0 0 0 3px rgba(79, 70, 229, 0.1),
+        0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .form-input::placeholder {
+      color: #9ca3af;
+      font-weight: 400;
+    }
+
+    .input-hint {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 48px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      flex: 2;
+      padding: 14px 20px;
+      box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 15px -3px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      flex: 1;
+      padding: 14px 16px;
+      box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 15px -3px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 18px 32px;
+      font-size: 18px;
+      font-weight: 700;
+      width: 100%;
+      margin: 32px 0;
+      box-shadow: 0 6px 12px -2px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 20px -4px rgba(16, 185, 129, 0.4);
+    }
+
+    .table-container {
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      margin: 24px 0;
+      border: 1px solid #e5e7eb;
+    }
+
+    .modern-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .modern-table th {
+      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+      padding: 16px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #374151;
+      text-align: center;
+      border-bottom: 2px solid #e5e7eb;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .modern-table td {
+      padding: 16px 12px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      border-bottom: 1px solid #f3f4f6;
+      color: #1f2937;
+    }
+
+    .modern-table tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .modern-table .total-row {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      font-weight: 700;
+    }
+
+    .modern-table .total-row td {
+      border-bottom: none;
+      font-size: 15px;
+      color: white;
+    }
+
+    .card-name-cell {
+      text-align: left !important;
+      font-weight: 600;
+      line-height: 1.4;
+      max-width: 200px;
+      word-break: break-word;
+      white-space: pre-line;
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .menu-toggle {
+      background: #f3f4f6;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      color: #6b7280;
+      transition: all 0.2s ease;
+    }
+
+    .menu-toggle:hover {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .menu-toggle.hidden {
+      display: none;
+    }
+
+    .action-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: none;
+    }
+
+    .action-btn.show {
+      display: inline-block;
+    }
+
+    .action-btn.edit {
+      background: #10b981;
+      color: white;
+    }
+
+    .action-btn.edit:hover {
+      background: #059669;
+      transform: scale(1.05);
+    }
+
+    .action-btn.delete {
+      background: #ef4444;
+      color: white;
+    }
+
+    .action-btn.delete:hover {
+      background: #dc2626;
+      transform: scale(1.05);
+    }
+
+    .form-select:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .form-row .input-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-row .form-select {
+      width: 100%;
+      min-height: 52px;
+      padding: 14px 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 500;
+      background: #ffffff;
+      color: #1f2937;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      min-width: 0;
+    }
+
+    .choice-section {
+      margin-bottom: 24px;
+    }
+
+    .form-select:disabled {
+      background-color: #f3f4f6;
+      color: #9ca3af;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .select-wrap.disabled::after {
+      color: #9ca3af;
+      opacity: 0.4;
+    }
+
+    .form-select {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding-right: 40px;
+    }
+
+    .select-wrap {
+      position: relative;
+      width: 100%;
+    }
+
+    .select-wrap::after {
+      content: "▾";
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: 14px;
+      opacity: 0.6;
+    }
+
+    .form-row > .input-group,
+    .form-row .form-input,
+    .form-row .form-select,
+    .select-wrap {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    .choice-label {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .choice-btn:hover {
+      background: #f8fafc;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .choice-btn.active {
+      border: none;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+    }
+
+    .choice-btn.gray.active {
+      border: none;
+      background: linear-gradient(135deg, #6b7280, #4b5563);
+      color: white;
+      box-shadow: 0 4px 6px -1px rgba(107, 114, 128, 0.3);
+    }
+
+    .choice-btn.blue.active {
+      border: none;
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: white;
+      box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.3);
+    }
+
+    .confirmation-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      overflow-y: auto;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .confirmation-modal {
+      background: white;
+      margin: 40px auto;
+      padding: 32px;
+      border-radius: 20px;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      animation: slideUpModal 0.4s ease-out;
+    }
+
+    @keyframes slideUpModal {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .confirmation-header {
+      text-align: left;
+      margin-bottom: 24px;
+    }
+
+    .confirmation-header h3 {
+      font-size: 24px;
+      font-weight: 800;
+      color: #1a202c;
+      margin-bottom: 8px;
+      text-align: left;
+    }
+
+    .fee-summary-card {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 24px;
+      border-radius: 16px;
+      margin: 20px 0;
+      box-shadow: 0 8px 15px -3px rgba(16, 185, 129, 0.4);
+    }
+
+    .fee-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .fee-row.total {
+      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid rgba(255, 255, 255, 0.3);
+      margin-top: 12px;
+      padding-top: 16px;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .fee-row.normal {
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .confirmation-details {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 12px;
+      margin: 16px 0;
+    }
+
+    .confirmation-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn-confirm {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      flex: 2;
+      padding: 16px 24px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .btn-cancel {
+      background: linear-gradient(135deg, #6b7280, #4b5563);
+      color: white;
+      flex: 1;
+      padding: 16px 16px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .success-message {
+      display: none;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 20px;
+      border-radius: 16px;
+      text-align: center;
+      font-weight: 600;
+      margin: 20px 0;
+      box-shadow: 0 8px 15px -3px rgba(16, 185, 129, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 12px 4px;
+      }
+
+      .form-content {
+        padding: 24px 8px;
+      }
+
+      .input-grid {
+        display: grid;
+        grid-template-columns: 4fr 4fr 2fr;
+        grid-template-rows: auto;
+        gap: 6px;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 8px;
+      }
+
+      .form-row .input-group {
+        flex: 1;
+      }
+
+      .choice-buttons {
+        gap: 6px;
+      }
+
+      .choice-btn {
+        font-size: 13px;
+        padding: 12px 8px;
+        min-height: 56px;
+      }
+
+      .confirmation-modal {
+        margin: 20px auto;
+        padding: 24px 20px;
+        width: 95%;
+      }
+
+      .confirmation-buttons {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .modern-table th,
+      .modern-table td {
+        padding: 12px 6px;
+        font-size: 12px;
+      }
+
+      .card-name-cell {
+        max-width: 120px;
+        font-size: 11px;
+      }
+
+      .form-select,
+      .form-input {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="main-card">
+      <div class="form-content">
+        <div class="section">
+          <div class="section-title">カード情報入力</div>
+          
+          <form id="itemForm">
+            <div class="input-group">
+              <label class="form-label" for="searchItem">
+                🎴 カード詳細情報
+              </label>
+              <input 
+                type="text" 
+                id="searchItem" 
+                name="searchItem" 
+                class="form-input"
+                placeholder="例：ブラッキーVMAX 2021 095/069 HR" 
+                required
+              >
+              <div class="input-hint">カード名・製造年・番号・レアリティを入力してください</div>
+            </div>
+            
+            <div class="input-grid">
+              <div class="input-group">
+                <label class="form-label" for="declaredValue">💰 申告額（1枚）</label>
+                <input 
+                  step="any" 
+                  min="0" 
+                  type="number" 
+                  id="declaredValue" 
+                  name="declaredValue" 
+                  class="form-input"
+                  placeholder="150000" 
+                  required 
+                  inputmode="numeric"
+                >
+                <div class="input-hint">1枚あたりの申告額</div>
+              </div>
+              
+              <div class="input-group">
+                <label class="form-label" for="acquisitionValue">🌍 取得額</label>
+                <input 
+                  step="any" 
+                  min="0" 
+                  type="number" 
+                  id="acquisitionValue" 
+                  name="acquisitionValue" 
+                  class="form-input"
+                  placeholder="200000" 
+                  inputmode="numeric"
+                >
+                <div class="input-hint">関税15％計算用の荷物価格</div>
+              </div>
+              
+              <div class="input-group">
+                <label class="form-label" for="quantity">📦 数量</label>
+                <input 
+                  type="number" 
+                  id="quantity" 
+                  name="quantity" 
+                  class="form-input"
+                  min="1" 
+                  required 
+                  inputmode="numeric"
+                  placeholder="枚"
+                >
+                <div class="input-hint">カードの枚数</div>
+              </div>
+            </div>
+            
+            <div class="button-container">
+              <button class="btn btn-primary" type="submit">
+                <span>💾</span> カードを保存
+              </button>
+              <button class="btn btn-danger" id="deleteDataButton" type="button">
+                <span>🗑️</span> 全削除
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="section">
+          <div class="section-title">カード一覧</div>
+          <div class="table-container">
+            <table class="modern-table" id="itemsTable">
+              <thead>
+                <tr>
+                  <th style="width: 8%;">No</th>
+                  <th style="width: 35%;">カード名</th>
+                  <th style="width: 10%;">数量</th>
+                  <th style="width: 15%;">申告額</th>
+                  <th style="width: 15%;">取得額</th>
+                  <th style="width: 17%;">操作</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+              <tfoot>
+                <tr class="total-row">
+                  <td colspan="3">合計</td>
+                  <td id="totalQuantity">0枚</td>
+                  <td colspan="2">代行料: <span id="totalFee">0円</span></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">サービス設定</div>
+          
+          <form id="contactForm">
+            <div class="form-row">
+              <div class="input-group">
+                <label class="form-label" for="plan">📋 代行プラン</label>
+                <div class="select-wrap">
+                <select id="plan" name="plan" class="form-select">
+                  <option value="normal">ノーマル 日本 (2.2%)</option>
+                  <option value="guarantee">70％保証 日本 (3.3%)</option>
+                  <option value="normal_usa">ノーマル アメリカ (3.3%)</option>
+                  <option value="guarantee_usa">70％保証 アメリカ (5.0%)</option>
+                </select>
+              </div>
+              </div>
+              
+              <div class="input-group">
+                <label class="form-label" for="serviceOption">⭐ PSA社プラン</label>
+                <div class="select-wrap">
+                <select id="serviceOption" name="serviceOption" class="form-select">
+                  <option value="バリューバルク">バリューバルク</option>
+                  <option value="バリュー">バリュー</option>
+                  <option value="バリュープラス">バリュープラス</option>
+                  <option value="レギュラー">レギュラー</option>
+                  <option value="パック・雑誌鑑定">パック・雑誌鑑定</option>
+                  <option value="特殊鑑定">特殊鑑定</option>
+                  <option value="それ以外">それ以外</option>
+                </select>
+              </div>
+          </div>
+          </div>
+
+            <div class="choice-section">
+              <div class="choice-label">💵 買取額の提示</div>
+              <div class="choice-buttons">
+                <button type="button" class="choice-btn" data-option="purchaseOffer" data-value="希望する">
+                  希望する
+                </button>
+                <button type="button" class="choice-btn gray active" data-option="purchaseOffer" data-value="希望しない">
+                  希望しない
+                </button>
+              </div>
+              <input type="hidden" id="purchaseOffer" name="purchaseOffer" value="希望しない">
+            </div>
+
+            <div class="choice-section">
+              <div class="choice-label">📮 返却方法</div>
+              <div class="choice-buttons">
+                <button type="button" class="choice-btn active" data-option="returnMethod" data-value="即時返送">
+                  即時返送<br>（送料負担）
+                </button>
+                <button type="button" class="choice-btn blue" data-option="returnMethod" data-value="鑑定品と一緒に返送">
+                  鑑定品と<br>一緒に返送
+                </button>
+              </div>
+              <input type="hidden" id="returnMethod" name="returnMethod" value="即時返送">
+            </div>
+
+            <div class="choice-section">
+              <div class="choice-label">🔍 無料検品</div>
+              <div class="choice-buttons">
+                <button type="button" class="choice-btn active" data-option="inspectionOption" data-value="希望する">
+                  希望する<br>（推奨）
+                </button>
+                <button type="button" class="choice-btn gray" data-option="inspectionOption" data-value="希望しない">
+                  希望しない
+                </button>
+              </div>
+              <input type="hidden" id="inspectionOption" name="inspectionOption" value="希望する">
+            </div>
+
+            <div class="form-row">
+              <div class="input-group">
+                <label class="form-label" for="contactName">👤 お名前</label>
+                <input 
+                  required 
+                  id="contactName" 
+                  name="contactName" 
+                  type="text" 
+                  class="form-input"
+                  placeholder="山田太郎"
+                >
+              </div>
+              <div class="input-group">
+                <label class="form-label" for="contactEmail">📧 メールアドレス</label>
+                <input 
+                  required 
+                  id="contactEmail" 
+                  name="contactEmail" 
+                  type="email" 
+                  class="form-input"
+                  placeholder="example@email.com"
+                >
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label class="form-label" for="contactBody">💬 メッセージ</label>
+              <textarea 
+                rows="4" 
+                id="contactBody" 
+                name="contact[body]" 
+                class="form-input"
+                placeholder="ご質問やご要望がございましたらご記入ください"
+              ></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-submit">
+              <span>📋</span> 内容を確認する
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="confirmation-overlay" id="confirmationScreen">
+      <div class="confirmation-modal">
+        <div class="confirmation-header">
+          <h3>📋 送信内容の最終確認</h3>
+          <p style="color: #6b7280;">以下の内容で送信いたします</p>
+        </div>
+        
+        <div class="fee-summary-card">
+          <div class="fee-row normal">
+            <span>代行手数料</span>
+            <span id="confirmAgencyFee">0円</span>
+          </div>
+          <div class="fee-row normal">
+            <span>見込鑑定料</span>
+            <span id="confirmEstimatedGradingFee">設定してください</span>
+          </div>
+          <div class="fee-row total">
+            <span>支払総額（予定額）</span>
+            <span id="confirmTotalEstimatedFee">-</span>
+          </div>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 16px; border-radius: 12px; margin: 16px 0; box-shadow: 0 4px 8px -2px rgba(245, 158, 11, 0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 14px; font-weight: 500;">関税見込み額　※発生時のみ</span>
+            <span id="confirmEstimatedTax" style="font-weight: 600;">0円</span>
+          </div>
+        </div>
+        
+        <div class="confirmation-details" id="confirmationDetails"></div>
+        
+        <div class="confirmation-buttons">
+          <button type="button" class="btn btn-confirm" id="finalSendBtn">
+            <span>📤</span> 送信実行
+          </button>
+          <button type="button" class="btn btn-cancel" id="cancelBtn">
+            <span>❌</span> キャンセル
+          </button>
+        </div>
+        
+        <div style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-top: 16px; text-align: center; font-size: 14px; color: #6b7280; line-height: 1.5;">
+          <p style="margin: 0 0 8px 0;">送信後、フォームに入力したアドレスに確認メッセージが届きます。</p>
+          <p style="margin: 0;">修正したい場合は、キャンセルボタンを押して修正してください。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="success-message" id="confirmationMessage">
+      ✅ お申し込みありがとうございました！<br>
+      確認メールをお送りいたしましたので、今しばらくお待ちください。
+    </div>
+  </div>
+
+  <script>
+    let editIndex = null;
+    let originalPlanOptions;
+
+    function calculateGradingFee(serviceOption, totalQuantity, plan) {
+      const japanFees = {
+        "バリューバルク": 3300,
+        "バリュー": 4300,
+        "バリュープラス": 6300,
+        "レギュラー": 9300
+      };
+      
+      const usaFees = {
+        "バリューバルク": 3900,
+        "バリュー": 5000,
+        "バリュープラス": 7200,
+        "レギュラー": 13500
+      };
+      
+      const isUSA = plan === "normal_usa" || plan === "guarantee_usa";
+      const fees = isUSA ? usaFees : japanFees;
+      
+      if (fees[serviceOption]) {
+        return fees[serviceOption] * totalQuantity;
+      } else {
+        return null;
+      }
+    }
+
+    function truncateCardName(text, maxCharsPerLine = 30, maxLines = 2) {
+      function getStringWidth(str) {
+        let width = 0;
+        for (let i = 0; i < str.length; i++) {
+          const char = str.charAt(i);
+          if (char.match(/[^\x01-\x7E]/)) {
+            width += 2;
+          } else {
+            width += 1;
+          }
+        }
+        return width;
+      }
+
+      function truncateByWidth(str, maxWidth) {
+        let result = '';
+        let currentWidth = 0;
+        
+        for (let i = 0; i < str.length; i++) {
+          const char = str.charAt(i);
+          const charWidth = char.match(/[^\x01-\x7E]/) ? 2 : 1;
+          
+          if (currentWidth + charWidth <= maxWidth) {
+            result += char;
+            currentWidth += charWidth;
+          } else {
+            break;
+          }
+        }
+        return result;
+      }
+
+      const words = text.split(' ');
+      const lines = [];
+      let currentLine = '';
+      
+      for (const word of words) {
+        const testLine = currentLine ? currentLine + ' ' + word : word;
+        
+        if (getStringWidth(testLine) <= maxCharsPerLine) {
+          currentLine = testLine;
+        } else {
+          if (currentLine) {
+            lines.push(currentLine);
+            currentLine = word;
+          } else {
+            lines.push(truncateByWidth(word, maxCharsPerLine));
+            currentLine = '';
+          }
+          
+          if (lines.length >= maxLines) {
+            break;
+          }
+        }
+      }
+      
+      if (currentLine && lines.length < maxLines) {
+        lines.push(currentLine);
+      }
+
+      if (lines.length === maxLines && words.length > lines.join(' ').split(' ').length) {
+        const lastLine = lines[maxLines - 1];
+        const truncatedLastLine = truncateByWidth(lastLine, maxCharsPerLine - 3) + '...';
+        lines[maxLines - 1] = truncatedLastLine;
+      }
+
+      return lines.join('\n');
+    }
+
+    function truncateCardNameForConfirmation(text, maxCharsPerLine = 70, maxLines = 2) {
+      return truncateCardName(text, maxCharsPerLine, maxLines);
+    }
+
+    function toggleButtons(index, event) {
+      event.stopPropagation();
+      
+      document.querySelectorAll('.action-btn').forEach(btn => {
+        if (!btn.id.includes(`-${index}`)) {
+          btn.classList.remove('show');
+        }
+      });
+      document.querySelectorAll('.menu-toggle').forEach(toggle => {
+        if (toggle.id !== `menu-${index}`) {
+          toggle.classList.remove('hidden');
+        }
+      });
+      
+      const menuToggle = document.getElementById(`menu-${index}`);
+      const editBtn = document.getElementById(`edit-${index}`);
+      const deleteBtn = document.getElementById(`delete-${index}`);
+      
+      if (editBtn.classList.contains('show')) {
+        editBtn.classList.remove('show');
+        deleteBtn.classList.remove('show');
+        menuToggle.classList.remove('hidden');
+      } else {
+        menuToggle.classList.add('hidden');
+        editBtn.classList.add('show');
+        deleteBtn.classList.add('show');
+      }
+    }
+
+    function hideButtons(index) {
+      const menuToggle = document.getElementById(`menu-${index}`);
+      const editBtn = document.getElementById(`edit-${index}`);
+      const deleteBtn = document.getElementById(`delete-${index}`);
+      
+      editBtn.classList.remove('show');
+      deleteBtn.classList.remove('show');
+      menuToggle.classList.remove('hidden');
+    }
+
+    document.addEventListener('click', function() {
+      document.querySelectorAll('.action-btn').forEach(btn => {
+        btn.classList.remove('show');
+      });
+      document.querySelectorAll('.menu-toggle').forEach(toggle => {
+        toggle.classList.remove('hidden');
+      });
+    });
+
+    function updatePSAOptions() {
+      const plan = document.getElementById("plan").value;
+      const serviceOption = document.getElementById("serviceOption");
+      const currentValue = serviceOption.value;
+      
+      const isJapan = plan === "normal" || plan === "guarantee";
+      
+      if (isJapan) {
+        serviceOption.innerHTML = `
+          <option value="バリューバルク">バリューバルク</option>
+          <option value="バリュー">バリュー</option>
+          <option value="バリュープラス">バリュープラス</option>
+          <option value="レギュラー">レギュラー</option>
+          <option value="それ以外">それ以外</option>
+        `;
+      } else {
+        serviceOption.innerHTML = `
+          <option value="バリューバルク">バリューバルク</option>
+          <option value="バリュー">バリュー</option>
+          <option value="バリュープラス">バリュープラス</option>
+          <option value="レギュラー">レギュラー</option>
+          <option value="パック・雑誌鑑定">パック・雑誌鑑定</option>
+          <option value="特殊鑑定">特殊鑑定</option>
+          <option value="それ以外">それ以外</option>
+        `;
+      }
+      
+      const options = Array.from(serviceOption.options);
+      const isCurrentValueAvailable = options.some(option => option.value === currentValue);
+      
+      if (isCurrentValueAvailable) {
+        serviceOption.value = currentValue;
+      } else {
+        serviceOption.value = serviceOption.options[0].value;
+      }
+    }
+    
+    document.addEventListener("DOMContentLoaded", function () {
+      originalPlanOptions = document.getElementById("plan").innerHTML;
+      loadItems();
+      updatePSAOptions();
+
+      document.getElementById("plan").addEventListener("change", function() {
+        updatePSAOptions();
+        updateTotalSummary();
+      });
+
+      document.getElementById("serviceOption").addEventListener("change", function() {
+        const serviceValue = this.value;
+        const planSelect = document.getElementById("plan");
+        const planSelectWrap = planSelect.closest('.select-wrap');
+        const currentPlanValue = planSelect.value;
+        
+        if (serviceValue === "パック・雑誌鑑定" || serviceValue === "特殊鑑定") {
+          planSelect.innerHTML = `<option value="normal_usa">ノーマル アメリカ (5%)</option>`;
+          planSelect.value = "normal_usa";
+          planSelect.disabled = true;
+          planSelectWrap.classList.add('disabled');
+        } else {
+          planSelect.innerHTML = originalPlanOptions;
+          planSelect.disabled = false;
+          planSelect.value = currentPlanValue;
+          planSelectWrap.classList.remove('disabled');
+          updatePSAOptions();
+        }
+        updateTotalSummary();
+      });
+
+      document.getElementById("contactForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        showConfirmationScreen();
+      });
+
+      setupChoiceButtons();
+      
+      document.getElementById("finalSendBtn").addEventListener("click", function() {
+        document.getElementById("confirmationScreen").style.display = "none";
+        sendEmails();
+      });
+      
+      document.getElementById("cancelBtn").addEventListener("click", function() {
+        document.getElementById("confirmationScreen").style.display = "none";
+      });
+    });
+
+    function setupChoiceButtons() {
+      document.querySelectorAll('.choice-btn').forEach(button => {
+        button.addEventListener('click', function() {
+          const option = this.dataset.option;
+          const value = this.dataset.value;
+          const hiddenInput = document.getElementById(option);
+          
+          document.querySelectorAll(`[data-option="${option}"]`).forEach(btn => {
+            btn.classList.remove('active');
+          });
+          
+          this.classList.add('active');
+          hiddenInput.value = value;
+          saveFormToStorage();
+        });
+      });
+    }
+
+    document.getElementById("itemForm").addEventListener("submit", function (event) {
+      event.preventDefault();
+      saveItem();
+    });
+
+    function saveItem() {
+      const itemName = document.getElementById("searchItem").value;
+      const quantity = parseInt(document.getElementById("quantity").value);
+      const declaredValue = parseFloat(document.getElementById("declaredValue").value);
+      const acquisitionValue = parseFloat(document.getElementById("acquisitionValue").value) || 0;
+      
+      const item = { itemName, quantity, declaredValue, acquisitionValue };
+      if (editIndex !== null) {
+        updateItemInTable(editIndex, item);
+        updateLocalStorage(editIndex, item);
+        editIndex = null;
+      } else {
+        addItemToTable(item);
+        saveToLocalStorage(item);
+      }
+      document.getElementById("itemForm").reset();
+      updateTotalSummary();
+    }
+
+    function addItemToTable(item) {
+      const tableBody = document.querySelector("#itemsTable tbody");
+      const newRow = tableBody.insertRow();
+      const rowCount = tableBody.rows.length;
+      
+      newRow.innerHTML = `
+        <td>${rowCount}</td>
+        <td class="card-name-cell">${truncateCardName(item.itemName)}</td>
+        <td><span style="background: #f3f4f6; padding: 4px 8px; border-radius: 6px; font-weight: 600;">${item.quantity}</span></td>
+        <td><span style="color: #059669; font-weight: 700;">¥${Number(item.declaredValue).toLocaleString()}</span></td>
+        <td><span style="color: #0ea5e9; font-weight: 700;">${item.acquisitionValue ? '¥' + Number(item.acquisitionValue).toLocaleString() : '-'}</span></td>
+        <td>
+          <div class="action-buttons">
+            <button class="menu-toggle" onclick="toggleButtons(${rowCount - 1}, event)" id="menu-${rowCount - 1}">⋮</button>
+            <button class="action-btn edit" onclick="editItem(${rowCount - 1}); hideButtons(${rowCount - 1})" id="edit-${rowCount - 1}">編集</button>
+            <button class="action-btn delete" onclick="confirmDelete(${rowCount - 1}); hideButtons(${rowCount - 1})" id="delete-${rowCount - 1}">削除</button>
+          </div>
+        </td>
+      `;
+    }
+
+    function updateItemInTable(index, item) {
+      const tableBody = document.querySelector("#itemsTable tbody");
+      const row = tableBody.rows[index];
+      
+      row.cells[1].innerHTML = truncateCardName(item.itemName);
+      row.cells[1].className = "card-name-cell";
+      row.cells[2].innerHTML = `<span style="background: #f3f4f6; padding: 4px 8px; border-radius: 6px; font-weight: 600;">${item.quantity}</span>`;
+      row.cells[3].innerHTML = `<span style="color: #059669; font-weight: 700;">¥${Number(item.declaredValue).toLocaleString()}</span>`;
+      row.cells[4].innerHTML = `<span style="color: #0ea5e9; font-weight: 700;">${item.acquisitionValue ? '¥' + Number(item.acquisitionValue).toLocaleString() : '-'}</span>`;
+    }
+
+    function saveToLocalStorage(item) {
+      let items = JSON.parse(localStorage.getItem("items")) || [];
+      items.push(item);
+      localStorage.setItem("items", JSON.stringify(items));
+    }
+
+    function updateLocalStorage(index, item) {
+      let items = JSON.parse(localStorage.getItem("items")) || [];
+      items[index] = item;
+      localStorage.setItem("items", JSON.stringify(items));
+    }
+
+    function loadItems() {
+      const items = JSON.parse(localStorage.getItem("items")) || [];
+      items.forEach((item, index) => addItemToTable(item));
+      updateTotalSummary();
+    }
+
+    function updateTotalSummary() {
+      const totalQuantityElement = document.getElementById("totalQuantity");
+      const totalFeeElement = document.getElementById("totalFee");
+      
+      let totalItems = 0;
+      let totalDeclaredValue = 0;
+      let totalAcquisitionValue = 0;
+      
+      const items = JSON.parse(localStorage.getItem("items")) || [];
+      const plan = document.getElementById("plan").value;
+      const serviceOption = document.getElementById("serviceOption").value;
+      
+      let feePercentage = 0;
+      if (plan === "normal") {
+        feePercentage = 0.022;
+      } else if (plan === "guarantee") {
+        feePercentage = 0.033;
+      } else if (plan === "normal_usa") {
+        if (serviceOption === "パック・雑誌鑑定" || serviceOption === "特殊鑑定") {
+          feePercentage = 0.05;
+        } else {
+          feePercentage = 0.033;
+        }
+      } else if (plan === "guarantee_usa") {
+        feePercentage = 0.05;
+      }
+      
+      items.forEach(item => {
+        totalItems += item.quantity;
+        totalDeclaredValue += item.declaredValue * item.quantity;
+        totalAcquisitionValue += (item.acquisitionValue || 0);
+      });
+      
+      const totalFeeValue = totalDeclaredValue * feePercentage;
+      const gradingFee = calculateGradingFee(serviceOption, totalItems, plan);
+      
+      totalQuantityElement.innerText = totalItems + "枚";
+      totalFeeElement.innerText = `¥${Math.round(totalFeeValue).toLocaleString()}`;
+    }
+
+    function showConfirmationScreen() {
+      const items = JSON.parse(localStorage.getItem("items")) || [];
+      let totalQuantityNum = 0;
+      let totalDeclaredValue = 0;
+      let totalAcquisitionValue = 0;
+      
+      const plan = document.getElementById("plan").value;
+      const serviceOption = document.getElementById("serviceOption").value;
+      
+      let feePercentage = 0;
+      if (plan === "normal") {
+        feePercentage = 0.022;
+      } else if (plan === "guarantee") {
+        feePercentage = 0.033;
+      } else if (plan === "normal_usa") {
+        if (serviceOption === "パック・雑誌鑑定" || serviceOption === "特殊鑑定") {
+          feePercentage = 0.05;
+        } else {
+          feePercentage = 0.033;
+        }
+      } else if (plan === "guarantee_usa") {
+        feePercentage = 0.05;
+      }
+      
+      items.forEach(item => {
+        totalQuantityNum += item.quantity;
+        totalDeclaredValue += item.declaredValue * item.quantity;
+        totalAcquisitionValue += (item.acquisitionValue || 0);
+      });
+      
+      if ((plan === "guarantee" || plan === "guarantee_usa") && totalQuantityNum < 10) {
+        alert("70％保証プランをご利用の場合、カードは10枚以上の入力が必要です。");
+        return;
+      }
+      
+      const estimatedTax = totalAcquisitionValue * 0.15;
+      const totalFeeValue = totalDeclaredValue * feePercentage;
+      const gradingFee = calculateGradingFee(serviceOption, totalQuantityNum, plan);
+      
+      document.getElementById("confirmEstimatedTax").textContent = `¥${Math.round(estimatedTax).toLocaleString()}`;
+      document.getElementById("confirmAgencyFee").textContent = `¥${Math.round(totalFeeValue).toLocaleString()}`;
+      
+      if (gradingFee !== null) {
+        document.getElementById("confirmEstimatedGradingFee").textContent = `¥${gradingFee.toLocaleString()}`;
+        document.getElementById("confirmTotalEstimatedFee").textContent = `¥${Math.round(totalFeeValue + gradingFee).toLocaleString()}`;
+      } else {
+        document.getElementById("confirmEstimatedGradingFee").textContent = "別途見積もり";
+        document.getElementById("confirmTotalEstimatedFee").textContent = "見積もり後に表示";
+      }
+      
+      const confirmationDetails = document.getElementById("confirmationDetails");
+      confirmationDetails.innerHTML = `
+        <div style="margin-bottom: 24px;">
+          <h4 style="margin-bottom: 16px; color: #1a202c; font-weight: 700; text-align: left;">📋 基本情報</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+            <div style="text-align: left;"><strong>お名前:</strong> ${document.getElementById("contactName").value}</div>
+            <div style="text-align: left;"><strong>メール:</strong> ${document.getElementById("contactEmail").value}</div>
+            <div style="text-align: left;"><strong>PSAプラン:</strong> ${document.getElementById("serviceOption").value}</div>
+            <div style="text-align: left;"><strong>代行プラン:</strong> ${document.getElementById("plan").options[document.getElementById("plan").selectedIndex].text}</div>
+            <div style="text-align: left;"><strong>買取額提示:</strong> ${document.getElementById("purchaseOffer").value}</div>
+            <div style="text-align: left;"><strong>返却方法:</strong> ${document.getElementById("returnMethod").value}</div>
+            <div style="text-align: left;"><strong>無料検品:</strong> ${document.getElementById("inspectionOption").value}</div>
+            <div style="text-align: left;"><strong>カード枚数:</strong> ${totalQuantityNum}枚</div>
+          </div>
+        </div>
+        
+        <div style="margin-bottom: 24px;">
+          <h4 style="margin-bottom: 16px; color: #1a202c; font-weight: 700; text-align: left;">🎴 入力カード情報</h4>
+          ${items.map((item, index) => `
+            <div style="background: white; border: 1px solid #e5e7eb; padding: 12px; margin-bottom: 8px; border-radius: 8px;">
+              <div style="text-align: left;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px; margin-bottom: 6px; line-height: 1.4; white-space: pre-line; max-width: 100%; word-break: break-word;">${index + 1}. ${truncateCardNameForConfirmation(item.itemName)}</div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #6b7280;">
+                  <span>申告額: ¥${Number(item.declaredValue).toLocaleString()}</span>
+                  <span>取得額: ${item.acquisitionValue ? '¥' + Number(item.acquisitionValue).toLocaleString() : '未設定'}</span>
+                  <span>数量: ${item.quantity}枚</span>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      
+      document.getElementById("confirmationScreen").style.display = "block";
+    }
+
+    function confirmDelete(index) {
+      if (confirm("本当にこのカードデータを削除してもよろしいですか？")) {
+        deleteFromLocalStorage(index);
+        reloadTable();
+      }
+    }
+
+    function deleteFromLocalStorage(index) {
+      let items = JSON.parse(localStorage.getItem("items")) || [];
+      items.splice(index, 1);
+      localStorage.setItem("items", JSON.stringify(items));
+    }
+
+    function editItem(index) {
+      let items = JSON.parse(localStorage.getItem("items")) || [];
+      const item = items[index];
+      document.getElementById("searchItem").value = item.itemName;
+      document.getElementById("quantity").value = item.quantity;
+      document.getElementById("declaredValue").value = item.declaredValue;
+      document.getElementById("acquisitionValue").value = item.acquisitionValue || "";
+      editIndex = index;
+
+      const targetInput = document.getElementById("searchItem");
+      targetInput.scrollIntoView({ behavior: "smooth", block: "center" });
+      targetInput.focus();
+    }
+
+    function reloadTable() {
+      const tableBody = document.querySelector("#itemsTable tbody");
+      tableBody.innerHTML = "";
+      loadItems();
+    }
+
+    document.getElementById("deleteDataButton").addEventListener("click", function () {
+      if (confirm("本当に全てのデータを削除してもよろしいですか？\nこの操作は取り消せません。")) {
+        const tableBody = document.querySelector("#itemsTable tbody");
+        tableBody.innerHTML = "";
+        localStorage.removeItem("items");
+        updateTotalSummary();
+        document.getElementById("contactForm").reset();
+        
+        document.querySelectorAll('.choice-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector('[data-option="purchaseOffer"][data-value="希望しない"]').classList.add('active');
+        document.querySelector('[data-option="returnMethod"][data-value="即時返送"]').classList.add('active');
+        document.querySelector('[data-option="inspectionOption"][data-value="希望する"]').classList.add('active');
+        
+        document.getElementById('purchaseOffer').value = '希望しない';
+        document.getElementById('returnMethod').value = '即時返送';
+        document.getElementById('inspectionOption').value = '希望する';
+      }
+    });
+
+    async function sendEmails() {
+      const contactName = document.getElementById("contactName").value;
+      const contactEmail = document.getElementById("contactEmail").value;
+      const contactBody = document.getElementById("contactBody").value;
+      const inspectionOption = document.getElementById("inspectionOption").value;
+      const planElement = document.getElementById("plan");
+      const planValue = planElement.value;
+      const planText = planElement.options[planElement.selectedIndex].text;
+      const purchaseOffer = document.getElementById("purchaseOffer").value;
+      const returnMethod = document.getElementById("returnMethod").value;
+      const serviceOption = document.getElementById("serviceOption").value;
+
+      const items = JSON.parse(localStorage.getItem("items")) || [];
+      let totalQuantityNum = 0;
+      let totalDeclaredValue = 0;
+      let totalAcquisitionValue = 0;
+      
+      items.forEach(item => { 
+        totalQuantityNum += item.quantity;
+        totalDeclaredValue += item.declaredValue * item.quantity;
+        totalAcquisitionValue += (item.acquisitionValue || 0);
+      });
+
+      let feePercentage = 0;
+      if (planValue === "normal") {
+        feePercentage = 0.022;
+      } else if (planValue === "guarantee") {
+        feePercentage = 0.033;
+      } else if (planValue === "normal_usa") {
+        if (serviceOption === "パック・雑誌鑑定" || serviceOption === "特殊鑑定") {
+          feePercentage = 0.05;
+        } else {
+          feePercentage = 0.033;
+        }
+      } else if (planValue === "guarantee_usa") {
+        feePercentage = 0.05;
+      }
+
+      const estimatedTax = totalAcquisitionValue * 0.15;
+      const totalFeeValue = totalDeclaredValue * feePercentage;
+      const gradingFee = calculateGradingFee(serviceOption, totalQuantityNum, planValue);
+
+      const submitButton = document.querySelector('.btn-submit');
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<span>⏳</span> 送信中...';
+      submitButton.style.background = 'linear-gradient(135deg, #6b7280, #4b5563)';
+
+      const requestData = {
+        contactName,
+        contactEmail,
+        contactBody,
+        plan: planText,
+        serviceOption,
+        purchaseOffer,
+        returnMethod,
+        inspectionOption,
+        items,
+        totalQuantity: `${totalQuantityNum}枚`,
+        totalDeclaredValue,
+        totalAcquisitionValue,
+        totalFee: `¥${Math.round(totalFeeValue).toLocaleString()}`,
+        estimatedTax: `¥${Math.round(estimatedTax).toLocaleString()}`,
+        estimatedGradingFee: gradingFee !== null ? `¥${gradingFee.toLocaleString()}` : "別途見積もり",
+        totalEstimatedFee: gradingFee !== null ? `¥${Math.round(totalFeeValue + gradingFee).toLocaleString()}` : "見積もり後に表示"
+      };
+
+      try {
+        const response = await fetch('/api/rich-form-submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert(`✅ ${result.message}\n\n📄 ご請求予定の代行手数料: ${requestData.totalFee}\n💰 関税見込み額: ${requestData.estimatedTax}`);
+          document.getElementById("confirmationMessage").style.display = "block";
+          
+          localStorage.removeItem("items");
+          localStorage.removeItem("contactFormData");
+          document.getElementById("contactForm").reset();
+          reloadTable();
+        } else {
+          alert(`❌ ${result.error}`);
+        }
+      } catch (error) {
+        console.error('送信エラー:', error);
+        alert('❌ メール送信に失敗しました。もう一度お試しください。');
+      } finally {
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<span>📋</span> 内容を確認する';
+        submitButton.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+      }
+    }
+
+    const formIds = [
+      "serviceOption",
+      "plan",
+      "purchaseOffer",
+      "returnMethod",
+      "inspectionOption",
+      "contactName",
+      "contactEmail",
+      "contactBody"
+    ];
+
+    function saveFormToStorage() {
+      const data = {};
+      formIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) data[id] = el.value;
+      });
+      localStorage.setItem("contactFormData", JSON.stringify(data));
+    }
+
+    function loadFormFromStorage() {
+      const data = JSON.parse(localStorage.getItem("contactFormData") || "{}");
+      formIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && typeof data[id] !== "undefined") {
+          el.value = data[id];
+          
+          if (["purchaseOffer", "returnMethod", "inspectionOption"].includes(id)) {
+            document.querySelectorAll(`[data-option="${id}"]`).forEach(btn => {
+              btn.classList.remove('active');
+              if (btn.dataset.value === data[id]) {
+                btn.classList.add('active');
+              }
+            });
+          }
+          
+          if (el.tagName === "SELECT" && ![...el.options].some(opt => opt.value === data[id])) {
+            el.selectedIndex = 0;
+          }
+        }
+      });
+      updateTotalSummary();
+    }
+
+    function clearFormStorage() {
+      localStorage.removeItem("contactFormData");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      loadFormFromStorage();
+
+      formIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener("change", saveFormToStorage);
+          el.addEventListener("input", saveFormToStorage);
+        }
+      });
+
+      document.getElementById("deleteDataButton").addEventListener("click", function () {
+        clearFormStorage();
+        formIds.forEach(id => {
+          const el = document.getElementById(id);
+          if (el && el.tagName === "SELECT") el.selectedIndex = 0;
+          if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA")) el.value = "";
+        });
+      });
+    });
+  </script>
+</body>
+</html>

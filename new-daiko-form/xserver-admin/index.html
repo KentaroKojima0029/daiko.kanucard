@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>買取管理画面 - Kanu Card Collection</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <!-- ログイン画面 -->
+    <div id="loginContainer" class="login-container">
+        <div class="login-header">
+            <h1>買取管理画面</h1>
+            <p>Kanu Card Collection 管理者ログイン</p>
+        </div>
+
+        <div id="errorMessage" class="message message-error"></div>
+        <div id="successMessage" class="message message-success"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="password" class="form-label">パスワード</label>
+                <input type="password" id="password" class="form-input" required autocomplete="current-password">
+            </div>
+
+            <div class="form-checkbox">
+                <input type="checkbox" id="remember">
+                <label for="remember">ログイン状態を保持</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">ログイン</button>
+        </form>
+    </div>
+
+    <!-- 管理画面メイン -->
+    <div id="adminContainer" class="admin-container">
+        <header class="header">
+            <h1>買取管理画面</h1>
+            <div class="header-actions">
+                <button id="logoutBtn" class="btn btn-logout">ログアウト</button>
+            </div>
+        </header>
+
+        <div id="errorMessage" class="message message-error"></div>
+        <div id="successMessage" class="message message-success"></div>
+
+        <!-- タブナビゲーション -->
+        <div class="tabs">
+            <button class="tab active" data-tab="create" onclick="adminUI.switchTab('create')">新規作成</button>
+            <button class="tab" data-tab="list" onclick="adminUI.switchTab('list')">依頼一覧</button>
+        </div>
+
+        <!-- 新規作成タブ -->
+        <div id="createTab" class="tab-content active">
+            <div class="card">
+                <h2 class="card-title">買取依頼作成</h2>
+
+                <form id="createForm">
+                    <div class="form-grid">
+                        <!-- カード情報 -->
+                        <div class="form-group">
+                            <label for="cardName" class="form-label">カード名 *</label>
+                            <input type="text" id="cardName" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cardCondition" class="form-label">コンディション</label>
+                            <input type="text" id="cardCondition" class="form-input" placeholder="例: PSA 10, 美品">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cardImageUrl" class="form-label">カード画像URL</label>
+                            <input type="url" id="cardImageUrl" class="form-input" placeholder="https://example.com/card.jpg">
+                        </div>
+
+                        <!-- 顧客情報 -->
+                        <div class="form-group">
+                            <label for="customerName" class="form-label">顧客名 *</label>
+                            <input type="text" id="customerName" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="customerEmail" class="form-label">顧客メール *</label>
+                            <input type="email" id="customerEmail" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="customerPhone" class="form-label">顧客電話</label>
+                            <input type="tel" id="customerPhone" class="form-input" placeholder="090-1234-5678">
+                        </div>
+
+                        <!-- 査定情報 -->
+                        <div class="form-group">
+                            <label for="assessmentPrice" class="form-label">査定価格（円）</label>
+                            <input type="number" id="assessmentPrice" class="form-input" placeholder="10000">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="assessorName" class="form-label">査定者名</label>
+                            <input type="text" id="assessorName" class="form-input" placeholder="山田太郎">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="assessmentComment" class="form-label">査定コメント</label>
+                        <textarea id="assessmentComment" class="form-input" rows="4" placeholder="カードの状態やコメントを記入してください"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">作成 & URL生成</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 依頼一覧タブ -->
+        <div id="listTab" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">買取依頼一覧</h2>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>カード名</th>
+                                <th>顧客名</th>
+                                <th>査定価格</th>
+                                <th>ステータス</th>
+                                <th>作成日</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestsTableBody">
+                            <tr>
+                                <td colspan="7" class="loading">
+                                    <div class="spinner"></div>
+                                    読み込み中...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 詳細表示モーダル -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>依頼詳細</h3>
+            </div>
+            <div id="detailModalBody" class="modal-body">
+                <!-- 詳細情報がここに動的に挿入されます -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="adminUI.closeModal('detailModal')">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- URL表示モーダル -->
+    <div id="urlModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>承認URL</h3>
+            </div>
+            <div class="modal-body">
+                <p>以下のURLを顧客に送信してください：</p>
+                <div class="url-display" id="generatedUrl"></div>
+                <button class="btn copy-btn" onclick="adminUI.copyUrl()">URLをコピー</button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="adminUI.closeModal('urlModal')">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- スクリプト読み込み -->
+    <script src="config.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
