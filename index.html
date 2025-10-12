@@ -164,7 +164,7 @@
             background: linear-gradient(145deg, #ffffff, #f8fafc);
             border: 1px solid rgba(59, 130, 246, 0.1);
             border-radius: 24px;
-            padding: 35px 25px;
+            padding: 40px 25px;
             text-align: center;
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -176,7 +176,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 220px;
+            min-height: 200px;
             box-shadow:
                 0 4px 6px rgba(0, 0, 0, 0.05),
                 0 10px 15px -3px rgba(0, 0, 0, 0.1),
@@ -283,39 +283,7 @@
             font-size: 0.95rem;
             color: #475569;
             line-height: 1.5;
-            margin-bottom: 20px;
             font-weight: 500;
-        }
-
-        .service-cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            background: white;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: #1e293b;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .service-card:hover .service-cta {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-        }
-
-        .service-cta svg {
-            width: 18px;
-            height: 18px;
-            transition: transform 0.3s ease;
-        }
-
-        .service-card:hover .service-cta svg {
-            transform: translateX(4px);
         }
 
         /* ステータスセクション */
@@ -661,13 +629,18 @@
 
             .service-card {
                 padding: 20px;
-                min-height: 160px;
+                min-height: 140px;
                 border-radius: 16px;
+            }
+
+            .service-icon-wrapper {
+                width: 60px;
+                height: 60px;
+                margin-bottom: 15px;
             }
 
             .service-icon {
                 font-size: 2rem;
-                margin-bottom: 12px;
             }
 
             .service-title {
@@ -811,12 +784,6 @@
                 </div>
                 <div class="service-title">代行申込</div>
                 <div class="service-description">PSA鑑定の代行申込フォーム</div>
-                <div class="service-cta">
-                    今すぐ申し込む
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                    </svg>
-                </div>
             </a>
 
             <a href="/status" class="service-card status">
@@ -825,12 +792,6 @@
                 </div>
                 <div class="service-title">進捗確認</div>
                 <div class="service-description">申込状況をリアルタイムで確認</div>
-                <div class="service-cta">
-                    状況を見る
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                    </svg>
-                </div>
             </a>
 
             <a href="/chat" class="service-card message">
@@ -840,12 +801,6 @@
                 </div>
                 <div class="service-title">メッセージ</div>
                 <div class="service-description">お問い合わせ・サポート対応</div>
-                <div class="service-cta">
-                    チャットを開く
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                    </svg>
-                </div>
             </a>
 
             <a href="/approval" class="service-card approval">
@@ -855,12 +810,6 @@
                 </div>
                 <div class="service-title">買取承認</div>
                 <div class="service-description">査定結果の確認と承認</div>
-                <div class="service-cta">
-                    確認する
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                    </svg>
-                </div>
             </a>
         </section>
 
