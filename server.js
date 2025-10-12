@@ -404,45 +404,63 @@ app.post('/api/rich-form-submit', async (req, res) => {
     await transporter.sendMail(customerMailOptions);
     await transporter.sendMail(adminMailOptions);
 
-    // 管理者側データベースにも保存
-    try {
-      const adminApiUrl = process.env.ADMIN_API_URL || 'https://kanucard-daiko-support.onrender.com';
-      const adminResponse = await fetch(`${adminApiUrl}/api/public/form-submit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          contactName,
-          contactEmail,
-          contactBody,
-          plan,
-          serviceOption,
-          purchaseOffer,
-          returnMethod,
-          inspectionOption,
-          items,
-          totalQuantity,
-          totalDeclaredValue,
-          totalAcquisitionValue,
-          totalFee,
-          estimatedTax,
-          estimatedGradingFee,
-          totalEstimatedFee
-        })
-      });
+    // 管理者側データベースにも保存（タイムアウト付き）
+    const saveToAdminDatabase = async () => {
+      try {
+        const adminApiUrl = process.env.ADMIN_API_URL || 'https://kanucard-daiko-support.onrender.com';
 
-      if (!adminResponse.ok) {
-        console.error('管理者DBへの保存失敗:', await adminResponse.text());
-      } else {
-        const adminData = await adminResponse.json();
-        console.log('管理者DBに保存成功:', adminData);
+        // タイムアウト付きfetch（10秒）
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        const adminResponse = await fetch(`${adminApiUrl}/api/public/form-submit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contactName,
+            contactEmail,
+            contactBody,
+            plan,
+            serviceOption,
+            purchaseOffer,
+            returnMethod,
+            inspectionOption,
+            items,
+            totalQuantity,
+            totalDeclaredValue,
+            totalAcquisitionValue,
+            totalFee,
+            estimatedTax,
+            estimatedGradingFee,
+            totalEstimatedFee
+          }),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!adminResponse.ok) {
+          console.error('管理者DBへの保存失敗:', await adminResponse.text());
+        } else {
+          const adminData = await adminResponse.json();
+          console.log('管理者DBに保存成功:', adminData);
+        }
+      } catch (adminError) {
+        if (adminError.name === 'AbortError') {
+          console.error('管理者API通信タイムアウト（10秒）');
+        } else {
+          console.error('管理者API通信エラー:', adminError);
+        }
+        // メール送信は成功しているので、エラーを握りつぶす
       }
-    } catch (adminError) {
-      console.error('管理者API通信エラー:', adminError);
-      // メール送信は成功しているので、エラーを握りつぶす
-    }
+    };
 
+    // 管理者DBへの保存を非同期で実行（レスポンスをブロックしない）
+    saveToAdminDatabase();
+
+    // すぐにレスポンスを返す
     res.json({
       success: true,
       message: 'お申し込みありがとうございました。確認メールをお送りしました。'
