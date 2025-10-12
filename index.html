@@ -318,7 +318,7 @@
             transform: translateX(4px);
         }
 
-        /* ステータスセクション */
+        /* 詳細ステータスセクション */
         .status-section {
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(16px);
@@ -328,38 +328,301 @@
         }
 
         .status-title {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: 700;
             color: #1e293b;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
+        .status-card {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            border-radius: 16px;
+            padding: 0;
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
-        .status-item {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            border-radius: 12px;
+        .status-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-header {
             padding: 20px;
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            cursor: pointer;
+            transition: background 0.3s ease;
         }
 
-        .status-number {
+        .status-header:hover {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        }
+
+        .status-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-icon {
+            font-size: 1.5rem;
+        }
+
+        .status-title-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .status-value {
             font-size: 2rem;
             font-weight: 700;
             color: #3b82f6;
+        }
+
+        .status-unit {
+            font-size: 1rem;
+            color: #64748b;
+            margin-left: 4px;
+        }
+
+        .expand-icon {
+            margin-left: 10px;
+            color: #64748b;
+            transition: transform 0.3s ease;
+        }
+
+        .expand-icon.expanded {
+            transform: rotate(180deg);
+        }
+
+        /* 受付数詳細 */
+        .status-detail {
+            padding: 20px;
+            background: #fafbfc;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .order-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .order-course {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .order-count {
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        /* グラフコンテナ */
+        .chart-container {
+            padding: 20px;
+            height: 250px;
+        }
+
+        .grading-summary {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            border-top: 1px solid #e5e7eb;
+            background: #fafbfc;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-label {
+            display: block;
+            font-size: 0.9rem;
+            color: #64748b;
             margin-bottom: 8px;
         }
 
-        .status-label {
+        .summary-value {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .summary-value.highlight {
+            color: #10b981;
+        }
+
+        .psa10-rate {
+            font-size: 0.95rem;
+            color: #64748b;
+        }
+
+        .psa10-rate strong {
+            color: #10b981;
+            font-size: 1.1rem;
+        }
+
+        /* ROI表示 */
+        .roi-card .status-header {
+            cursor: default;
+        }
+
+        .roi-display {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .roi-main {
+            margin-bottom: 25px;
+        }
+
+        .roi-percentage {
+            display: block;
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10b981, #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .roi-label {
+            font-size: 1rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .roi-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .roi-item {
+            text-align: center;
+        }
+
+        .roi-item-label {
+            display: block;
             font-size: 0.9rem;
             color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .roi-item-value {
+            display: block;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .roi-item-value.success {
+            color: #10b981;
+        }
+
+        /* 買取依頼 */
+        .buyback-card .status-header {
+            cursor: default;
+        }
+
+        .btn-view-all {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-view-all:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .buyback-list {
+            padding: 20px;
+            background: #fafbfc;
+        }
+
+        .buyback-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .buyback-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .buyback-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .buyback-date {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .buyback-cards {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .btn-buyback-request {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-buyback-request:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
         }
 
         /* 通知バッジ */
@@ -428,23 +691,60 @@
                 font-size: 1.4rem;
             }
 
-            .status-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 12px;
+            .status-card {
+                margin-bottom: 15px;
             }
 
-            .status-item {
+            .status-header {
                 padding: 15px;
             }
 
-            .status-number {
+            .status-value {
                 font-size: 1.5rem;
+            }
+
+            .roi-percentage {
+                font-size: 2.5rem;
+            }
+
+            .roi-details {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .chart-container {
+                height: 200px;
+            }
+
+            .buyback-item {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .btn-buyback-request {
+                width: 100%;
             }
         }
 
         @media (max-width: 480px) {
-            .status-grid {
-                grid-template-columns: repeat(2, 1fr);
+            .grading-summary {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .status-header-left,
+            .status-header-right {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .status-icon {
+                font-size: 1.2rem;
+            }
+
+            .status-title-text {
+                font-size: 0.95rem;
             }
         }
     </style>
@@ -550,31 +850,128 @@
             </a>
         </section>
 
-        <!-- ステータスセクション -->
+        <!-- 詳細サービス利用状況セクション -->
         <section class="status-section">
             <h2 class="status-title">
                 📊 サービス利用状況
             </h2>
-            <div class="status-grid">
-                <div class="status-item">
-                    <div class="status-number" id="pendingCount">15</div>
-                    <div class="status-label">受付中</div>
+
+            <!-- 受付数セクション -->
+            <div class="status-card">
+                <div class="status-header" onclick="toggleDetail('order-detail')">
+                    <div class="status-header-left">
+                        <span class="status-icon">📦</span>
+                        <span class="status-title-text">現在の受付数</span>
+                    </div>
+                    <div class="status-header-right">
+                        <span class="status-value" id="totalOrders">3</span>
+                        <span class="status-unit">件</span>
+                        <span class="expand-icon" id="order-expand">▼</span>
+                    </div>
                 </div>
-                <div class="status-item">
-                    <div class="status-number" id="gradingCount">28</div>
-                    <div class="status-label">鑑定中</div>
+                <div class="status-detail" id="order-detail" style="display: none;">
+                    <div class="order-breakdown">
+                        <div class="order-item">
+                            <span class="order-course">🇯🇵 日本レギュラーコース</span>
+                            <span class="order-count">1件</span>
+                        </div>
+                        <div class="order-item">
+                            <span class="order-course">🇺🇸 アメリカバリューバルク</span>
+                            <span class="order-count">1件</span>
+                        </div>
+                        <div class="order-item">
+                            <span class="order-course">🚀 アメリカエクスプレス</span>
+                            <span class="order-count">1件</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="status-item">
-                    <div class="status-number" id="shippingCount">8</div>
-                    <div class="status-label">発送準備</div>
+            </div>
+
+            <!-- 鑑定実績グラフセクション -->
+            <div class="status-card">
+                <div class="status-header">
+                    <div class="status-header-left">
+                        <span class="status-icon">📈</span>
+                        <span class="status-title-text">鑑定実績</span>
+                    </div>
+                    <div class="status-header-right">
+                        <span class="psa10-rate">PSA10率: <strong>42.8%</strong></span>
+                    </div>
                 </div>
-                <div class="status-item">
-                    <div class="status-number" id="completedCount">156</div>
-                    <div class="status-label">完了</div>
+                <div class="chart-container">
+                    <canvas id="gradingChart"></canvas>
+                </div>
+                <div class="grading-summary">
+                    <div class="summary-item">
+                        <span class="summary-label">総鑑定枚数</span>
+                        <span class="summary-value">156枚</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">PSA10獲得</span>
+                        <span class="summary-value highlight">67枚</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROI表示セクション -->
+            <div class="status-card roi-card">
+                <div class="status-header">
+                    <div class="status-header-left">
+                        <span class="status-icon">💰</span>
+                        <span class="status-title-text">投資収益率（ROI）</span>
+                    </div>
+                </div>
+                <div class="roi-display">
+                    <div class="roi-main">
+                        <span class="roi-percentage">+258%</span>
+                        <span class="roi-label">価値向上</span>
+                    </div>
+                    <div class="roi-details">
+                        <div class="roi-item">
+                            <span class="roi-item-label">投資額</span>
+                            <span class="roi-item-value">¥450,000</span>
+                        </div>
+                        <div class="roi-item">
+                            <span class="roi-item-label">現在価値</span>
+                            <span class="roi-item-value success">¥1,611,000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 買取依頼セクション -->
+            <div class="status-card buyback-card">
+                <div class="status-header">
+                    <div class="status-header-left">
+                        <span class="status-icon">💴</span>
+                        <span class="status-title-text">買取依頼</span>
+                    </div>
+                    <div class="status-header-right">
+                        <button class="btn-view-all" onclick="viewAllBuyback()">すべて見る</button>
+                    </div>
+                </div>
+                <div class="buyback-list">
+                    <div class="buyback-item">
+                        <div class="buyback-info">
+                            <span class="buyback-date">2025年1月返却分</span>
+                            <span class="buyback-cards">PSA10: 12枚 / PSA9: 8枚</span>
+                        </div>
+                        <button class="btn-buyback-request" onclick="requestBuyback('2025-01')">買取依頼</button>
+                    </div>
+                    <div class="buyback-item">
+                        <div class="buyback-info">
+                            <span class="buyback-date">2024年12月返却分</span>
+                            <span class="buyback-cards">PSA10: 8枚 / PSA9: 5枚</span>
+                        </div>
+                        <button class="btn-buyback-request" onclick="requestBuyback('2024-12')">買取依頼</button>
+                    </div>
                 </div>
             </div>
         </section>
     </div>
+
+    <!-- Chart.js ライブラリ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         // カウントダウン機能
@@ -699,33 +1096,151 @@
             }
         }
 
-        // ステータス更新（デモ用）
-        function updateStatus() {
-            // 実際はAPIから取得
-            const statuses = {
-                pending: Math.floor(Math.random() * 30) + 5,
-                grading: Math.floor(Math.random() * 40) + 10,
-                shipping: Math.floor(Math.random() * 15) + 3,
-                completed: Math.floor(Math.random() * 200) + 100
+        // 受付数詳細の展開・折りたたみ
+        function toggleDetail(detailId) {
+            const detail = document.getElementById(detailId);
+            const expandIcon = document.getElementById('order-expand');
+
+            if (detail.style.display === 'none') {
+                detail.style.display = 'block';
+                expandIcon.classList.add('expanded');
+            } else {
+                detail.style.display = 'none';
+                expandIcon.classList.remove('expanded');
+            }
+        }
+
+        // 買取依頼処理
+        function requestBuyback(period) {
+            // 実際はAPIに送信
+            alert(`${period}の鑑定品について買取依頼を受け付けました。担当者より連絡いたします。`);
+            // メッセージページへ遷移してもよい
+            // window.location.href = '/chat';
+        }
+
+        // 全ての買取依頼を表示
+        function viewAllBuyback() {
+            // 買取専用ページへ遷移 または モーダル表示
+            alert('買取依頼履歴ページを表示します');
+            // window.location.href = '/buyback';
+        }
+
+        // グラフ描画
+        function drawGradingChart() {
+            const ctx = document.getElementById('gradingChart').getContext('2d');
+
+            // サンプルデータ（実際はAPIから取得）
+            const gradingData = {
+                labels: ['日本レギュラー', 'USバリュー', 'USエクスプレス'],
+                datasets: [
+                    {
+                        label: 'PSA10',
+                        data: [45, 38, 52],
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'PSA9',
+                        data: [28, 35, 25],
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'PSA8以下',
+                        data: [15, 20, 18],
+                        backgroundColor: 'rgba(156, 163, 175, 0.8)',
+                        borderColor: 'rgba(156, 163, 175, 1)',
+                        borderWidth: 1
+                    }
+                ]
             };
 
-            document.getElementById('pendingCount').textContent = statuses.pending;
-            document.getElementById('gradingCount').textContent = statuses.grading;
-            document.getElementById('shippingCount').textContent = statuses.shipping;
-            document.getElementById('completedCount').textContent = statuses.completed;
+            new Chart(ctx, {
+                type: 'bar',
+                data: gradingData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y + '枚';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '枚';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ROI計算（デモ用）
+        function calculateROI() {
+            // 実際はユーザーの実データから計算
+            const totalCards = 156;
+            const psa10Cards = 67;
+            const avgCardCost = 2884; // 平均仕入れ価格
+            const avgPSA10Value = 24045; // PSA10の平均価値
+
+            const totalInvestment = totalCards * avgCardCost;
+            const currentValue = psa10Cards * avgPSA10Value + (totalCards - psa10Cards) * avgCardCost;
+            const roi = ((currentValue - totalInvestment) / totalInvestment * 100).toFixed(0);
+
+            // DOM更新は既にHTML内でハードコード済み
+            // 実際のアプリケーションではここでDOMを更新
+        }
+
+        // データ更新（実際はAPIから取得）
+        function updateDashboardData() {
+            // ユーザー固有のデータを取得
+            // fetch('/api/user/dashboard')
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         // 各セクションのデータを更新
+            //     });
         }
 
         // 初期化
         document.addEventListener('DOMContentLoaded', () => {
             updateCountdowns();
             updateBadges();
-            updateStatus();
+            drawGradingChart();
+            calculateROI();
+            updateDashboardData();
 
             // 1分ごとにカウントダウン更新
             setInterval(updateCountdowns, 60000);
 
-            // 5分ごとにステータス更新
-            setInterval(updateStatus, 300000);
+            // 5分ごとにダッシュボードデータ更新
+            setInterval(updateDashboardData, 300000);
         });
 
         // サービスカードのクリックアニメーション
