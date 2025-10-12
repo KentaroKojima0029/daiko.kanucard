@@ -1865,6 +1865,10 @@
                 const gradingFee = calculateGradingFee(serviceOption, totalQuantity, plan);
                 const estimatedTax = totalAcquisitionValue * 0.15;
 
+                // タイムアウト付きfetch（30秒）
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000);
+
                 const response = await fetch('/api/rich-form-submit', {
                     method: 'POST',
                     headers: {
@@ -1883,9 +1887,15 @@
                         totalFee: Math.round(totalFee),
                         estimatedGradingFee: gradingFee,
                         estimatedTax: Math.round(estimatedTax),
-                        totalQuantity: totalQuantity
-                    })
+                        totalQuantity: totalQuantity,
+                        totalDeclaredValue: totalDeclaredValue,
+                        totalAcquisitionValue: totalAcquisitionValue,
+                        totalEstimatedFee: Math.round(totalFee + (gradingFee || 0) + estimatedTax)
+                    }),
+                    signal: controller.signal
                 });
+
+                clearTimeout(timeoutId);
 
                 if (response.ok) {
                     closeConfirmationModal();
@@ -1899,11 +1909,16 @@
                     renderTable();
                     updateTotalSummary();
                 } else {
-                    throw new Error('送信に失敗しました');
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || '送信に失敗しました');
                 }
             } catch (error) {
-                console.error('エラー:', error);
-                alert('送信に失敗しました。もう一度お試しください。');
+                console.error('送信エラー:', error);
+                if (error.name === 'AbortError') {
+                    alert('送信がタイムアウトしました。サーバーが応答していない可能性があります。しばらくしてから再度お試しください。');
+                } else {
+                    alert('送信に失敗しました: ' + error.message + '\n\nもう一度お試しください。');
+                }
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = '送信する';
