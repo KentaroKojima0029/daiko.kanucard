@@ -318,7 +318,7 @@
             transform: translateX(4px);
         }
 
-        /* 詳細ステータスセクション */
+        /* ステータスセクション */
         .status-section {
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(16px);
@@ -337,290 +337,281 @@
             gap: 10px;
         }
 
-        .status-card {
+        /* ボタングリッド */
+        .status-button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .status-button {
             background: linear-gradient(145deg, #ffffff, #f8fafc);
-            border: 1px solid rgba(59, 130, 246, 0.1);
+            border: 2px solid rgba(59, 130, 246, 0.1);
             border-radius: 16px;
-            padding: 0;
-            margin-bottom: 20px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .status-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .status-header {
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            padding: 25px 20px;
             cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .status-header:hover {
-            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-        }
-
-        .status-header-left {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
+            flex-direction: column;
             align-items: center;
             gap: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
-        .status-header-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .status-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #3b82f6);
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        .status-icon {
-            font-size: 1.5rem;
+        .status-button:hover::before {
+            opacity: 1;
         }
 
-        .status-title-text {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #334155;
+        .status-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.3);
         }
 
-        .status-value {
+        .status-button:active {
+            transform: translateY(-2px);
+        }
+
+        .status-button-icon {
+            font-size: 2.5rem;
+            display: block;
+        }
+
+        .status-button-value {
             font-size: 2rem;
             font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status-button-label {
+            font-size: 1rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .status-button-arrow {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .status-button:hover .status-button-arrow {
+            transform: translateX(5px);
             color: #3b82f6;
         }
 
-        .status-unit {
-            font-size: 1rem;
+        /* モーダル */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 30px;
+            border-bottom: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: white;
+            border-radius: 50%;
+            font-size: 1.5rem;
             color: #64748b;
-            margin-left: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .expand-icon {
-            margin-left: 10px;
-            color: #64748b;
-            transition: transform 0.3s ease;
+        .modal-close:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+            transform: rotate(90deg);
         }
 
-        .expand-icon.expanded {
-            transform: rotate(180deg);
+        .modal-body {
+            padding: 30px;
         }
 
-        /* 受付数詳細 */
-        .status-detail {
-            padding: 20px;
-            background: #fafbfc;
-            border-top: 1px solid #e5e7eb;
+        /* モーダル内のコンテンツスタイル */
+        .detail-section {
+            margin-bottom: 25px;
         }
 
-        .order-breakdown {
+        .detail-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .order-detail-list {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
 
-        .order-item {
+        .order-detail-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 16px;
-            background: white;
-            border-radius: 8px;
+            padding: 15px 20px;
+            background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+            border-radius: 12px;
             border: 1px solid #e5e7eb;
         }
 
-        .order-course {
-            font-weight: 600;
-            color: #334155;
+        .chart-detail-container {
+            height: 300px;
+            margin: 20px 0;
         }
 
-        .order-count {
+        .grading-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+            border-radius: 12px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
             font-weight: 700;
             color: #3b82f6;
         }
 
-        /* グラフコンテナ */
-        .chart-container {
-            padding: 20px;
-            height: 250px;
-        }
-
-        .grading-summary {
-            display: flex;
-            justify-content: space-around;
-            padding: 20px;
-            border-top: 1px solid #e5e7eb;
-            background: #fafbfc;
-        }
-
-        .summary-item {
-            text-align: center;
-        }
-
-        .summary-label {
-            display: block;
+        .stat-label {
             font-size: 0.9rem;
             color: #64748b;
-            margin-bottom: 8px;
+            margin-top: 5px;
         }
 
-        .summary-value {
-            display: block;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1e293b;
-        }
-
-        .summary-value.highlight {
-            color: #10b981;
-        }
-
-        .psa10-rate {
-            font-size: 0.95rem;
-            color: #64748b;
-        }
-
-        .psa10-rate strong {
-            color: #10b981;
-            font-size: 1.1rem;
-        }
-
-        /* ROI表示 */
-        .roi-card .status-header {
-            cursor: default;
-        }
-
-        .roi-display {
-            padding: 30px;
+        .roi-detail-display {
             text-align: center;
+            padding: 30px;
+            background: linear-gradient(145deg, #f0fdf4, #dcfce7);
+            border-radius: 16px;
         }
 
-        .roi-main {
-            margin-bottom: 25px;
-        }
-
-        .roi-percentage {
-            display: block;
-            font-size: 3rem;
+        .roi-big-number {
+            font-size: 4rem;
             font-weight: 700;
             background: linear-gradient(135deg, #10b981, #059669);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 8px;
         }
 
-        .roi-label {
-            font-size: 1rem;
-            color: #64748b;
-            font-weight: 600;
-        }
-
-        .roi-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .roi-item {
-            text-align: center;
-        }
-
-        .roi-item-label {
-            display: block;
-            font-size: 0.9rem;
-            color: #64748b;
-            margin-bottom: 8px;
-        }
-
-        .roi-item-value {
-            display: block;
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #1e293b;
-        }
-
-        .roi-item-value.success {
-            color: #10b981;
-        }
-
-        /* 買取依頼 */
-        .buyback-card .status-header {
-            cursor: default;
-        }
-
-        .btn-view-all {
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-view-all:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-        }
-
-        .buyback-list {
-            padding: 20px;
-            background: #fafbfc;
-        }
-
-        .buyback-item {
+        .buyback-detail-list {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .buyback-detail-item {
+            padding: 20px;
             background: white;
             border: 1px solid #e5e7eb;
             border-radius: 12px;
-            margin-bottom: 12px;
         }
 
-        .buyback-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .buyback-info {
+        .buyback-actions {
             display: flex;
-            flex-direction: column;
-            gap: 4px;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
         }
 
-        .buyback-date {
-            font-weight: 600;
-            color: #334155;
-        }
-
-        .buyback-cards {
-            font-size: 0.9rem;
-            color: #64748b;
-        }
-
-        .btn-buyback-request {
+        .btn-request {
             padding: 10px 20px;
             background: linear-gradient(135deg, #10b981, #059669);
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .btn-buyback-request:hover {
+        .btn-request:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
         }
@@ -691,60 +682,83 @@
                 font-size: 1.4rem;
             }
 
-            .status-card {
-                margin-bottom: 15px;
-            }
-
-            .status-header {
-                padding: 15px;
-            }
-
-            .status-value {
-                font-size: 1.5rem;
-            }
-
-            .roi-percentage {
-                font-size: 2.5rem;
-            }
-
-            .roi-details {
-                grid-template-columns: 1fr;
+            .status-button-grid {
+                grid-template-columns: repeat(2, 1fr);
                 gap: 15px;
             }
 
-            .chart-container {
-                height: 200px;
+            .status-button {
+                padding: 20px 15px;
             }
 
-            .buyback-item {
+            .status-button-icon {
+                font-size: 2rem;
+            }
+
+            .status-button-value {
+                font-size: 1.5rem;
+            }
+
+            .status-button-label {
+                font-size: 0.9rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                border-radius: 16px;
+            }
+
+            .modal-header {
+                padding: 20px;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
+
+            .chart-detail-container {
+                height: 250px;
+            }
+
+            .buyback-detail-item > div {
                 flex-direction: column;
-                gap: 12px;
-                text-align: center;
+                gap: 15px;
             }
 
-            .btn-buyback-request {
+            .btn-request {
                 width: 100%;
             }
         }
 
         @media (max-width: 480px) {
-            .grading-summary {
-                flex-direction: column;
-                gap: 15px;
+            .status-button-grid {
+                grid-template-columns: 1fr;
             }
 
-            .status-header-left,
-            .status-header-right {
-                flex-direction: column;
-                gap: 8px;
+            .status-button {
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 18px 20px;
             }
 
-            .status-icon {
+            .status-button-icon {
+                font-size: 1.8rem;
+            }
+
+            .status-button-value {
+                font-size: 1.3rem;
+            }
+
+            .grading-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .modal-header h3 {
                 font-size: 1.2rem;
             }
 
-            .status-title-text {
-                font-size: 0.95rem;
+            .roi-big-number {
+                font-size: 3rem;
             }
         }
     </style>
@@ -850,124 +864,56 @@
             </a>
         </section>
 
-        <!-- 詳細サービス利用状況セクション -->
+        <!-- サービス利用状況セクション -->
         <section class="status-section">
             <h2 class="status-title">
                 📊 サービス利用状況
             </h2>
 
-            <!-- 受付数セクション -->
-            <div class="status-card">
-                <div class="status-header" onclick="toggleDetail('order-detail')">
-                    <div class="status-header-left">
-                        <span class="status-icon">📦</span>
-                        <span class="status-title-text">現在の受付数</span>
-                    </div>
-                    <div class="status-header-right">
-                        <span class="status-value" id="totalOrders">3</span>
-                        <span class="status-unit">件</span>
-                        <span class="expand-icon" id="order-expand">▼</span>
-                    </div>
-                </div>
-                <div class="status-detail" id="order-detail" style="display: none;">
-                    <div class="order-breakdown">
-                        <div class="order-item">
-                            <span class="order-course">🇯🇵 日本レギュラーコース</span>
-                            <span class="order-count">1件</span>
-                        </div>
-                        <div class="order-item">
-                            <span class="order-course">🇺🇸 アメリカバリューバルク</span>
-                            <span class="order-count">1件</span>
-                        </div>
-                        <div class="order-item">
-                            <span class="order-course">🚀 アメリカエクスプレス</span>
-                            <span class="order-count">1件</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- ボタングリッド表示 -->
+            <div class="status-button-grid">
+                <button class="status-button" onclick="showStatusDetail('orders')">
+                    <span class="status-button-icon">📦</span>
+                    <span class="status-button-value">3</span>
+                    <span class="status-button-label">受付中</span>
+                    <span class="status-button-arrow">→</span>
+                </button>
 
-            <!-- 鑑定実績グラフセクション -->
-            <div class="status-card">
-                <div class="status-header">
-                    <div class="status-header-left">
-                        <span class="status-icon">📈</span>
-                        <span class="status-title-text">鑑定実績</span>
-                    </div>
-                    <div class="status-header-right">
-                        <span class="psa10-rate">PSA10率: <strong>42.8%</strong></span>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="gradingChart"></canvas>
-                </div>
-                <div class="grading-summary">
-                    <div class="summary-item">
-                        <span class="summary-label">総鑑定枚数</span>
-                        <span class="summary-value">156枚</span>
-                    </div>
-                    <div class="summary-item">
-                        <span class="summary-label">PSA10獲得</span>
-                        <span class="summary-value highlight">67枚</span>
-                    </div>
-                </div>
-            </div>
+                <button class="status-button" onclick="showStatusDetail('grading')">
+                    <span class="status-button-icon">📈</span>
+                    <span class="status-button-value">42.8%</span>
+                    <span class="status-button-label">PSA10率</span>
+                    <span class="status-button-arrow">→</span>
+                </button>
 
-            <!-- ROI表示セクション -->
-            <div class="status-card roi-card">
-                <div class="status-header">
-                    <div class="status-header-left">
-                        <span class="status-icon">💰</span>
-                        <span class="status-title-text">投資収益率（ROI）</span>
-                    </div>
-                </div>
-                <div class="roi-display">
-                    <div class="roi-main">
-                        <span class="roi-percentage">+258%</span>
-                        <span class="roi-label">価値向上</span>
-                    </div>
-                    <div class="roi-details">
-                        <div class="roi-item">
-                            <span class="roi-item-label">投資額</span>
-                            <span class="roi-item-value">¥450,000</span>
-                        </div>
-                        <div class="roi-item">
-                            <span class="roi-item-label">現在価値</span>
-                            <span class="roi-item-value success">¥1,611,000</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                <button class="status-button" onclick="showStatusDetail('roi')">
+                    <span class="status-button-icon">💰</span>
+                    <span class="status-button-value">+258%</span>
+                    <span class="status-button-label">ROI</span>
+                    <span class="status-button-arrow">→</span>
+                </button>
 
-            <!-- 買取依頼セクション -->
-            <div class="status-card buyback-card">
-                <div class="status-header">
-                    <div class="status-header-left">
-                        <span class="status-icon">💴</span>
-                        <span class="status-title-text">買取依頼</span>
-                    </div>
-                    <div class="status-header-right">
-                        <button class="btn-view-all" onclick="viewAllBuyback()">すべて見る</button>
-                    </div>
-                </div>
-                <div class="buyback-list">
-                    <div class="buyback-item">
-                        <div class="buyback-info">
-                            <span class="buyback-date">2025年1月返却分</span>
-                            <span class="buyback-cards">PSA10: 12枚 / PSA9: 8枚</span>
-                        </div>
-                        <button class="btn-buyback-request" onclick="requestBuyback('2025-01')">買取依頼</button>
-                    </div>
-                    <div class="buyback-item">
-                        <div class="buyback-info">
-                            <span class="buyback-date">2024年12月返却分</span>
-                            <span class="buyback-cards">PSA10: 8枚 / PSA9: 5枚</span>
-                        </div>
-                        <button class="btn-buyback-request" onclick="requestBuyback('2024-12')">買取依頼</button>
-                    </div>
-                </div>
+                <button class="status-button" onclick="showStatusDetail('buyback')">
+                    <span class="status-button-icon">💴</span>
+                    <span class="status-button-value">2</span>
+                    <span class="status-button-label">買取可能</span>
+                    <span class="status-button-arrow">→</span>
+                </button>
             </div>
         </section>
+
+        <!-- 詳細モーダル -->
+        <div id="statusDetailModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">詳細情報</h3>
+                    <button class="modal-close" onclick="closeStatusDetail()">×</button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- 動的にコンテンツを挿入 -->
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Chart.js ライブラリ -->
@@ -1096,40 +1042,208 @@
             }
         }
 
-        // 受付数詳細の展開・折りたたみ
-        function toggleDetail(detailId) {
-            const detail = document.getElementById(detailId);
-            const expandIcon = document.getElementById('order-expand');
+        // モーダル表示
+        let currentChart = null;
 
-            if (detail.style.display === 'none') {
-                detail.style.display = 'block';
-                expandIcon.classList.add('expanded');
-            } else {
-                detail.style.display = 'none';
-                expandIcon.classList.remove('expanded');
+        function showStatusDetail(type) {
+            const modal = document.getElementById('statusDetailModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            // モーダルタイトル設定
+            const titles = {
+                orders: '📦 受付状況詳細',
+                grading: '📈 鑑定実績詳細',
+                roi: '💰 投資収益率詳細',
+                buyback: '💴 買取依頼管理'
+            };
+            modalTitle.textContent = titles[type];
+
+            // コンテンツ生成
+            let content = '';
+
+            switch (type) {
+                case 'orders':
+                    content = `
+                        <div class="detail-section">
+                            <h4 class="detail-title">コース別受付状況</h4>
+                            <div class="order-detail-list">
+                                <div class="order-detail-item">
+                                    <span>🇯🇵 日本レギュラーコース</span>
+                                    <strong style="color: #3b82f6;">1件</strong>
+                                </div>
+                                <div class="order-detail-item">
+                                    <span>🇺🇸 アメリカバリューバルク</span>
+                                    <strong style="color: #3b82f6;">1件</strong>
+                                </div>
+                                <div class="order-detail-item">
+                                    <span>🚀 アメリカエクスプレス</span>
+                                    <strong style="color: #3b82f6;">1件</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <h4 class="detail-title">受付済みカード内訳</h4>
+                            <div class="grading-stats">
+                                <div class="stat-card">
+                                    <div class="stat-value">45</div>
+                                    <div class="stat-label">総カード枚数</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">¥135,000</div>
+                                    <div class="stat-label">合計金額</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'grading':
+                    content = `
+                        <div class="detail-section">
+                            <h4 class="detail-title">PSA鑑定結果分析</h4>
+                            <div class="chart-detail-container">
+                                <canvas id="modalGradingChart"></canvas>
+                            </div>
+                            <div class="grading-stats">
+                                <div class="stat-card">
+                                    <div class="stat-value">156</div>
+                                    <div class="stat-label">総鑑定枚数</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" style="color: #10b981;">67</div>
+                                    <div class="stat-label">PSA10獲得</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">42.8%</div>
+                                    <div class="stat-label">PSA10率</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">88</div>
+                                    <div class="stat-label">PSA9以下</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'roi':
+                    content = `
+                        <div class="detail-section">
+                            <div class="roi-detail-display">
+                                <div class="roi-big-number">+258%</div>
+                                <div style="font-size: 1.2rem; color: #059669; font-weight: 600; margin-bottom: 30px;">
+                                    価値向上率
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; text-align: center;">
+                                    <div>
+                                        <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 10px;">投資総額</div>
+                                        <div style="font-size: 1.8rem; font-weight: 700; color: #1e293b;">¥450,000</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 10px;">現在価値</div>
+                                        <div style="font-size: 1.8rem; font-weight: 700; color: #10b981;">¥1,611,000</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <h4 class="detail-title">コース別ROI</h4>
+                            <div class="order-detail-list">
+                                <div class="order-detail-item">
+                                    <span>日本レギュラー</span>
+                                    <strong style="color: #10b981;">+285%</strong>
+                                </div>
+                                <div class="order-detail-item">
+                                    <span>USバリューバルク</span>
+                                    <strong style="color: #10b981;">+245%</strong>
+                                </div>
+                                <div class="order-detail-item">
+                                    <span>USエクスプレス</span>
+                                    <strong style="color: #10b981;">+265%</strong>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'buyback':
+                    content = `
+                        <div class="detail-section">
+                            <h4 class="detail-title">買取可能な鑑定品</h4>
+                            <div class="buyback-detail-list">
+                                <div class="buyback-detail-item">
+                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                        <div>
+                                            <h5 style="margin: 0 0 10px 0; color: #1e293b;">2025年1月返却分</h5>
+                                            <div style="color: #64748b; font-size: 0.9rem;">
+                                                PSA10: 12枚 / PSA9: 8枚 / PSA8: 5枚
+                                            </div>
+                                            <div style="margin-top: 10px; color: #10b981; font-weight: 600;">
+                                                推定価値: ¥580,000
+                                            </div>
+                                        </div>
+                                        <button class="btn-request" onclick="requestBuyback('2025-01')">
+                                            買取依頼
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="buyback-detail-item">
+                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                        <div>
+                                            <h5 style="margin: 0 0 10px 0; color: #1e293b;">2024年12月返却分</h5>
+                                            <div style="color: #64748b; font-size: 0.9rem;">
+                                                PSA10: 8枚 / PSA9: 5枚 / PSA8: 3枚
+                                            </div>
+                                            <div style="margin-top: 10px; color: #10b981; font-weight: 600;">
+                                                推定価値: ¥420,000
+                                            </div>
+                                        </div>
+                                        <button class="btn-request" onclick="requestBuyback('2024-12')">
+                                            買取依頼
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+
+            modalBody.innerHTML = content;
+            modal.style.display = 'flex';
+
+            // グラフが必要な場合は描画
+            if (type === 'grading') {
+                setTimeout(() => {
+                    drawModalGradingChart();
+                }, 100);
             }
         }
 
-        // 買取依頼処理
-        function requestBuyback(period) {
-            // 実際はAPIに送信
-            alert(`${period}の鑑定品について買取依頼を受け付けました。担当者より連絡いたします。`);
-            // メッセージページへ遷移してもよい
-            // window.location.href = '/chat';
+        function closeStatusDetail() {
+            const modal = document.getElementById('statusDetailModal');
+            modal.style.display = 'none';
+
+            // グラフのクリーンアップ
+            if (currentChart) {
+                currentChart.destroy();
+                currentChart = null;
+            }
         }
 
-        // 全ての買取依頼を表示
-        function viewAllBuyback() {
-            // 買取専用ページへ遷移 または モーダル表示
-            alert('買取依頼履歴ページを表示します');
-            // window.location.href = '/buyback';
-        }
+        // モーダル内のグラフ描画
+        function drawModalGradingChart() {
+            const canvas = document.getElementById('modalGradingChart');
+            if (!canvas) return;
 
-        // グラフ描画
-        function drawGradingChart() {
-            const ctx = document.getElementById('gradingChart').getContext('2d');
+            const ctx = canvas.getContext('2d');
 
-            // サンプルデータ（実際はAPIから取得）
+            // 既存のチャートがあれば破棄
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
             const gradingData = {
                 labels: ['日本レギュラー', 'USバリュー', 'USエクスプレス'],
                 datasets: [
@@ -1157,7 +1271,7 @@
                 ]
             };
 
-            new Chart(ctx, {
+            currentChart = new Chart(ctx, {
                 type: 'bar',
                 data: gradingData,
                 options: {
@@ -1202,6 +1316,22 @@
             });
         }
 
+        // 買取依頼処理
+        function requestBuyback(period) {
+            // 実際はAPIに送信
+            alert(`${period}の鑑定品について買取依頼を受け付けました。担当者より連絡いたします。`);
+            // メッセージページへ遷移してもよい
+            // window.location.href = '/chat';
+        }
+
+        // モーダル外クリックで閉じる
+        window.onclick = function(event) {
+            const modal = document.getElementById('statusDetailModal');
+            if (event.target === modal) {
+                closeStatusDetail();
+            }
+        }
+
         // ROI計算（デモ用）
         function calculateROI() {
             // 実際はユーザーの実データから計算
@@ -1232,8 +1362,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             updateCountdowns();
             updateBadges();
-            drawGradingChart();
-            calculateROI();
             updateDashboardData();
 
             // 1分ごとにカウントダウン更新
