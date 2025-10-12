@@ -96,7 +96,12 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: process.env.SMTP_USER || 'collection@kanucard.com',
     pass: process.env.SMTP_PASS
-  }
+  },
+  connectionTimeout: 60000, // 60秒
+  greetingTimeout: 30000, // 30秒
+  socketTimeout: 60000, // 60秒
+  logger: process.env.NODE_ENV !== 'production', // 開発環境でログを有効化
+  debug: process.env.NODE_ENV !== 'production' // 開発環境でデバッグを有効化
 });
 
 // リッチフォーム送信API
