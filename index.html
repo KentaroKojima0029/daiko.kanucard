@@ -950,39 +950,39 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // 残り時間の割合に応じてグラデーション色を取得
-        function getGradientColor(percentage) {
-            // percentage: 0-100 (100が最も時間がある状態、0が締切)
-            if (percentage >= 80) {
-                // 青
+        // 残り日数に応じてグラデーション色を取得
+        function getGradientColorByDays(days) {
+            // 残り日数で色分け
+            if (days >= 10) {
+                // 青 - 10日以上（時間に余裕あり）
                 return {
                     text: '#3b82f6',
                     gradient: 'linear-gradient(135deg, #3b82f6, #1e40af)',
                     border: 'linear-gradient(135deg, #3b82f6, #1e40af)'
                 };
-            } else if (percentage >= 60) {
-                // 緑
+            } else if (days >= 6) {
+                // 緑 - 6〜9日（まだ余裕あり）
                 return {
                     text: '#10b981',
                     gradient: 'linear-gradient(135deg, #10b981, #059669)',
                     border: 'linear-gradient(135deg, #10b981, #059669)'
                 };
-            } else if (percentage >= 40) {
-                // 黄色
+            } else if (days >= 4) {
+                // 黄色 - 4〜5日（やや注意）
                 return {
                     text: '#f59e0b',
                     gradient: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
                     border: 'linear-gradient(135deg, #fbbf24, #f59e0b)'
                 };
-            } else if (percentage >= 20) {
-                // オレンジ
+            } else if (days >= 2) {
+                // オレンジ - 2〜3日（締切接近）
                 return {
                     text: '#f97316',
                     gradient: 'linear-gradient(135deg, #fb923c, #f97316)',
                     border: 'linear-gradient(135deg, #fb923c, #f97316)'
                 };
             } else {
-                // 赤
+                // 赤 - 1日以内（締切間近）
                 return {
                     text: '#ef4444',
                     gradient: 'linear-gradient(135deg, #ef4444, #dc2626)',
@@ -1053,9 +1053,8 @@
                 const progress = Math.max(0, 100 - (usaCountdown.total / (7 * 24 * 60 * 60 * 1000) * 100));
                 usaProgressElement.style.width = progress + '%';
 
-                // 残り時間の割合を計算してグラデーション色を適用
-                const usaPercentage = (usaCountdown.total / (7 * 24 * 60 * 60 * 1000)) * 100;
-                const usaColors = getGradientColor(usaPercentage);
+                // 残り日数に応じてグラデーション色を適用
+                const usaColors = getGradientColorByDays(usaCountdown.days);
 
                 // カウントダウンテキストとプログレスバーに色を適用
                 usaElement.style.color = usaColors.text;
@@ -1086,9 +1085,8 @@
                 const progress = Math.max(0, 100 - (japanCountdown.total / (30 * 24 * 60 * 60 * 1000) * 100));
                 japanProgressElement.style.width = progress + '%';
 
-                // 残り時間の割合を計算してグラデーション色を適用
-                const japanPercentage = (japanCountdown.total / (30 * 24 * 60 * 60 * 1000)) * 100;
-                const japanColors = getGradientColor(japanPercentage);
+                // 残り日数に応じてグラデーション色を適用
+                const japanColors = getGradientColorByDays(japanCountdown.days);
 
                 // カウントダウンテキストとプログレスバーに色を適用
                 japanElement.style.color = japanColors.text;
