@@ -11,7 +11,10 @@ const nodemailer = require('nodemailer');
 const logger = require('./logger');
 
 // 環境変数から設定を取得
-const USE_XSERVER_FALLBACK = process.env.USE_XSERVER_FALLBACK === 'true';
+// USE_XSERVER_FALLBACKは'true'、'1'、'yes'のいずれかで有効化
+const USE_XSERVER_FALLBACK = ['true', '1', 'yes'].includes(
+  String(process.env.USE_XSERVER_FALLBACK || '').toLowerCase()
+);
 const XSERVER_API_URL = process.env.XSERVER_API_URL;
 const XSERVER_API_KEY = process.env.XSERVER_API_KEY;
 
@@ -154,41 +157,85 @@ async function sendViaSMTP(mailOptions) {
 async function sendEmail(mailOptions) {
   const errors = [];
 
+  // ログ: メール送信開始
+  console.log('============================================');
+  console.log('[email-service] Starting email send process');
+  console.log('[email-service] To:', mailOptions.to);
+  console.log('[email-service] Subject:', mailOptions.subject);
+  console.log('[email-service] Fallback enabled:', USE_XSERVER_FALLBACK);
+  console.log('[email-service] API configured:', !!(XSERVER_API_URL && XSERVER_API_KEY));
+  console.log('============================================');
+
   // 1. まずSMTP送信を試行
   try {
+    console.log('[email-service] Attempting SMTP send...');
     const result = await sendViaSMTP(mailOptions);
+    console.log('[email-service] ✓ SMTP send successful');
     return result;
   } catch (smtpError) {
+    console.error('[email-service] ✗ SMTP send failed:', smtpError.message);
+    console.error('[email-service] SMTP error code:', smtpError.code);
+
     errors.push({
       method: 'smtp',
-      error: smtpError.message
+      error: smtpError.message,
+      code: smtpError.code
     });
 
     logger.warn('SMTP send failed, attempting fallback', {
       error: smtpError.message,
-      fallbackEnabled: USE_XSERVER_FALLBACK
+      code: smtpError.code,
+      fallbackEnabled: USE_XSERVER_FALLBACK,
+      apiConfigured: !!(XSERVER_API_URL && XSERVER_API_KEY)
     });
   }
 
   // 2. SMTP失敗時、フォールバックが有効ならXserverVPS APIを試行
   if (USE_XSERVER_FALLBACK) {
-    try {
-      const result = await sendViaXserverAPI(mailOptions);
-      return result;
-    } catch (apiError) {
+    console.log('[email-service] Fallback is enabled, checking API configuration...');
+
+    if (!XSERVER_API_URL) {
+      console.error('[email-service] ✗ XSERVER_API_URL not configured!');
       errors.push({
         method: 'xserver-api',
-        error: apiError.message
+        error: 'XSERVER_API_URL not configured'
       });
+    } else if (!XSERVER_API_KEY) {
+      console.error('[email-service] ✗ XSERVER_API_KEY not configured!');
+      errors.push({
+        method: 'xserver-api',
+        error: 'XSERVER_API_KEY not configured'
+      });
+    } else {
+      try {
+        console.log('[email-service] Attempting XserverVPS API fallback...');
+        const result = await sendViaXserverAPI(mailOptions);
+        console.log('[email-service] ✓ XserverVPS API send successful');
+        return result;
+      } catch (apiError) {
+        console.error('[email-service] ✗ XserverVPS API failed:', apiError.message);
 
-      logger.error('XserverVPS API fallback also failed', {
-        error: apiError.message
-      });
+        errors.push({
+          method: 'xserver-api',
+          error: apiError.message
+        });
+
+        logger.error('XserverVPS API fallback also failed', {
+          error: apiError.message
+        });
+      }
     }
+  } else {
+    console.warn('[email-service] Fallback is disabled (USE_XSERVER_FALLBACK not set to true)');
   }
 
   // 3. すべての方法が失敗した場合
   const errorMessage = errors.map(e => `${e.method}: ${e.error}`).join('; ');
+
+  console.error('============================================');
+  console.error('[email-service] All email sending methods failed');
+  console.error('[email-service] Errors:', JSON.stringify(errors, null, 2));
+  console.error('============================================');
 
   logger.error('All email sending methods failed', {
     to: mailOptions.to,
@@ -205,22 +252,53 @@ async function sendEmail(mailOptions) {
 function validateEmailConfig() {
   const issues = [];
 
+  console.log('============================================');
+  console.log('[email-service] Validating email configuration');
+  console.log('============================================');
+
   // SMTP設定チェック
+  console.log('[email-service] SMTP Configuration:');
+  console.log('  - SMTP_HOST:', process.env.SMTP_HOST || 'NOT SET');
+  console.log('  - SMTP_PORT:', process.env.SMTP_PORT || 'NOT SET');
+  console.log('  - SMTP_USER:', process.env.SMTP_USER || 'NOT SET');
+  console.log('  - SMTP_PASS:', process.env.SMTP_PASS ? '****' : 'NOT SET');
+
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
     issues.push('SMTP configuration incomplete');
+    console.error('[email-service] ✗ SMTP configuration incomplete!');
+  } else {
+    console.log('[email-service] ✓ SMTP configuration complete');
   }
 
   // フォールバック設定チェック
+  console.log('[email-service] Fallback Configuration:');
+  console.log('  - USE_XSERVER_FALLBACK (raw):', process.env.USE_XSERVER_FALLBACK || 'NOT SET');
+  console.log('  - USE_XSERVER_FALLBACK (parsed):', USE_XSERVER_FALLBACK);
+  console.log('  - XSERVER_API_URL:', XSERVER_API_URL || 'NOT SET');
+  console.log('  - XSERVER_API_KEY:', XSERVER_API_KEY ? '****' : 'NOT SET');
+
   if (USE_XSERVER_FALLBACK) {
     if (!XSERVER_API_URL) {
       issues.push('XSERVER_API_URL not set');
+      console.error('[email-service] ✗ XSERVER_API_URL not set!');
     }
     if (!XSERVER_API_KEY) {
       issues.push('XSERVER_API_KEY not set');
+      console.error('[email-service] ✗ XSERVER_API_KEY not set!');
     }
+
+    if (XSERVER_API_URL && XSERVER_API_KEY) {
+      console.log('[email-service] ✓ Fallback configuration complete');
+    }
+  } else {
+    console.warn('[email-service] ⚠ Fallback is DISABLED');
+    console.warn('[email-service] Set USE_XSERVER_FALLBACK=true to enable');
   }
 
+  console.log('============================================');
+
   if (issues.length > 0) {
+    console.error('[email-service] Configuration issues:', issues);
     logger.warn('Email configuration issues detected', { issues });
     return {
       valid: false,
@@ -228,6 +306,7 @@ function validateEmailConfig() {
     };
   }
 
+  console.log('[email-service] ✓ Email configuration valid');
   logger.info('Email configuration validated', {
     smtpConfigured: true,
     fallbackEnabled: USE_XSERVER_FALLBACK,
