@@ -20,72 +20,6 @@
             letter-spacing: 0.02em;
         }
 
-        /* ナビゲーションバー */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(16px);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-            border-bottom: 1px solid rgba(203, 213, 225, 0.3);
-            z-index: 1000;
-        }
-
-        .navbar-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 24px;
-        }
-
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #0f172a;
-            text-decoration: none;
-            letter-spacing: 0.05em;
-        }
-
-        .navbar-menu {
-            display: flex;
-            gap: 8px;
-            list-style: none;
-        }
-
-        .navbar-link {
-            padding: 10px 20px;
-            color: #475569;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 15px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .navbar-link:hover {
-            background: linear-gradient(135deg, #1e40af, #1e3a8a);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .navbar-link.active {
-            background: linear-gradient(135deg, #1e40af, #1e3a8a);
-            color: white;
-        }
-
-        .mobile-menu-button {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 28px;
-            color: #1e40af;
-            cursor: pointer;
-        }
-
         /* ホームボタン */
         .btn-home-fixed {
             position: fixed;
@@ -116,52 +50,8 @@
             height: 20px;
         }
 
-        @media (max-width: 768px) {
-            body {
-                padding-top: 70px;
-                padding-left: 10px;
-                padding-right: 10px;
-            }
-
-            .btn-home-fixed {
-                top: 10px;
-                left: 10px;
-                padding: 10px 16px;
-                font-size: 13px;
-            }
-
-            .btn-home-fixed svg {
-                width: 18px;
-                height: 18px;
-            }
-
-            .navbar-brand {
-                font-size: 1.2rem;
-            }
-
-            .mobile-menu-button {
-                display: block;
-            }
-
-            .navbar-menu {
-                display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: white;
-                flex-direction: column;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                padding: 8px;
-            }
-
-            .navbar-menu.show {
-                display: flex;
-            }
-        }
-
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             animation: slideUp 0.8s ease-out;
@@ -195,14 +85,227 @@
             opacity: 0.9;
         }
 
-        .progress-card {
+        /* 送信データ一覧 */
+        .submissions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .submission-card {
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(16px);
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(226, 232, 240, 0.5);
-            padding: 60px 40px;
-            margin-bottom: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submission-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #059669, #10b981);
+        }
+
+        .submission-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .submission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 20px;
+        }
+
+        .submission-id {
+            font-size: 0.9rem;
+            color: #059669;
+            font-weight: 700;
+            background: rgba(5, 150, 105, 0.1);
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+
+        .submission-date {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .submission-info {
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 0.9rem;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-top: 16px;
+        }
+
+        .status-badge.step-1 {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+        }
+
+        .status-badge.step-2 {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: white;
+        }
+
+        .status-badge.step-3 {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .status-badge.step-4 {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .status-badge.step-5 {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+        }
+
+        .status-badge.step-6 {
+            background: linear-gradient(135deg, #059669, #047857);
+            color: white;
+        }
+
+        /* 詳細モーダル */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: modalSlide 0.3s ease-out;
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            padding: 30px;
+            border-radius: 24px 24px 0 0;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .modal-header p {
+            opacity: 0.95;
+            font-size: 0.95rem;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-section {
+            margin-bottom: 30px;
+        }
+
+        .modal-section h4 {
+            color: #059669;
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #d1fae5;
         }
 
         /* 進捗ステップバー */
@@ -211,7 +314,8 @@
             justify-content: space-between;
             align-items: center;
             position: relative;
-            margin-bottom: 60px;
+            margin: 30px 0;
+            padding: 20px 0;
         }
 
         .progress-line {
@@ -238,30 +342,23 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             position: relative;
             z-index: 1;
             flex: 1;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .step:hover .step-circle {
-            transform: scale(1.05);
         }
 
         .step-circle {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background: rgba(5, 150, 105, 0.15);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 20px;
+            font-size: 18px;
             transition: all 0.4s ease;
-            border: 4px solid transparent;
             color: #64748b;
         }
 
@@ -275,21 +372,18 @@
         .step.completed .step-circle {
             background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
             color: white;
-            border-color: #059669;
         }
 
         .step-label {
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 600;
             text-align: center;
             color: #64748b;
-            white-space: nowrap;
         }
 
         .step.active .step-label {
             color: #059669;
             font-weight: 700;
-            font-size: 14px;
         }
 
         .step.completed .step-label {
@@ -297,184 +391,118 @@
             font-weight: 700;
         }
 
-        /* 現在のステップ情報 */
-        .current-step-info {
-            text-align: center;
-            padding: 30px;
-            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-            border-radius: 16px;
-            border-left: 5px solid #059669;
-            margin-bottom: 30px;
-        }
-
-        .current-step-info h2 {
-            color: #059669;
-            font-size: 1.5rem;
-            margin-bottom: 12px;
-        }
-
-        .current-step-info p {
-            color: #064e3b;
-            font-size: 1rem;
-            line-height: 1.8;
-            margin-bottom: 12px;
-        }
-
-        .next-action {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border-left: 5px solid #f59e0b;
-            padding: 20px;
+        /* カード情報表示（読み取り専用） */
+        .cards-list {
+            background: #f8fafc;
             border-radius: 12px;
-            margin-top: 16px;
-        }
-
-        .next-action strong {
-            color: #92400e;
-            font-size: 1rem;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        .next-action p {
-            color: #78350f;
-            font-size: 0.95rem;
-            margin: 0;
-        }
-
-        /* モーダル */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
             padding: 20px;
         }
 
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
+        .card-item-readonly {
             background: white;
-            border-radius: 20px;
-            max-width: 600px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-            animation: modalSlide 0.3s ease-out;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #e5e7eb;
         }
 
-        @keyframes modalSlide {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .card-item-readonly:last-child {
+            margin-bottom: 0;
         }
 
-        .modal-header {
-            background: linear-gradient(135deg, #059669, #10b981);
-            color: white;
-            padding: 30px;
-            border-radius: 20px 20px 0 0;
-        }
-
-        .modal-header h3 {
-            font-size: 1.5rem;
-            margin-bottom: 8px;
-        }
-
-        .modal-header p {
-            opacity: 0.95;
-            font-size: 0.95rem;
-        }
-
-        .modal-body {
-            padding: 30px;
-        }
-
-        .modal-section {
-            margin-bottom: 24px;
-        }
-
-        .modal-section h4 {
+        .card-item-header {
+            font-size: 1rem;
+            font-weight: 700;
             color: #059669;
-            font-size: 1.1rem;
             margin-bottom: 12px;
             padding-bottom: 8px;
             border-bottom: 2px solid #d1fae5;
         }
 
-        .modal-section p {
-            color: #374151;
-            line-height: 1.6;
-            margin-bottom: 8px;
+        .card-field-row {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
         }
 
-        .modal-info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #e5e7eb;
+        .card-field-row:last-child {
+            border-bottom: none;
         }
 
-        .modal-info-label {
+        .card-field-label {
+            font-size: 0.9rem;
+            color: #64748b;
             font-weight: 600;
-            color: #374151;
         }
 
-        .modal-info-value {
-            color: #6b7280;
+        .card-field-value {
+            font-size: 0.9rem;
+            color: #1e293b;
+            font-weight: 500;
         }
 
-        .modal-close {
-            background: #e5e7eb;
-            color: #374151;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
-            transition: all 0.3s ease;
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
         }
 
-        .modal-close:hover {
-            background: #d1d5db;
+        .no-data-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
         }
 
-        .back-link {
+        .no-data h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        .no-data p {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-bottom: 24px;
+        }
+
+        .btn-primary {
             display: inline-block;
-            margin-top: 30px;
             padding: 14px 32px;
-            background: linear-gradient(135deg, #1e40af, #2563eb);
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
             color: white;
             text-decoration: none;
             border-radius: 12px;
             font-weight: 600;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
         }
 
-        .back-link:hover {
+        .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45);
+            box-shadow: 0 12px 32px rgba(59, 130, 246, 0.45);
         }
 
         @media (max-width: 768px) {
-            .progress-card {
-                padding: 40px 20px;
+            body {
+                padding-top: 70px;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .btn-home-fixed {
+                top: 10px;
+                left: 10px;
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+
+            .submissions-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .progress-steps {
+                padding: 10px 0;
             }
 
             .step-circle {
@@ -488,23 +516,16 @@
             }
 
             .step-label {
-                font-size: 10px;
-            }
-
-            .step.active .step-label {
-                font-size: 11px;
+                font-size: 9px;
             }
 
             .progress-line {
                 top: 20px;
             }
 
-            .current-step-info h2 {
-                font-size: 1.2rem;
-            }
-
-            .modal-content {
-                max-height: 90vh;
+            .card-field-row {
+                grid-template-columns: 100px 1fr;
+                gap: 8px;
             }
         }
     </style>
@@ -518,73 +539,23 @@
         ホーム
     </a>
 
-    <!-- ナビゲーションバー -->
-    <nav class="navbar">
-        <div class="navbar-container">
-            <a href="/" class="navbar-brand">PSA代行サービス</a>
-            <button class="mobile-menu-button" id="mobileMenuButton">☰</button>
-            <ul class="navbar-menu" id="navbarMenu">
-                <li><a href="/" class="navbar-link">代行フォーム</a></li>
-                <li><a href="/status" class="navbar-link active">進捗確認</a></li>
-                <li><a href="/approval" class="navbar-link">買取承認</a></li>
-                <li><a href="/contact" class="navbar-link">お問い合わせ</a></li>
-                <li><a href="/admin" class="navbar-link">管理者</a></li>
-            </ul>
-        </div>
-    </nav>
-
     <div class="container">
         <div class="header">
             <h1>進捗状況</h1>
-            <p>PSA代行買取承認システム</p>
+            <p>代行申込の進捗状況を確認できます</p>
         </div>
 
-        <div class="progress-card">
-            <!-- 進捗ステップバー -->
-            <div class="progress-steps">
-                <div class="progress-line">
-                    <div class="progress-line-fill" id="progressFill"></div>
-                </div>
-                <div class="step" id="step1" onclick="showStepDetails(1)">
-                    <div class="step-circle">1</div>
-                    <div class="step-label">お申し込み<br>受付</div>
-                </div>
-                <div class="step" id="step2" onclick="showStepDetails(2)">
-                    <div class="step-circle">2</div>
-                    <div class="step-label">カード受領<br>・検品</div>
-                </div>
-                <div class="step" id="step3" onclick="showStepDetails(3)">
-                    <div class="step-circle">3</div>
-                    <div class="step-label">代行料<br>お支払い</div>
-                </div>
-                <div class="step" id="step4" onclick="showStepDetails(4)">
-                    <div class="step-circle">4</div>
-                    <div class="step-label">PSA<br>鑑定中</div>
-                </div>
-                <div class="step" id="step5" onclick="showStepDetails(5)">
-                    <div class="step-circle">5</div>
-                    <div class="step-label">鑑定料<br>お支払い</div>
-                </div>
-                <div class="step" id="step6" onclick="showStepDetails(6)">
-                    <div class="step-circle">6</div>
-                    <div class="step-label">返送<br>・完了</div>
-                </div>
-            </div>
+        <!-- 送信データ一覧 -->
+        <div class="submissions-grid" id="submissionsGrid">
+            <!-- JavaScriptで動的に生成 -->
+        </div>
 
-            <!-- 現在のステップ情報 -->
-            <div class="current-step-info" id="currentStepInfo">
-                <h2>現在のステータス：お申し込み受付</h2>
-                <p>お申し込みを受け付けました。カードのお預かりをお待ちしております。</p>
-
-                <div class="next-action">
-                    <strong>次にすべきこと：</strong>
-                    <p>指定の住所にカードを発送してください。到着後、無料検品を行います。</p>
-                </div>
-            </div>
-
-            <div style="text-align: center;">
-                <a href="/" class="back-link">← トップページに戻る</a>
-            </div>
+        <!-- データがない場合 -->
+        <div class="no-data" id="noData" style="display: none;">
+            <div class="no-data-icon">📋</div>
+            <h3>申込データがありません</h3>
+            <p>まだ代行申込を行っていません</p>
+            <a href="/form" class="btn-primary">代行申込フォームへ</a>
         </div>
     </div>
 
@@ -592,8 +563,9 @@
     <div class="modal" id="detailModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle">ステップ詳細</h3>
-                <p id="modalSubtitle">詳細情報</p>
+                <button class="modal-close" onclick="closeModal()">×</button>
+                <h3 id="modalTitle">申込詳細</h3>
+                <p id="modalSubtitle">進捗状況と詳細情報</p>
             </div>
             <div class="modal-body" id="modalBody">
                 <!-- JavaScriptで動的に生成 -->
@@ -602,192 +574,222 @@
     </div>
 
     <script>
-        // ステップ定義
-        const stepData = {
-            1: {
-                title: 'お申し込み受付',
-                subtitle: '代行フォーム入力完了',
-                description: 'お申し込みを受け付けました。カードのお預かりをお待ちしております。',
-                nextAction: '指定の住所にカードを発送してください。到着後、無料検品を行います。',
+        // デモデータ（実際はAPIから取得）
+        const mockSubmissions = [
+            {
+                id: 'PSA-2025-001',
+                date: '2025-10-09',
+                plan: 'ノーマル 日本',
+                service: '70%保証なし',
+                cardCount: 15,
+                totalAmount: 45000,
+                currentStep: 2,
+                cards: [
+                    { playerName: '大谷翔平', year: '2018', cardName: 'Topps Chrome', number: '#1', declaredValue: 10000, quantity: 1 },
+                    { playerName: 'ダルビッシュ有', year: '2012', cardName: 'Bowman Chrome', number: '#50', declaredValue: 5000, quantity: 2 }
+                ],
                 details: {
                     '申込日': '2025-10-09',
                     '受付番号': 'PSA-2025-001',
-                    'プラン': 'レギュラー',
-                    'カード枚数': '15枚'
-                },
-                shippingAddress: '〒123-4567<br>東京都〇〇区〇〇 1-2-3<br>PSA代行サービス カード受付係'
-            },
-            2: {
-                title: 'カード受領・検品',
-                subtitle: '発送〜到着〜無料検品完了',
-                description: 'カードの到着をお待ちしております。到着後、PSA10見込み判定を含む無料検品を実施します。',
-                nextAction: 'カードを弊社指定住所へ発送してください。到着後24時間以内に検品結果をご連絡いたします。',
-                details: {
-                    '発送状況': '発送待ち',
-                    '追跡番号': '未設定',
-                    '到着予定': '発送後1-3日',
-                    '検品状況': '未着'
+                    'プラン': 'ノーマル 日本',
+                    'サービス': '70%保証なし',
+                    'カード枚数': '15枚',
+                    '合計金額': '¥45,000'
                 }
             },
-            3: {
-                title: '代行料お支払い',
-                subtitle: '検品結果確認〜1回目決済',
-                description: '検品結果をご確認の上、代行料をお支払いください。',
-                nextAction: '検品結果をメールでお送りします。内容をご確認後、代行料をお支払いください。',
+            {
+                id: 'PSA-2025-002',
+                date: '2025-10-10',
+                plan: 'ノーマル アメリカ',
+                service: '70%保証あり',
+                cardCount: 8,
+                totalAmount: 28000,
+                currentStep: 1,
+                cards: [
+                    { playerName: 'マイク・トラウト', year: '2011', cardName: 'Bowman Chrome', number: '#101', declaredValue: 15000, quantity: 1 },
+                    { playerName: 'ブライス・ハーパー', year: '2012', cardName: 'Topps Chrome', number: '#1', declaredValue: 8000, quantity: 1 }
+                ],
                 details: {
-                    '代行料': '未確定',
-                    '支払方法': '銀行振込 / クレジットカード',
-                    '支払期限': '検品完了後7日以内',
-                    '支払状況': '未払い'
-                }
-            },
-            4: {
-                title: 'PSA鑑定中',
-                subtitle: '提出〜鑑定期間〜結果確定',
-                description: 'PSA社への提出準備を進めております。',
-                nextAction: '鑑定完了までお待ちください。進捗は随時更新いたします。',
-                details: {
-                    'PSA提出日': '未提出',
-                    'PSA追跡番号': '未発行',
-                    '鑑定予定完了日': '提出後45-60日',
-                    '選択プラン': 'レギュラー'
-                }
-            },
-            5: {
-                title: '鑑定料お支払い',
-                subtitle: '結果通知〜2回目決済',
-                description: '鑑定結果をご確認の上、鑑定料と返送料をお支払いください。',
-                nextAction: '鑑定結果通知後、鑑定料と返送料をお支払いください。',
-                details: {
-                    '鑑定結果': '未確定',
-                    '鑑定料': '未確定',
-                    '返送料': '未確定',
-                    '支払状況': '未払い'
-                }
-            },
-            6: {
-                title: '返送・完了',
-                subtitle: '発送〜お客様受取完了',
-                description: 'カードの返送準備を進めております。',
-                nextAction: 'カードの発送後、追跡番号をお知らせします。',
-                details: {
-                    '返送方法': '未定',
-                    '発送日': '未発送',
-                    '追跡番号': '未発行',
-                    '到着予定': '発送後1-3日'
+                    '申込日': '2025-10-10',
+                    '受付番号': 'PSA-2025-002',
+                    'プラン': 'ノーマル アメリカ',
+                    'サービス': '70%保証あり',
+                    'カード枚数': '8枚',
+                    '合計金額': '¥28,000'
                 }
             }
-        };
+        ];
 
-        // 現在のステップ（URLパラメータまたはデフォルト）
-        const urlParams = new URLSearchParams(window.location.search);
-        let currentStep = parseInt(urlParams.get('step')) || 1;
-        if (currentStep < 1 || currentStep > 6) currentStep = 1;
+        // ステップ名定義
+        const stepNames = {
+            1: 'お申し込み受付',
+            2: 'カード受領・検品',
+            3: '代行料お支払い',
+            4: 'PSA鑑定中',
+            5: '鑑定料お支払い',
+            6: '返送・完了'
+        };
 
         // 初期化
         document.addEventListener('DOMContentLoaded', () => {
-            setupMobileMenu();
-            updateProgress(currentStep);
+            loadSubmissions();
         });
 
-        // モバイルメニュー
-        function setupMobileMenu() {
-            const mobileMenuButton = document.getElementById('mobileMenuButton');
-            const navbarMenu = document.getElementById('navbarMenu');
+        // 送信データ一覧を読み込み
+        function loadSubmissions() {
+            const grid = document.getElementById('submissionsGrid');
+            const noData = document.getElementById('noData');
 
-            if (mobileMenuButton) {
-                mobileMenuButton.addEventListener('click', () => {
-                    navbarMenu.classList.toggle('show');
-                });
+            // 実際はAPIから取得
+            const submissions = mockSubmissions;
 
-                document.addEventListener('click', (e) => {
-                    if (!mobileMenuButton.contains(e.target) && !navbarMenu.contains(e.target)) {
-                        navbarMenu.classList.remove('show');
-                    }
-                });
+            if (submissions.length === 0) {
+                grid.style.display = 'none';
+                noData.style.display = 'block';
+                return;
             }
+
+            grid.innerHTML = '';
+            submissions.forEach(submission => {
+                const card = createSubmissionCard(submission);
+                grid.appendChild(card);
+            });
         }
 
-        // 進捗状況を更新
-        function updateProgress(step) {
-            // すべてのステップをリセット
-            for (let i = 1; i <= 6; i++) {
-                const stepElement = document.getElementById(`step${i}`);
-                stepElement.classList.remove('active', 'completed');
-            }
+        // 送信データカードを作成
+        function createSubmissionCard(submission) {
+            const card = document.createElement('div');
+            card.className = 'submission-card';
+            card.onclick = () => showDetail(submission);
 
-            // 現在のステップまでを更新
-            for (let i = 1; i < step; i++) {
-                document.getElementById(`step${i}`).classList.add('completed');
-            }
-            document.getElementById(`step${step}`).classList.add('active');
-
-            // プログレスバーの幅を更新
-            const progressWidth = ((step - 1) / 5) * 100;
-            document.getElementById('progressFill').style.width = `${progressWidth}%`;
-
-            // 現在のステップ情報を更新
-            const data = stepData[step];
-            document.getElementById('currentStepInfo').innerHTML = `
-                <h2>現在のステータス：${data.title}</h2>
-                <p>${data.description}</p>
-
-                <div class="next-action">
-                    <strong>次にすべきこと：</strong>
-                    <p>${data.nextAction}</p>
+            card.innerHTML = `
+                <div class="submission-header">
+                    <div class="submission-id">${submission.id}</div>
+                    <div class="submission-date">${submission.date}</div>
+                </div>
+                <div class="submission-info">
+                    <div class="info-row">
+                        <span class="info-label">プラン</span>
+                        <span class="info-value">${submission.plan}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">サービス</span>
+                        <span class="info-value">${submission.service}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">カード枚数</span>
+                        <span class="info-value">${submission.cardCount}枚</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">合計金額</span>
+                        <span class="info-value">¥${submission.totalAmount.toLocaleString()}</span>
+                    </div>
+                </div>
+                <div class="status-badge step-${submission.currentStep}">
+                    現在: ${stepNames[submission.currentStep]}
                 </div>
             `;
+
+            return card;
         }
 
-        // ステップ詳細を表示
-        function showStepDetails(stepNumber) {
-            const data = stepData[stepNumber];
+        // 詳細を表示
+        function showDetail(submission) {
             const modal = document.getElementById('detailModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalSubtitle = document.getElementById('modalSubtitle');
+            const modalBody = document.getElementById('modalBody');
 
-            document.getElementById('modalTitle').textContent = data.title;
-            document.getElementById('modalSubtitle').textContent = data.subtitle;
+            modalTitle.textContent = `申込番号: ${submission.id}`;
+            modalSubtitle.textContent = `申込日: ${submission.date}`;
 
+            // 進捗ステップバー
+            let stepsHTML = `
+                <div class="modal-section">
+                    <h4>進捗状況</h4>
+                    <div class="progress-steps">
+                        <div class="progress-line">
+                            <div class="progress-line-fill" style="width: ${((submission.currentStep - 1) / 5) * 100}%"></div>
+                        </div>
+            `;
+
+            for (let i = 1; i <= 6; i++) {
+                const stepClass = i < submission.currentStep ? 'completed' : (i === submission.currentStep ? 'active' : '');
+                stepsHTML += `
+                    <div class="step ${stepClass}">
+                        <div class="step-circle">${i}</div>
+                        <div class="step-label">${stepNames[i].replace('・', '<br>')}</div>
+                    </div>
+                `;
+            }
+
+            stepsHTML += `
+                    </div>
+                </div>
+            `;
+
+            // 申込詳細
             let detailsHTML = `
                 <div class="modal-section">
-                    <h4>概要</h4>
-                    <p>${data.description}</p>
-                </div>
-
-                <div class="modal-section">
-                    <h4>次にすべきこと</h4>
-                    <p>${data.nextAction}</p>
-                </div>
-
-                <div class="modal-section">
-                    <h4>詳細情報</h4>
+                    <h4>申込詳細</h4>
             `;
 
-            for (const [label, value] of Object.entries(data.details)) {
+            for (const [label, value] of Object.entries(submission.details)) {
                 detailsHTML += `
-                    <div class="modal-info-row">
-                        <span class="modal-info-label">${label}</span>
-                        <span class="modal-info-value">${value}</span>
+                    <div class="info-row">
+                        <span class="info-label">${label}</span>
+                        <span class="info-value">${value}</span>
                     </div>
                 `;
             }
 
             detailsHTML += `</div>`;
 
-            // 発送先住所（ステップ1のみ）
-            if (stepNumber === 1 && data.shippingAddress) {
-                detailsHTML += `
-                    <div class="modal-section">
-                        <h4>カード発送先</h4>
-                        <p>${data.shippingAddress}</p>
-                    </div>
-                `;
-            }
-
-            detailsHTML += `
-                <button class="modal-close" onclick="closeModal()">閉じる</button>
+            // カード情報（読み取り専用）
+            let cardsHTML = `
+                <div class="modal-section">
+                    <h4>カード情報（${submission.cards.length}枚）</h4>
+                    <div class="cards-list">
             `;
 
-            document.getElementById('modalBody').innerHTML = detailsHTML;
+            submission.cards.forEach((card, index) => {
+                cardsHTML += `
+                    <div class="card-item-readonly">
+                        <div class="card-item-header">カード ${index + 1}</div>
+                        <div class="card-field-row">
+                            <span class="card-field-label">選手名</span>
+                            <span class="card-field-value">${card.playerName}</span>
+                        </div>
+                        <div class="card-field-row">
+                            <span class="card-field-label">年</span>
+                            <span class="card-field-value">${card.year || '-'}</span>
+                        </div>
+                        <div class="card-field-row">
+                            <span class="card-field-label">カード名</span>
+                            <span class="card-field-value">${card.cardName}</span>
+                        </div>
+                        <div class="card-field-row">
+                            <span class="card-field-label">番号</span>
+                            <span class="card-field-value">${card.number || '-'}</span>
+                        </div>
+                        <div class="card-field-row">
+                            <span class="card-field-label">申告額</span>
+                            <span class="card-field-value">¥${card.declaredValue.toLocaleString()}</span>
+                        </div>
+                        <div class="card-field-row">
+                            <span class="card-field-label">数量</span>
+                            <span class="card-field-value">${card.quantity}枚</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            cardsHTML += `
+                    </div>
+                </div>
+            `;
+
+            modalBody.innerHTML = stepsHTML + detailsHTML + cardsHTML;
             modal.classList.add('show');
         }
 
