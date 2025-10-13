@@ -1846,6 +1846,8 @@
             submitBtn.disabled = true;
             submitBtn.textContent = '送信中...';
 
+            console.log('[Form] Starting email submission...');
+
             try {
                 const plan = document.getElementById('plan').value;
                 const serviceOption = document.getElementById('serviceOption').value;
@@ -1868,6 +1870,8 @@
                 // タイムアウト付きfetch（30秒）
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+                console.log('[Form] Sending POST request to /api/rich-form-submit...');
 
                 const response = await fetch('/api/rich-form-submit', {
                     method: 'POST',
@@ -1897,29 +1901,84 @@
 
                 clearTimeout(timeoutId);
 
+                console.log('[Form] Response received. Status:', response.status, 'OK:', response.ok);
+
                 if (response.ok) {
-                    closeConfirmationModal();
-                    document.getElementById('successModal').classList.add('show');
+                    console.log('[Form] Response is OK. Showing success message...');
+
+                    // 確認モーダルの内容を成功メッセージに置き換え
+                    const modalHeader = document.querySelector('#confirmationModal .modal-header');
+                    const modalBody = document.querySelector('#confirmationModal .modal-body');
+                    const modalFooter = document.querySelector('#confirmationModal .modal-footer');
+
+                    // ヘッダーを成功メッセージに変更
+                    modalHeader.innerHTML = `
+                        <h3 style="font-size: 2rem;">✅ 送信完了しました！</h3>
+                        <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">ご依頼ありがとうございます</p>
+                    `;
+                    modalHeader.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+
+                    // 本文を成功メッセージに変更
+                    modalBody.innerHTML = `
+                        <div style="text-align: center; padding: 40px 20px;">
+                            <div style="font-size: 80px; margin-bottom: 24px;">✓</div>
+                            <h3 style="font-size: 1.5rem; color: #059669; margin-bottom: 16px; font-weight: 700;">
+                                代行依頼を受け付けました
+                            </h3>
+                            <p style="font-size: 1.1rem; color: #1e293b; margin-bottom: 24px; line-height: 1.8;">
+                                ${document.getElementById('contactEmail').value} 宛に<br>
+                                確認メールをお送りしました。
+                            </p>
+                            <div style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); border-left: 4px solid #3b82f6; padding: 20px; border-radius: 12px; margin: 24px 0; text-align: left;">
+                                <p style="margin: 0 0 12px 0; color: #1e40af; font-weight: 700; font-size: 1rem;">
+                                    📧 次のステップ
+                                </p>
+                                <ul style="margin: 0; padding-left: 20px; color: #1e293b; line-height: 1.8;">
+                                    <li>担当者が内容を確認後、1-2営業日以内にご連絡いたします</li>
+                                    <li>ご不明な点がございましたら、確認メールに返信してください</li>
+                                    <li>マイページで進捗状況を確認できます</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+
+                    // フッターを閉じるボタンのみに変更
+                    modalFooter.innerHTML = `
+                        <button class="btn btn-primary" onclick="location.reload()" style="width: 100%; font-size: 1.1rem; padding: 16px;">
+                            フォームを閉じる
+                        </button>
+                    `;
+
+                    console.log('[Form] Success message displayed in modal');
 
                     // フォームリセット
+                    console.log('[Form] Resetting form data...');
                     items = [];
                     localStorage.removeItem('items');
                     document.getElementById('contactForm').reset();
                     document.getElementById('itemForm').reset();
                     renderTable();
                     updateTotalSummary();
+                    console.log('[Form] Form reset complete.');
                 } else {
-                    const errorData = await response.json();
+                    console.error('[Form] Response NOT OK. Status:', response.status);
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    console.error('[Form] Error data:', errorData);
                     throw new Error(errorData.error || '送信に失敗しました');
                 }
             } catch (error) {
-                console.error('送信エラー:', error);
+                console.error('[Form] Exception caught:', error);
+                console.error('[Form] Error name:', error.name);
+                console.error('[Form] Error message:', error.message);
+                console.error('[Form] Error stack:', error.stack);
+
                 if (error.name === 'AbortError') {
                     alert('送信がタイムアウトしました。サーバーが応答していない可能性があります。しばらくしてから再度お試しください。');
                 } else {
                     alert('送信に失敗しました: ' + error.message + '\n\nもう一度お試しください。');
                 }
             } finally {
+                console.log('[Form] Finally block: Re-enabling submit button...');
                 submitBtn.disabled = false;
                 submitBtn.textContent = '送信する';
             }
