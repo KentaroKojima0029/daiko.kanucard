@@ -1314,10 +1314,10 @@
                             <div class="form-group">
                                 <label class="form-label" for="plan">代行プラン<span class="required">*</span></label>
                                 <select id="plan" class="form-select" required>
-                                    <option value="normal">ノーマル 日本 (2.2%)</option>
-                                    <option value="guarantee">70％保証 日本 (3.3%)</option>
-                                    <option value="normal_usa">ノーマル アメリカ (3.3%)</option>
-                                    <option value="guarantee_usa">70％保証 アメリカ (5.0%)</option>
+                                    <option value="normal">ノーマル 日本 (4.7%)</option>
+                                    <option value="guarantee">70％保証 日本 (5.8%)</option>
+                                    <option value="normal_usa">ノーマル アメリカ (5.8%)</option>
+                                    <option value="guarantee_usa">70％保証 アメリカ (7.5%)</option>
                                 </select>
                             </div>
 
@@ -1458,6 +1458,10 @@
                         <div class="fee-row">
                             <span>輸出入送料</span>
                             <span style="font-weight: 700; color: #ca8a04;">実費精算</span>
+                        </div>
+                        <div class="fee-row">
+                            <span>通関手数料</span>
+                            <span id="confirmCustomsClearanceFee" style="font-weight: 700; color: #ca8a04;">¥1,000</span>
                         </div>
                         <div class="fee-row" id="taxRow">
                             <span>関税（発生時のみ）</span>
@@ -1674,10 +1678,9 @@
                     ? item.itemName.substring(0, 30) + '...'
                     : item.itemName;
 
-                // 代行料を計算（1枚あたりと合計）
-                const itemTotalValue = item.declaredValue * item.quantity;
-                const itemFee = itemTotalValue * feePercentage;
-                const feePerCard = (item.declaredValue * feePercentage);
+                // 代行料を計算（最低300円/枚を適用）
+                const itemFee = calculateAgencyFee(item.declaredValue, item.quantity, feePercentage);
+                const feePerCard = Math.max(item.declaredValue * feePercentage, 300);
 
                 // 代行料の表示（複数枚の場合は内訳を表示）
                 let feeDisplay = '';
@@ -1749,7 +1752,12 @@
             const plan = document.getElementById('plan').value;
             const serviceOption = document.getElementById('serviceOption').value;
             const feePercentage = getFeePercentage(plan, serviceOption);
-            const totalFee = totalDeclaredValue * feePercentage;
+
+            // 各カードに最低300円を適用して合計を計算
+            let totalFee = 0;
+            items.forEach(item => {
+                totalFee += calculateAgencyFee(item.declaredValue, item.quantity, feePercentage);
+            });
 
             document.getElementById('totalQuantity').textContent = totalQuantity + '枚';
             document.getElementById('totalFee').textContent = '¥' + Math.round(totalFee).toLocaleString();
@@ -1759,18 +1767,25 @@
             document.getElementById('fixedTotalFee').textContent = '¥' + Math.round(totalFee).toLocaleString();
         }
 
-        // 手数料率取得
+        // 手数料率取得（全て2.5%引き上げ）
         function getFeePercentage(plan, serviceOption) {
-            if (plan === 'normal') return 0.022;
-            if (plan === 'guarantee') return 0.033;
+            if (plan === 'normal') return 0.047;  // 2.2% → 4.7%
+            if (plan === 'guarantee') return 0.058;  // 3.3% → 5.8%
             if (plan === 'normal_usa') {
                 if (serviceOption === 'パック・雑誌鑑定' || serviceOption === '特殊鑑定') {
-                    return 0.05;
+                    return 0.075;  // 5.0% → 7.5%
                 }
-                return 0.033;
+                return 0.058;  // 3.3% → 5.8%
             }
-            if (plan === 'guarantee_usa') return 0.05;
+            if (plan === 'guarantee_usa') return 0.075;  // 5.0% → 7.5%
             return 0;
+        }
+
+        // 代行料計算（最低300円/枚を適用）
+        function calculateAgencyFee(declaredValue, quantity, feePercentage) {
+            const calculatedFeePerCard = declaredValue * feePercentage;
+            const actualFeePerCard = Math.max(calculatedFeePerCard, 300);  // 最低300円/枚
+            return actualFeePerCard * quantity;
         }
 
         // 鑑定料計算
@@ -1845,23 +1860,31 @@
             });
 
             const feePercentage = getFeePercentage(plan, serviceOption);
-            const totalFee = totalDeclaredValue * feePercentage;
+
+            // 各カードに最低300円を適用して合計を計算
+            let totalFee = 0;
+            items.forEach(item => {
+                totalFee += calculateAgencyFee(item.declaredValue, item.quantity, feePercentage);
+            });
+
             const gradingFee = calculateGradingFee(serviceOption, totalQuantity, plan);
             const estimatedTax = totalAcquisitionValue * 0.15;
+            const customsClearanceFee = 1000; // 通関手数料
 
             // 1回目の支払い（代行手数料のみ）
             const firstPayment = Math.round(totalFee);
             document.getElementById('confirmAgencyFee').textContent = '¥' + firstPayment.toLocaleString();
             document.getElementById('confirmFirstPayment').textContent = '¥' + firstPayment.toLocaleString();
 
-            // 2回目の支払い（鑑定料 + 関税）
+            // 2回目の支払い（鑑定料 + 通関手数料 + 関税）
             document.getElementById('confirmEstimatedTax').textContent = '¥' + Math.round(estimatedTax).toLocaleString();
+            document.getElementById('confirmCustomsClearanceFee').textContent = '¥' + customsClearanceFee.toLocaleString();
 
             if (gradingFee !== null) {
-                const secondPayment = Math.round(gradingFee + estimatedTax);
+                const secondPayment = Math.round(gradingFee + customsClearanceFee + estimatedTax);
                 document.getElementById('confirmEstimatedGradingFee').textContent = '¥' + gradingFee.toLocaleString();
                 document.getElementById('confirmSecondPayment').textContent = '¥' + secondPayment.toLocaleString() + ' +実費';
-                document.getElementById('confirmTotalEstimatedFee').textContent = '¥' + Math.round(totalFee + gradingFee + estimatedTax).toLocaleString() + ' +実費';
+                document.getElementById('confirmTotalEstimatedFee').textContent = '¥' + Math.round(totalFee + gradingFee + customsClearanceFee + estimatedTax).toLocaleString() + ' +実費';
             } else {
                 document.getElementById('confirmEstimatedGradingFee').textContent = '別途見積もり';
                 document.getElementById('confirmSecondPayment').textContent = '見積もり後に表示';
@@ -1871,10 +1894,9 @@
             const planText = document.getElementById('plan').options[document.getElementById('plan').selectedIndex].text;
 
             let cardsList = items.map((item, index) => {
-                // 代行料を計算
-                const itemTotalValue = item.declaredValue * item.quantity;
-                const itemFee = itemTotalValue * feePercentage;
-                const feePerCard = item.declaredValue * feePercentage;
+                // 代行料を計算（最低300円/枚を適用）
+                const itemFee = calculateAgencyFee(item.declaredValue, item.quantity, feePercentage);
+                const feePerCard = Math.max(item.declaredValue * feePercentage, 300);
 
                 // 代行料の表示文字列を生成
                 let feeText = '';
@@ -1952,9 +1974,16 @@
                 });
 
                 const feePercentage = getFeePercentage(plan, serviceOption);
-                const totalFee = totalDeclaredValue * feePercentage;
+
+                // 各カードに最低300円を適用して合計を計算
+                let totalFee = 0;
+                items.forEach(item => {
+                    totalFee += calculateAgencyFee(item.declaredValue, item.quantity, feePercentage);
+                });
+
                 const gradingFee = calculateGradingFee(serviceOption, totalQuantity, plan);
                 const estimatedTax = totalAcquisitionValue * 0.15;
+                const customsClearanceFee = 1000; // 通関手数料
 
                 // タイムアウト付きfetch（60秒に延長）
                 const controller = new AbortController();
@@ -1980,10 +2009,11 @@
                         totalFee: Math.round(totalFee),
                         estimatedGradingFee: gradingFee,
                         estimatedTax: Math.round(estimatedTax),
+                        customsClearanceFee: customsClearanceFee,
                         totalQuantity: totalQuantity,
                         totalDeclaredValue: totalDeclaredValue,
                         totalAcquisitionValue: totalAcquisitionValue,
-                        totalEstimatedFee: Math.round(totalFee + (gradingFee || 0) + estimatedTax)
+                        totalEstimatedFee: Math.round(totalFee + (gradingFee || 0) + customsClearanceFee + estimatedTax)
                     }),
                     signal: controller.signal
                 });
