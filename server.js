@@ -1115,16 +1115,6 @@ app.get('/contact', (req, res) => {
   res.redirect('/chat');
 });
 
-// 申請履歴ページ
-app.get('/my-submissions', (req, res) => {
-  res.sendFile(path.join(__dirname, 'new-daiko-form', 'my-submissions.html'));
-});
-
-// 申請詳細ページ
-app.get('/submission/:id', (req, res) => {
-  res.sendFile(path.join(__dirname, 'new-daiko-form', 'submission-detail.html'));
-});
-
 // SPAのフォールバック（HTMLファイルのみ）
 app.get('*', (req, res) => {
   // 静的ファイルのリクエストは除外
