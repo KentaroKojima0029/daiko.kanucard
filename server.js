@@ -401,10 +401,45 @@ app.post('/api/rich-form-submit', async (req, res) => {
       `
     };
 
+    // データベースに保存
+    let submissionId = null;
+    try {
+      const result = submissionQueries.create.run(
+        null, // user_id (後でShopify連携時に使用)
+        contactEmail,
+        contactName,
+        plan,
+        serviceOption,
+        purchaseOffer || null,
+        returnMethod || null,
+        inspectionOption || null,
+        JSON.stringify(items), // items配列をJSON文字列に変換
+        totalQuantity,
+        totalDeclaredValue,
+        totalAcquisitionValue,
+        totalFee,
+        estimatedTax,
+        estimatedGradingFee,
+        totalEstimatedFee,
+        contactBody || null
+      );
+      submissionId = result.lastInsertRowid;
+
+      logger.info('Form submission saved to database', {
+        submissionId,
+        email: contactEmail,
+        name: contactName
+      });
+    } catch (dbError) {
+      logger.error('Database save error', { error: dbError.message });
+      // DBエラーでもメール送信は継続
+    }
+
     // 即座にレスポンスを返す（ユーザーを待たせない）
     res.json({
       success: true,
-      message: 'お申し込みありがとうございました。確認メールをお送りしました。'
+      message: 'お申し込みありがとうございました。確認メールをお送りしました。',
+      submissionId: submissionId // 申請IDを返す
     });
 
     // メール送信と管理者DB保存をバックグラウンドで非同期実行
@@ -881,6 +916,164 @@ app.post('/api/kaitori/respond', async (req, res) => {
   }
 });
 
+// ===== 利用者向け申請管理API =====
+
+// 申請履歴取得
+app.get('/api/my-submissions', async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'メールアドレスが必要です'
+      });
+    }
+
+    // メールアドレスのバリデーション
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        error: '有効なメールアドレスを入力してください'
+      });
+    }
+
+    const submissions = submissionQueries.findByEmail.all(email);
+
+    // items列（JSON文字列）をパースして返す
+    const submissionsWithParsedItems = submissions.map(sub => ({
+      ...sub,
+      items: sub.items ? JSON.parse(sub.items) : []
+    }));
+
+    logger.info('Submissions retrieved', {
+      email,
+      count: submissions.length
+    });
+
+    res.json({
+      success: true,
+      count: submissions.length,
+      submissions: submissionsWithParsedItems
+    });
+  } catch (error) {
+    console.error('Get submissions error:', error);
+    logger.error('Get submissions error', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'データの取得に失敗しました'
+    });
+  }
+});
+
+// 申請詳細取得
+app.get('/api/submission/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'メールアドレスが必要です'
+      });
+    }
+
+    const submission = submissionQueries.findById.get(id);
+
+    if (!submission) {
+      return res.status(404).json({
+        success: false,
+        error: '申請が見つかりません'
+      });
+    }
+
+    // セキュリティ: メールアドレスが一致する場合のみ返す
+    if (submission.email !== email) {
+      return res.status(403).json({
+        success: false,
+        error: 'アクセス権限がありません'
+      });
+    }
+
+    // items列（JSON文字列）をパース
+    const submissionWithParsedItems = {
+      ...submission,
+      items: submission.items ? JSON.parse(submission.items) : []
+    };
+
+    logger.info('Submission detail retrieved', {
+      submissionId: id,
+      email: submission.email
+    });
+
+    res.json({
+      success: true,
+      submission: submissionWithParsedItems
+    });
+  } catch (error) {
+    console.error('Get submission detail error:', error);
+    logger.error('Get submission detail error', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'データの取得に失敗しました'
+    });
+  }
+});
+
+// 申請ステータス確認（ID + メールアドレス）
+app.get('/api/status/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'メールアドレスが必要です'
+      });
+    }
+
+    const submission = submissionQueries.findById.get(id);
+
+    if (!submission) {
+      return res.status(404).json({
+        success: false,
+        error: '申請が見つかりません'
+      });
+    }
+
+    // セキュリティチェック
+    if (submission.email !== email) {
+      return res.status(403).json({
+        success: false,
+        error: 'アクセス権限がありません'
+      });
+    }
+
+    logger.info('Status checked', {
+      submissionId: id,
+      status: submission.status
+    });
+
+    res.json({
+      success: true,
+      id: submission.id,
+      status: submission.status,
+      created_at: submission.created_at,
+      updated_at: submission.updated_at
+    });
+  } catch (error) {
+    console.error('Get status error:', error);
+    logger.error('Get status error', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'ステータスの取得に失敗しました'
+    });
+  }
+});
+
 // ===== HTMLページルーティング =====
 
 // 代行申込フォームページ
@@ -920,6 +1113,16 @@ app.get('/messages', (req, res) => {
 // お問い合わせページ（メッセージページへリダイレクト）
 app.get('/contact', (req, res) => {
   res.redirect('/chat');
+});
+
+// 申請履歴ページ
+app.get('/my-submissions', (req, res) => {
+  res.sendFile(path.join(__dirname, 'new-daiko-form', 'my-submissions.html'));
+});
+
+// 申請詳細ページ
+app.get('/submission/:id', (req, res) => {
+  res.sendFile(path.join(__dirname, 'new-daiko-form', 'submission-detail.html'));
 });
 
 // SPAのフォールバック（HTMLファイルのみ）

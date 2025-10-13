@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>申請履歴 - PSA代行サービス</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 32px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .card-content {
+            padding: 40px;
+        }
+
+        .auth-section {
+            margin-bottom: 40px;
+        }
+
+        .auth-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auth-description {
+            color: #6b7280;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .auth-form {
+            display: flex;
+            gap: 12px;
+            max-width: 600px;
+        }
+
+        .form-input {
+            flex: 1;
+            padding: 14px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .results-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .results-count {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .submissions-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .submissions-table th {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            padding: 16px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #374151;
+            text-align: left;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .submissions-table td {
+            padding: 16px 12px;
+            font-size: 14px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #1f2937;
+        }
+
+        .submissions-table tbody tr {
+            transition: background 0.2s ease;
+            cursor: pointer;
+        }
+
+        .submissions-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-processing {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .btn-view {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-view:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .error-message.show {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #4f46e5;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 24px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateX(-4px);
+        }
+
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .card-content {
+                padding: 24px 16px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .auth-form {
+                flex-direction: column;
+            }
+
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            .submissions-table {
+                min-width: 600px;
+            }
+
+            .submissions-table th,
+            .submissions-table td {
+                padding: 12px 8px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            ホームに戻る
+        </a>
+
+        <div class="header">
+            <h1>📋 申請履歴</h1>
+            <p>過去に送信した申請内容を確認できます</p>
+        </div>
+
+        <div class="main-card">
+            <div class="card-content">
+                <!-- 認証セクション -->
+                <div class="auth-section" id="authSection">
+                    <h2 class="auth-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 28px; height: 28px; color: #4f46e5;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                        </svg>
+                        メールアドレス認証
+                    </h2>
+                    <p class="auth-description">
+                        申請時に使用したメールアドレスを入力してください。<br>
+                        ご本人様確認のため、登録されたメールアドレスからのみアクセス可能です。
+                    </p>
+                    <form class="auth-form" id="authForm">
+                        <input
+                            type="email"
+                            class="form-input"
+                            id="emailInput"
+                            placeholder="example@email.com"
+                            required
+                            autocomplete="email"
+                        >
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            </svg>
+                            履歴を確認
+                        </button>
+                    </form>
+                </div>
+
+                <!-- エラーメッセージ -->
+                <div class="error-message" id="errorMessage">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                    <span id="errorText">エラーメッセージ</span>
+                </div>
+
+                <!-- 結果セクション -->
+                <div class="results-section" id="resultsSection">
+                    <div class="results-header">
+                        <h2 class="results-title">申請一覧</h2>
+                        <span class="results-count" id="resultsCount">0件</span>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="submissions-table">
+                            <thead>
+                                <tr>
+                                    <th>申請日</th>
+                                    <th>お名前</th>
+                                    <th>プラン</th>
+                                    <th>カード枚数</th>
+                                    <th>ステータス</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="submissionsTableBody">
+                                <!-- データはJavaScriptで動的に生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="empty-state" id="emptyState" style="display: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H6.911a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661z" />
+                        </svg>
+                        <h3>申請履歴がありません</h3>
+                        <p>このメールアドレスで送信された申請はまだありません。</p>
+                    </div>
+                </div>
+
+                <!-- ローディング -->
+                <div class="loading" id="loadingIndicator" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p>データを読み込んでいます...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // グローバル変数
+        let currentEmail = null;
+        let submissions = [];
+
+        // DOM要素
+        const authForm = document.getElementById('authForm');
+        const emailInput = document.getElementById('emailInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const authSection = document.getElementById('authSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const submissionsTableBody = document.getElementById('submissionsTableBody');
+        const resultsCount = document.getElementById('resultsCount');
+        const emptyState = document.getElementById('emptyState');
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            // セッションストレージからメールアドレスを復元
+            const savedEmail = sessionStorage.getItem('userEmail');
+            if (savedEmail) {
+                emailInput.value = savedEmail;
+                loadSubmissions(savedEmail);
+            }
+        });
+
+        // フォーム送信
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = emailInput.value.trim();
+
+            if (!validateEmail(email)) {
+                showError('有効なメールアドレスを入力してください');
+                return;
+            }
+
+            hideError();
+            await loadSubmissions(email);
+        });
+
+        // メールアドレスバリデーション
+        function validateEmail(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
+
+        // 申請履歴を読み込む
+        async function loadSubmissions(email) {
+            currentEmail = email;
+            sessionStorage.setItem('userEmail', email);
+
+            showLoading();
+            hideError();
+
+            try {
+                const response = await fetch(`/api/my-submissions?email=${encodeURIComponent(email)}`);
+                const data = await response.json();
+
+                hideLoading();
+
+                if (!response.ok) {
+                    showError(data.error || '申請履歴の取得に失敗しました');
+                    return;
+                }
+
+                submissions = data.submissions || [];
+                displaySubmissions();
+
+            } catch (error) {
+                hideLoading();
+                console.error('API呼び出しエラー:', error);
+                showError('ネットワークエラーが発生しました。もう一度お試しください。');
+            }
+        }
+
+        // 申請履歴を表示
+        function displaySubmissions() {
+            resultsSection.classList.add('show');
+
+            if (submissions.length === 0) {
+                emptyState.style.display = 'block';
+                submissionsTableBody.innerHTML = '';
+                resultsCount.textContent = '0件';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            resultsCount.textContent = `${submissions.length}件`;
+
+            submissionsTableBody.innerHTML = submissions.map(sub => `
+                <tr onclick="viewDetail(${sub.id})">
+                    <td>${formatDate(sub.created_at)}</td>
+                    <td>${escapeHtml(sub.name)}</td>
+                    <td>${escapeHtml(sub.plan)}</td>
+                    <td>${sub.total_quantity}枚</td>
+                    <td>${getStatusBadge(sub.status)}</td>
+                    <td onclick="event.stopPropagation();">
+                        <button class="btn-view" onclick="viewDetail(${sub.id})">
+                            詳細を見る
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 詳細ページへ移動
+        function viewDetail(id) {
+            window.location.href = `/submission/${id}?email=${encodeURIComponent(currentEmail)}`;
+        }
+
+        // ステータスバッジ
+        function getStatusBadge(status) {
+            const statusMap = {
+                'pending': { label: '受付済み', class: 'status-pending' },
+                'processing': { label: '処理中', class: 'status-processing' },
+                'completed': { label: '完了', class: 'status-completed' }
+            };
+
+            const statusInfo = statusMap[status] || { label: status, class: 'status-pending' };
+            return `<span class="status-badge ${statusInfo.class}">${statusInfo.label}</span>`;
+        }
+
+        // 日付フォーマット
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}/${month}/${day} ${hours}:${minutes}`;
+        }
+
+        // HTMLエスケープ
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // エラー表示
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.add('show');
+        }
+
+        // エラー非表示
+        function hideError() {
+            errorMessage.classList.remove('show');
+        }
+
+        // ローディング表示
+        function showLoading() {
+            loadingIndicator.style.display = 'block';
+            authSection.style.display = 'none';
+            resultsSection.classList.remove('show');
+        }
+
+        // ローディング非表示
+        function hideLoading() {
+            loadingIndicator.style.display = 'none';
+            authSection.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
