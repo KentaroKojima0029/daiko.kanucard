@@ -152,7 +152,21 @@ ADMIN_API_URL=https://kanucard-daiko-support.onrender.com
    - `read_orders`
 6. トークンを`.env`ファイルの`SHOPIFY_ADMIN_ACCESS_TOKEN`に貼り付け
 
-### 4. 環境変数の確認
+### 4. メール送信API認証キーの生成
+
+XserverVPS APIを使用したメール送信フォールバック機能のため、セキュアな認証キーを生成します：
+
+```bash
+# ランダムなAPIキーを生成
+openssl rand -hex 32
+
+# または
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+生成されたキーを`.env`ファイルの`XSERVER_API_KEY`に設定してください。
+
+### 5. 環境変数の確認
 
 ```bash
 # .envファイルの内容を確認
@@ -160,6 +174,9 @@ cat .env
 
 # 特にShopify設定を確認
 grep SHOPIFY .env
+
+# メール送信API設定を確認
+grep XSERVER_API .env
 ```
 
 ---
@@ -413,6 +430,66 @@ chmod 755 /var/www/psa-api/database
 # サーバー再起動
 pm2 restart psa-api
 ```
+
+---
+
+## Render環境でのメール送信フォールバック設定
+
+RenderなどのクラウドプラットフォームではSMTP接続が制限される場合があります。このシステムでは、VPS上のメール送信APIにフォールバックする機能を実装しています。
+
+### VPS側の設定（API提供側）
+
+1. **APIキーの設定**
+
+VPS上の`.env`ファイルに以下を設定：
+
+```env
+# メール送信API認証キー
+XSERVER_API_KEY=your-generated-secure-api-key-here
+```
+
+2. **API動作確認**
+
+```bash
+# VPS上でAPIエンドポイントをテスト
+curl -X POST http://localhost:3000/api/send-email \
+  -H "Content-Type: application/json" \
+  -H "X-Api-Key: your-generated-secure-api-key-here" \
+  -d '{
+    "to": "test@example.com",
+    "subject": "Test Email",
+    "html": "<h1>Test</h1>",
+    "text": "Test"
+  }'
+```
+
+### Render側の設定（API利用側）
+
+Renderの環境変数に以下を設定：
+
+```env
+# メール送信フォールバック有効化
+USE_XSERVER_FALLBACK=true
+
+# VPSのAPIエンドポイントURL
+XSERVER_API_URL=https://api.kanucard.com
+
+# VPS側と同じAPIキー
+XSERVER_API_KEY=your-generated-secure-api-key-here
+```
+
+### 動作フロー
+
+1. **1次試行**: Render環境から直接SMTP送信を試みる（タイムアウト: 15秒）
+2. **フォールバック**: SMTP失敗時、VPS APIを使用してメール送信
+3. **エラー処理**: 両方失敗した場合はエラーを返す
+
+### セキュリティ注意事項
+
+- **APIキーは必ず強力なランダム値を使用**してください
+- **HTTPS通信のみ**を許可するようにNginxを設定してください
+- APIキーは環境変数で管理し、**コードにハードコードしない**でください
+- ログにAPIキーが記録されないよう注意してください
 
 ---
 

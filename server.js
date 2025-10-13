@@ -1,12 +1,13 @@
 const express = require('express');
 const path = require('path');
-const nodemailer = require('nodemailer');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const { init: initDatabase, submissionQueries, kaitoriQueries } = require('./database');
 const { getCustomerById, getCustomerOrders, listAllCustomers } = require('./shopify-client');
 const logger = require('./logger');
+const { sendEmail, validateEmailConfig } = require('./email-service');
+const { validateApiKey, sendEmailHandler } = require('./email-api-endpoint');
 const {
   apiLimiter,
   authLimiter,
@@ -78,6 +79,17 @@ logger.info('Server initializing', {
   port
 });
 
+// メール設定の検証
+const emailConfig = validateEmailConfig();
+if (!emailConfig.valid) {
+  logger.warn('Email configuration issues', { issues: emailConfig.issues });
+} else {
+  logger.info('Email service ready', {
+    fallbackEnabled: emailConfig.fallbackEnabled,
+    apiConfigured: emailConfig.apiConfigured
+  });
+}
+
 // 静的ファイルの配信（優先）
 app.use(express.static(__dirname, {
   maxAge: '1d',
@@ -87,22 +99,6 @@ app.use(express.static(__dirname, {
     }
   }
 }));
-
-// Nodemailer設定
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'sv10210.xserver.jp',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER || 'collection@kanucard.com',
-    pass: process.env.SMTP_PASS
-  },
-  connectionTimeout: 60000, // 60秒
-  greetingTimeout: 30000, // 30秒
-  socketTimeout: 60000, // 60秒
-  logger: process.env.NODE_ENV !== 'production', // 開発環境でログを有効化
-  debug: process.env.NODE_ENV !== 'production' // 開発環境でデバッグを有効化
-});
 
 // リッチフォーム送信API
 app.post('/api/rich-form-submit', async (req, res) => {
@@ -405,9 +401,9 @@ app.post('/api/rich-form-submit', async (req, res) => {
       `
     };
 
-    // メール送信
-    await transporter.sendMail(customerMailOptions);
-    await transporter.sendMail(adminMailOptions);
+    // メール送信（フォールバック機能付き）
+    await sendEmail(customerMailOptions);
+    await sendEmail(adminMailOptions);
 
     // 管理者側データベースにも保存（タイムアウト付き）
     const saveToAdminDatabase = async () => {
@@ -559,9 +555,9 @@ app.post('/api/contact', async (req, res) => {
       `
     };
 
-    // メール送信
-    await transporter.sendMail(adminMailOptions);
-    await transporter.sendMail(customerMailOptions);
+    // メール送信（フォールバック機能付き）
+    await sendEmail(adminMailOptions);
+    await sendEmail(customerMailOptions);
 
     res.json({
       success: true,
@@ -574,6 +570,11 @@ app.post('/api/contact', async (req, res) => {
     });
   }
 });
+
+// ===== XserverVPS メール送信API =====
+
+// メール送信APIエンドポイント（VPS上でのみ有効）
+app.post('/api/send-email', validateApiKey, sendEmailHandler);
 
 // ===== テスト/ヘルスチェックAPI =====
 
