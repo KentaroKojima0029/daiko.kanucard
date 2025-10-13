@@ -1443,6 +1443,10 @@
                             <span>代行手数料</span>
                             <span id="confirmAgencyFee" style="font-weight: 700; color: #1e40af;">0円</span>
                         </div>
+                        <div class="fee-row" id="confirmDiscountRow" style="display: none;">
+                            <span>🎉 早期申込割引（0.5%）</span>
+                            <span id="confirmDiscount" style="font-weight: 700; color: #dc2626;">-0円</span>
+                        </div>
                         <div class="fee-row" style="border-top: 2px solid #1e40af; padding-top: 8px; margin-top: 8px;">
                             <span style="font-weight: 700;">小計</span>
                             <span id="confirmFirstPayment" style="font-weight: 700; font-size: 1.1rem; color: #1e40af;">0円</span>
@@ -1767,18 +1771,74 @@
             document.getElementById('fixedTotalFee').textContent = '¥' + Math.round(totalFee).toLocaleString();
         }
 
-        // 手数料率取得（全て2.5%引き上げ）
-        function getFeePercentage(plan, serviceOption) {
-            if (plan === 'normal') return 0.047;  // 2.2% → 4.7%
-            if (plan === 'guarantee') return 0.058;  // 3.3% → 5.8%
-            if (plan === 'normal_usa') {
-                if (serviceOption === 'パック・雑誌鑑定' || serviceOption === '特殊鑑定') {
-                    return 0.075;  // 5.0% → 7.5%
+        // 受付開始から3日以内かどうかを判定
+        function isWithinDiscountPeriod(plan) {
+            const now = new Date();
+            let acceptStart;
+
+            if (plan.includes('usa')) {
+                // アメリカ発送: 毎週火曜が発送日、その6日前が受付開始
+                const next = new Date();
+                const dayOfWeek = next.getDay();
+                const daysUntilTuesday = (2 - dayOfWeek + 7) % 7 || 7;
+                next.setDate(next.getDate() + daysUntilTuesday);
+                next.setHours(12, 0, 0, 0);
+                acceptStart = new Date(next);
+                acceptStart.setDate(acceptStart.getDate() - 6);
+            } else {
+                // 日本発送: 毎月15日が発送日、前月16日が受付開始
+                const next = new Date();
+                if (next.getDate() > 15) {
+                    next.setMonth(next.getMonth() + 1);
                 }
-                return 0.058;  // 3.3% → 5.8%
+                next.setDate(15);
+                next.setHours(12, 0, 0, 0);
+                acceptStart = new Date(next);
+                acceptStart.setMonth(acceptStart.getMonth() - 1);
+                acceptStart.setDate(16);
             }
-            if (plan === 'guarantee_usa') return 0.075;  // 5.0% → 7.5%
-            return 0;
+
+            const daysSinceStart = Math.floor((now - acceptStart) / (1000 * 60 * 60 * 24));
+            return daysSinceStart >= 0 && daysSinceStart < 3;
+        }
+
+        // 手数料率取得（全て2.5%引き上げ、受付開始から3日間は0.5%割引）
+        function getFeePercentage(plan, serviceOption) {
+            let baseRate;
+
+            if (plan === 'normal') baseRate = 0.047;  // 2.2% → 4.7%
+            else if (plan === 'guarantee') baseRate = 0.058;  // 3.3% → 5.8%
+            else if (plan === 'normal_usa') {
+                if (serviceOption === 'パック・雑誌鑑定' || serviceOption === '特殊鑑定') {
+                    baseRate = 0.075;  // 5.0% → 7.5%
+                } else {
+                    baseRate = 0.058;  // 3.3% → 5.8%
+                }
+            }
+            else if (plan === 'guarantee_usa') baseRate = 0.075;  // 5.0% → 7.5%
+            else baseRate = 0;
+
+            // 受付開始から3日以内なら0.5%割引
+            if (isWithinDiscountPeriod(plan)) {
+                return baseRate - 0.005;  // 0.5%割引
+            }
+
+            return baseRate;
+        }
+
+        // 割引額を計算
+        function calculateDiscount(plan, serviceOption) {
+            if (!isWithinDiscountPeriod(plan)) {
+                return 0;
+            }
+
+            // 0.5%割引
+            let totalDeclaredValue = 0;
+            items.forEach(item => {
+                totalDeclaredValue += item.declaredValue * item.quantity;
+            });
+
+            return totalDeclaredValue * 0.005;  // 0.5%の割引額
         }
 
         // 代行料計算（最低300円/枚を適用）
@@ -1872,8 +1932,22 @@
             const customsClearanceFee = 1000; // 通関手数料
 
             // 1回目の支払い（代行手数料のみ）
-            const firstPayment = Math.round(totalFee);
-            document.getElementById('confirmAgencyFee').textContent = '¥' + firstPayment.toLocaleString();
+            document.getElementById('confirmAgencyFee').textContent = '¥' + Math.round(totalFee).toLocaleString();
+
+            // 割引計算
+            const discountAmount = calculateDiscount(plan, serviceOption);
+            const discountRow = document.getElementById('confirmDiscountRow');
+            const discountElement = document.getElementById('confirmDiscount');
+
+            if (discountAmount > 0) {
+                discountRow.style.display = 'flex';
+                discountElement.textContent = '-¥' + Math.round(discountAmount).toLocaleString();
+            } else {
+                discountRow.style.display = 'none';
+            }
+
+            // 1回目の支払い合計（割引適用後）
+            const firstPayment = Math.round(totalFee - discountAmount);
             document.getElementById('confirmFirstPayment').textContent = '¥' + firstPayment.toLocaleString();
 
             // 2回目の支払い（鑑定料 + 通関手数料 + 関税）

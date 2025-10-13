@@ -817,20 +817,16 @@
                     </div>
                     <div class="schedule-info">
                         <div class="schedule-info-item">
-                            <span class="schedule-info-label">受付開始</span>
-                            <span class="schedule-info-value" id="usaAcceptStart">-</span>
-                        </div>
-                        <div class="schedule-info-item">
                             <span class="schedule-info-label">受付締切</span>
                             <span class="schedule-info-value" id="usaAcceptEnd">-</span>
                         </div>
                         <div class="schedule-info-item">
-                            <span class="schedule-info-label">貨物到着予定</span>
+                            <span class="schedule-info-label">※弊社必着</span>
                             <span class="schedule-info-value" id="usaArrival">-</span>
                         </div>
                     </div>
                     <div class="discount-badge" id="usaDiscountBadge" style="display: none;">
-                        🎉 申込3日以内で代行料割引！
+                        🎉 <span id="usaDiscountText">申込日以内で代行料割引！</span>
                     </div>
                 </div>
                 <div class="countdown-card japan">
@@ -845,20 +841,16 @@
                     </div>
                     <div class="schedule-info">
                         <div class="schedule-info-item">
-                            <span class="schedule-info-label">受付開始</span>
-                            <span class="schedule-info-value" id="japanAcceptStart">-</span>
-                        </div>
-                        <div class="schedule-info-item">
                             <span class="schedule-info-label">受付締切</span>
                             <span class="schedule-info-value" id="japanAcceptEnd">-</span>
                         </div>
                         <div class="schedule-info-item">
-                            <span class="schedule-info-label">貨物到着予定</span>
+                            <span class="schedule-info-label">※弊社必着</span>
                             <span class="schedule-info-value" id="japanArrival">-</span>
                         </div>
                     </div>
                     <div class="discount-badge" id="japanDiscountBadge" style="display: none;">
-                        🎉 申込3日以内で代行料割引！
+                        🎉 <span id="japanDiscountText">申込日以内で代行料割引！</span>
                     </div>
                 </div>
             </div>
@@ -1066,10 +1058,6 @@
             const usaArrival = new Date(usaShipping);
             usaArrival.setDate(usaArrival.getDate() + 6); // 発送から6日後に到着
 
-            document.getElementById('usaAcceptStart').textContent = usaAcceptStart.toLocaleDateString('ja-JP', {
-                month: 'numeric',
-                day: 'numeric'
-            }) + '日';
             document.getElementById('usaAcceptEnd').textContent = usaShipping.toLocaleDateString('ja-JP', {
                 month: 'numeric',
                 day: 'numeric'
@@ -1086,10 +1074,6 @@
             const japanArrival = new Date(japanShipping);
             japanArrival.setDate(25); // 当月25日に到着
 
-            document.getElementById('japanAcceptStart').textContent = japanAcceptStart.toLocaleDateString('ja-JP', {
-                month: 'numeric',
-                day: 'numeric'
-            }) + '日';
             document.getElementById('japanAcceptEnd').textContent = japanShipping.toLocaleDateString('ja-JP', {
                 month: 'numeric',
                 day: 'numeric'
@@ -1099,17 +1083,28 @@
                 day: 'numeric'
             }) + '日';
 
-            // 割引バッジの表示（公開から3日以内）
+            // 割引バッジの表示（受付開始から3日間のみ）
             const usaDiscountBadge = document.getElementById('usaDiscountBadge');
             const japanDiscountBadge = document.getElementById('japanDiscountBadge');
+            const usaDiscountText = document.getElementById('usaDiscountText');
+            const japanDiscountText = document.getElementById('japanDiscountText');
 
-            if (usaCountdown.days <= 3 && usaCountdown.days >= 0) {
+            // アメリカ発送：受付開始からの経過日数を計算
+            const usaDaysSinceStart = Math.floor((now - usaAcceptStart) / (1000 * 60 * 60 * 24));
+            if (usaDaysSinceStart >= 0 && usaDaysSinceStart < 3) {
+                // 割引率: 0.5% (5.8% → 5.3%, 7.5% → 7.0%)
+                // 各プランの割引例を表示
+                usaDiscountText.textContent = '受付開始から3日間限定！全プラン0.5%割引';
                 usaDiscountBadge.style.display = 'block';
             } else {
                 usaDiscountBadge.style.display = 'none';
             }
 
-            if (japanCountdown.days <= 3 && japanCountdown.days >= 0) {
+            // 日本発送：受付開始からの経過日数を計算
+            const japanDaysSinceStart = Math.floor((now - japanAcceptStart) / (1000 * 60 * 60 * 24));
+            if (japanDaysSinceStart >= 0 && japanDaysSinceStart < 3) {
+                // 割引率: 0.5% (4.7% → 4.2%, 5.8% → 5.3%)
+                japanDiscountText.textContent = '受付開始から3日間限定！全プラン0.5%割引';
                 japanDiscountBadge.style.display = 'block';
             } else {
                 japanDiscountBadge.style.display = 'none';
