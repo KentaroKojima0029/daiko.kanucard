@@ -950,6 +950,47 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
+        // 残り時間の割合に応じてグラデーション色を取得
+        function getGradientColor(percentage) {
+            // percentage: 0-100 (100が最も時間がある状態、0が締切)
+            if (percentage >= 80) {
+                // 青
+                return {
+                    text: '#3b82f6',
+                    gradient: 'linear-gradient(135deg, #3b82f6, #1e40af)',
+                    border: 'linear-gradient(135deg, #3b82f6, #1e40af)'
+                };
+            } else if (percentage >= 60) {
+                // 緑
+                return {
+                    text: '#10b981',
+                    gradient: 'linear-gradient(135deg, #10b981, #059669)',
+                    border: 'linear-gradient(135deg, #10b981, #059669)'
+                };
+            } else if (percentage >= 40) {
+                // 黄色
+                return {
+                    text: '#f59e0b',
+                    gradient: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                    border: 'linear-gradient(135deg, #fbbf24, #f59e0b)'
+                };
+            } else if (percentage >= 20) {
+                // オレンジ
+                return {
+                    text: '#f97316',
+                    gradient: 'linear-gradient(135deg, #fb923c, #f97316)',
+                    border: 'linear-gradient(135deg, #fb923c, #f97316)'
+                };
+            } else {
+                // 赤
+                return {
+                    text: '#ef4444',
+                    gradient: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                    border: 'linear-gradient(135deg, #ef4444, #dc2626)'
+                };
+            }
+        }
+
         // カウントダウン機能
         function updateCountdowns() {
             const now = new Date();
@@ -1012,14 +1053,18 @@
                 const progress = Math.max(0, 100 - (usaCountdown.total / (7 * 24 * 60 * 60 * 1000) * 100));
                 usaProgressElement.style.width = progress + '%';
 
-                // 締切が近い場合の色変更
-                if (usaCountdown.days < 1) {
-                    usaElement.style.color = '#dc2626';
-                    usaProgressElement.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
-                } else if (usaCountdown.days < 3) {
-                    usaElement.style.color = '#f59e0b';
-                    usaProgressElement.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
-                }
+                // 残り時間の割合を計算してグラデーション色を適用
+                const usaPercentage = (usaCountdown.total / (7 * 24 * 60 * 60 * 1000)) * 100;
+                const usaColors = getGradientColor(usaPercentage);
+
+                // カウントダウンテキストとプログレスバーに色を適用
+                usaElement.style.color = usaColors.text;
+                usaProgressElement.style.background = usaColors.gradient;
+
+                // カードの上部ボーダーにも色を適用
+                const usaCard = document.querySelector('.countdown-card.usa');
+                const usaBefore = usaCard.querySelector('::before') || usaCard;
+                usaCard.style.borderTop = `4px solid ${usaColors.text}`;
             }
 
             // 日本発送カウントダウン
@@ -1041,14 +1086,17 @@
                 const progress = Math.max(0, 100 - (japanCountdown.total / (30 * 24 * 60 * 60 * 1000) * 100));
                 japanProgressElement.style.width = progress + '%';
 
-                // 締切が近い場合の色変更
-                if (japanCountdown.days < 3) {
-                    japanElement.style.color = '#dc2626';
-                    japanProgressElement.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
-                } else if (japanCountdown.days < 7) {
-                    japanElement.style.color = '#f59e0b';
-                    japanProgressElement.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
-                }
+                // 残り時間の割合を計算してグラデーション色を適用
+                const japanPercentage = (japanCountdown.total / (30 * 24 * 60 * 60 * 1000)) * 100;
+                const japanColors = getGradientColor(japanPercentage);
+
+                // カウントダウンテキストとプログレスバーに色を適用
+                japanElement.style.color = japanColors.text;
+                japanProgressElement.style.background = japanColors.gradient;
+
+                // カードの上部ボーダーにも色を適用
+                const japanCard = document.querySelector('.countdown-card.japan');
+                japanCard.style.borderTop = `4px solid ${japanColors.text}`;
             }
 
             // 受付日時・貨物到着日・割引バッジの表示
