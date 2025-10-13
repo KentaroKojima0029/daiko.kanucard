@@ -1564,13 +1564,19 @@
             }
         }
 
+        // プラン変更時にテーブルを再レンダリング
+        function handlePlanChange() {
+            renderTable();
+            updateTotalSummary();
+        }
+
         // イベントリスナー設定
         function setupEventListeners() {
             document.getElementById('itemForm').addEventListener('submit', handleItemSubmit);
             document.getElementById('contactForm').addEventListener('submit', handleContactSubmit);
             document.getElementById('deleteDataButton').addEventListener('click', deleteAllData);
-            document.getElementById('plan').addEventListener('change', updateTotalSummary);
-            document.getElementById('serviceOption').addEventListener('change', updateTotalSummary);
+            document.getElementById('plan').addEventListener('change', handlePlanChange);
+            document.getElementById('serviceOption').addEventListener('change', handlePlanChange);
             document.getElementById('closeConfirmationBtn').addEventListener('click', closeConfirmationModal);
             document.getElementById('finalSubmitBtn').addEventListener('click', sendEmail);
             document.getElementById('closeSuccessBtn').addEventListener('click', closeSuccessModal);

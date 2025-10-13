@@ -1059,7 +1059,7 @@
 
                 // カウントダウンテキストとプログレスバーに色を適用
                 usaElement.style.color = usaColors.text;
-                usaProgressElement.style.background = usaColors.gradient;
+                usaProgressElement.style.setProperty('background', usaColors.gradient, 'important');
 
                 // カードの上部ボーダーにも色を適用
                 const usaCard = document.querySelector('.countdown-card.usa');
@@ -1092,7 +1092,7 @@
 
                 // カウントダウンテキストとプログレスバーに色を適用
                 japanElement.style.color = japanColors.text;
-                japanProgressElement.style.background = japanColors.gradient;
+                japanProgressElement.style.setProperty('background', japanColors.gradient, 'important');
 
                 // カードの上部ボーダーにも色を適用
                 const japanCard = document.querySelector('.countdown-card.japan');
