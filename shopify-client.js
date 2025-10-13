@@ -10,7 +10,27 @@ let shopify = null;
 // Shopify APIクライアントの初期化
 function initShopify() {
   if (!SHOPIFY_SHOP || !SHOPIFY_ACCESS_TOKEN) {
-    console.warn('Shopify credentials not configured. Customer lookup will be disabled.');
+    const missingVars = [];
+    if (!SHOPIFY_SHOP) missingVars.push('SHOPIFY_SHOP_NAME');
+    if (!SHOPIFY_ACCESS_TOKEN) missingVars.push('SHOPIFY_ADMIN_ACCESS_TOKEN');
+
+    console.error('======================================');
+    console.error('⚠️  Shopify環境変数が不足しています');
+    console.error('======================================');
+    console.error('不足している環境変数:', missingVars.join(', '));
+    console.error('');
+    console.error('解決方法:');
+    console.error('1. .envファイルに以下の環境変数を追加してください:');
+    console.error('   SHOPIFY_SHOP_NAME=kanucard');
+    console.error('   SHOPIFY_ADMIN_ACCESS_TOKEN=shpat_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+    console.error('');
+    console.error('2. Shopifyトークンの取得方法:');
+    console.error('   - Shopify管理画面 > 設定 > アプリと販売チャネル');
+    console.error('   - カスタムアプリを作成してAdmin APIトークンを取得');
+    console.error('');
+    console.error('3. 詳細はREADME_VPS.mdを参照してください');
+    console.error('======================================');
+    console.warn('⚠️  Shopify機能が無効になっています。顧客検索が利用できません。');
     return null;
   }
 
