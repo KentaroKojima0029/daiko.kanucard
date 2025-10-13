@@ -47,7 +47,7 @@ https://console.cloud.google.com/
    - **名前**: `PSA代行サービス Web Client`
    - **承認済みのリダイレクト URI**:
      - ローカル開発: `http://localhost:3000/auth/google/callback`
-     - 本番環境: `https://new-daiko-form.onrender.com/auth/google/callback`
+     - 本番環境: `https://daiko.kanucard.com/auth/google/callback`
 5. 「作成」をクリック
 6. 表示される**クライアントID**と**クライアントシークレット**をコピー
 
@@ -82,7 +82,7 @@ Renderダッシュボードで環境変数を設定：
 |-----|-------|
 | `GOOGLE_CLIENT_ID` | あなたのクライアントID.apps.googleusercontent.com |
 | `GOOGLE_CLIENT_SECRET` | あなたのクライアントシークレット |
-| `GOOGLE_CALLBACK_URL` | https://new-daiko-form.onrender.com/auth/google/callback |
+| `GOOGLE_CALLBACK_URL` | https://daiko.kanucard.com/auth/google/callback |
 | `SESSION_SECRET` | ランダムな長い文字列（既存のJWT_SECRETを使用可能） |
 
 5. 「Save Changes」をクリック（自動的に再デプロイされます）
@@ -110,7 +110,7 @@ Renderダッシュボードで環境変数を設定：
 
 ### 本番環境
 
-1. `https://new-daiko-form.onrender.com/login.html` にアクセス
+1. `https://daiko.kanucard.com/login.html` にアクセス
 
 2. 「Googleでログイン」ボタンをクリック
 
@@ -139,7 +139,7 @@ Renderダッシュボードで環境変数を設定：
 1. Google Cloud Consoleの「認証情報」→OAuth 2.0クライアントIDを開く
 2. 「承認済みのリダイレクトURI」に正しいURLが追加されているか確認:
    - ローカル: `http://localhost:3000/auth/google/callback`
-   - 本番: `https://new-daiko-form.onrender.com/auth/google/callback`
+   - 本番: `https://daiko.kanucard.com/auth/google/callback`
 3. 追加されていなければ追加して「保存」
 
 ### エラー: "このGoogleアカウントのメールアドレスはShopifyに登録されていません"

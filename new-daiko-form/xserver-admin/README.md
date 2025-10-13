@@ -31,10 +31,10 @@ xserver-admin/
 ```javascript
 const CONFIG = {
     // Render APIエンドポイント
-    API_BASE_URL: 'https://new-daiko-form.onrender.com/api',
+    API_BASE_URL: 'https://daiko.kanucard.com/api',
 
     // 承認ページURL
-    APPROVAL_BASE_URL: 'https://new-daiko-form.onrender.com/approval',
+    APPROVAL_BASE_URL: 'https://daiko.kanucard.com/approval',
 
     // 管理者パスワード（必ず変更してください！）
     ADMIN_PASSWORD: 'kaitori_admin_2025',
@@ -56,7 +56,7 @@ ADMIN_ORIGIN=https://your-xserver-domain.com
 
 ```javascript
 const allowedOrigins = [
-    'https://new-daiko-form.onrender.com',
+    'https://daiko.kanucard.com',
     'http://localhost:3000',
     'https://your-xserver-domain.com',  // ← ここに追加
     process.env.ADMIN_ORIGIN

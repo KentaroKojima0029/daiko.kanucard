@@ -144,7 +144,7 @@ pm2 restart psa-api
 
 ```bash
 # Renderアプリケーションにリクエスト
-curl https://new-daiko-form.onrender.com/api/health
+curl https://daiko.kanucard.com/api/health
 
 # 期待されるレスポンス（emailConfigセクションを確認）
 {

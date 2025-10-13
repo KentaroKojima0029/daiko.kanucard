@@ -108,7 +108,7 @@ Renderダッシュボードで環境変数を更新：
 
 ### 本番環境でテスト
 
-1. `https://new-daiko-form.onrender.com/login.html` にアクセス
+1. `https://daiko.kanucard.com/login.html` にアクセス
 
 2. Shopifyに登録されているメールアドレスを入力
 
