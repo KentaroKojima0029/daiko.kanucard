@@ -401,70 +401,86 @@ app.post('/api/rich-form-submit', async (req, res) => {
       `
     };
 
-    // メール送信（フォールバック機能付き）
-    await sendEmail(customerMailOptions);
-    await sendEmail(adminMailOptions);
-
-    // 管理者側データベースにも保存（タイムアウト付き）
-    const saveToAdminDatabase = async () => {
-      try {
-        const adminApiUrl = process.env.ADMIN_API_URL || 'https://kanucard-daiko-support.onrender.com';
-
-        // タイムアウト付きfetch（10秒）
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-        const adminResponse = await fetch(`${adminApiUrl}/api/public/form-submit`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            contactName,
-            contactEmail,
-            contactBody,
-            plan,
-            serviceOption,
-            purchaseOffer,
-            returnMethod,
-            inspectionOption,
-            items,
-            totalQuantity,
-            totalDeclaredValue,
-            totalAcquisitionValue,
-            totalFee,
-            estimatedTax,
-            estimatedGradingFee,
-            totalEstimatedFee
-          }),
-          signal: controller.signal
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!adminResponse.ok) {
-          console.error('管理者DBへの保存失敗:', await adminResponse.text());
-        } else {
-          const adminData = await adminResponse.json();
-          console.log('管理者DBに保存成功:', adminData);
-        }
-      } catch (adminError) {
-        if (adminError.name === 'AbortError') {
-          console.error('管理者API通信タイムアウト（10秒）');
-        } else {
-          console.error('管理者API通信エラー:', adminError);
-        }
-        // メール送信は成功しているので、エラーを握りつぶす
-      }
-    };
-
-    // 管理者DBへの保存を非同期で実行（レスポンスをブロックしない）
-    saveToAdminDatabase();
-
-    // すぐにレスポンスを返す
+    // 即座にレスポンスを返す（ユーザーを待たせない）
     res.json({
       success: true,
       message: 'お申し込みありがとうございました。確認メールをお送りしました。'
+    });
+
+    // メール送信と管理者DB保存をバックグラウンドで非同期実行
+    setImmediate(async () => {
+      try {
+        console.log('[Background] Starting email and DB save process...');
+
+        // メール送信（フォールバック機能付き）
+        try {
+          await sendEmail(customerMailOptions);
+          console.log('[Background] Customer email sent successfully');
+        } catch (emailError) {
+          console.error('[Background] Customer email send error:', emailError);
+        }
+
+        try {
+          await sendEmail(adminMailOptions);
+          console.log('[Background] Admin email sent successfully');
+        } catch (emailError) {
+          console.error('[Background] Admin email send error:', emailError);
+        }
+
+        // 管理者側データベースにも保存
+        try {
+          const adminApiUrl = process.env.ADMIN_API_URL || 'https://kanucard-daiko-support.onrender.com';
+
+          // タイムアウト付きfetch（10秒）
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+          const adminResponse = await fetch(`${adminApiUrl}/api/public/form-submit`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              contactName,
+              contactEmail,
+              contactBody,
+              plan,
+              serviceOption,
+              purchaseOffer,
+              returnMethod,
+              inspectionOption,
+              items,
+              totalQuantity,
+              totalDeclaredValue,
+              totalAcquisitionValue,
+              totalFee,
+              estimatedTax,
+              estimatedGradingFee,
+              totalEstimatedFee
+            }),
+            signal: controller.signal
+          });
+
+          clearTimeout(timeoutId);
+
+          if (!adminResponse.ok) {
+            console.error('[Background] 管理者DBへの保存失敗:', await adminResponse.text());
+          } else {
+            const adminData = await adminResponse.json();
+            console.log('[Background] 管理者DBに保存成功:', adminData);
+          }
+        } catch (adminError) {
+          if (adminError.name === 'AbortError') {
+            console.error('[Background] 管理者API通信タイムアウト（10秒）');
+          } else {
+            console.error('[Background] 管理者API通信エラー:', adminError);
+          }
+        }
+
+        console.log('[Background] All background processes completed');
+      } catch (error) {
+        console.error('[Background] Unexpected error in background process:', error);
+      }
     });
 
   } catch (error) {
