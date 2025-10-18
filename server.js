@@ -683,6 +683,104 @@ app.get('/api/debug/search-email', async (req, res) => {
   }
 });
 
+// ===== Shopify注文履歴API =====
+
+// 顧客の注文履歴取得
+app.get('/api/shopify/customer/:email/orders', async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'emailパラメータが必要です'
+      });
+    }
+
+    logger.info('Fetching customer orders', { email });
+
+    // Shopifyから顧客情報を取得
+    const { findCustomerByEmail, getCustomerOrders } = require('./shopify-client');
+    const customer = await findCustomerByEmail(email);
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: '顧客情報が見つかりません',
+        data: {
+          customer: null,
+          orders: []
+        }
+      });
+    }
+
+    // 注文履歴を取得
+    const orders = await getCustomerOrders(customer.id, 50);
+
+    // レスポンスデータの整形
+    const formattedOrders = orders.map(order => {
+      // 日本円の処理（通貨記号を除去して数値に変換）
+      const totalPrice = order.totalPrice ? parseFloat(order.totalPrice.replace(/[^0-9.-]/g, '')) : 0;
+
+      return {
+        shopifyOrderId: order.id,
+        orderNumber: order.name || order.id.split('/').pop(),
+        createdAt: order.createdAt,
+        totalPrice: totalPrice.toString(),
+        financialStatus: order.financialStatus || 'PENDING',
+        fulfillmentStatus: order.fulfillmentStatus || 'UNFULFILLED',
+        items: order.lineItems?.edges?.map(edge => ({
+          productName: edge.node.title || 'Unknown Product',
+          quantity: edge.node.quantity || 1,
+          variant: edge.node.variant?.title || null,
+          price: edge.node.variant?.price || '0'
+        })) || []
+      };
+    });
+
+    // 顧客情報の整形
+    const customerData = {
+      firstName: customer.firstName || '',
+      lastName: customer.lastName || '',
+      email: customer.email,
+      phone: customer.phone || null,
+      ordersCount: customer.numberOfOrders?.toString() || '0',
+      totalSpent: customer.amountSpent?.amount || '0',
+      tags: customer.tags || [],
+      createdAt: customer.createdAt,
+      updatedAt: customer.updatedAt
+    };
+
+    logger.info('Customer orders retrieved successfully', {
+      email,
+      customerFound: true,
+      ordersCount: formattedOrders.length
+    });
+
+    res.json({
+      success: true,
+      message: '注文履歴を取得しました',
+      data: {
+        customer: customerData,
+        orders: formattedOrders
+      }
+    });
+
+  } catch (error) {
+    console.error('Get customer orders error:', error);
+    logger.error('Get customer orders error', {
+      error: error.message,
+      email: req.params.email
+    });
+
+    res.status(500).json({
+      success: false,
+      error: '注文履歴の取得に失敗しました',
+      message: error.message
+    });
+  }
+});
+
 // ===== 買取管理API =====
 
 // 買取依頼作成
