@@ -43,7 +43,7 @@ app.use(requestLogger);
 // CORS設定（外部管理画面用）
 app.use((req, res, next) => {
   const allowedOrigins = [
-    'https://new-daiko-form.onrender.com',
+    'https://daiko.kanucard.com',
     'http://localhost:3000',
     'http://localhost:3443',
     'https://kanucard.com',

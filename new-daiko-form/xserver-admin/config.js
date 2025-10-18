@@ -1,10 +1,10 @@
 // API設定
 const CONFIG = {
     // Render APIエンドポイント
-    API_BASE_URL: 'https://new-daiko-form.onrender.com/api',
+    API_BASE_URL: 'https://daiko.kanucard.com/api',
 
     // 承認ページURL
-    APPROVAL_BASE_URL: 'https://new-daiko-form.onrender.com/approval',
+    APPROVAL_BASE_URL: 'https://daiko.kanucard.com/approval',
 
     // 管理者パスワード（本番環境では変更必須）
     // 推奨: この値を環境変数やサーバー側で管理

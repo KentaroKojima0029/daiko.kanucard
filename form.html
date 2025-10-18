@@ -15,14 +15,14 @@
             font-family: 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
             min-height: 100vh;
-            padding: 160px 20px 20px;
+            padding: 190px 20px 20px;
             color: #1e293b;
             letter-spacing: 0.02em;
         }
 
         @media (max-width: 768px) {
             body {
-                padding: 130px 4px 20px;
+                padding: 140px 4px 20px;
             }
         }
 
@@ -755,9 +755,9 @@
 
         .fixed-summary-content {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            gap: 16px;
+            gap: 32px;
             padding-top: 12px;
             border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
@@ -766,6 +766,7 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
+            align-items: center;
         }
 
         .fixed-summary-label {
@@ -935,6 +936,39 @@
             border: 2px solid #e5e7eb;
         }
 
+        .confirmation-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .confirmation-info-grid > div {
+            padding: 8px 0;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .confirmation-info-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .confirmation-info-grid > div {
+                padding: 10px 12px;
+                background: #f9fafb;
+                border-radius: 6px;
+                font-size: 14px;
+            }
+
+            .confirmation-info-grid > div strong {
+                display: block;
+                color: #6b7280;
+                font-size: 12px;
+                margin-bottom: 4px;
+            }
+        }
+
         .modal-footer {
             padding: 24px 32px;
             border-top: 2px solid #e5e7eb;
@@ -1079,8 +1113,23 @@
                 color: #6b7280;
             }
 
-            /* 操作ボタン */
+            /* 3行目：代行料 */
             .modern-table tbody tr td:nth-child(6) {
+                display: block;
+                font-size: 13px;
+                margin-top: 8px;
+                padding-top: 8px;
+                border-top: 1px solid #e5e7eb;
+            }
+
+            .modern-table tbody tr td:nth-child(6)::before {
+                content: '代行料: ';
+                font-weight: 600;
+                color: #6b7280;
+            }
+
+            /* 操作ボタン */
+            .modern-table tbody tr td:nth-child(7) {
                 margin-top: 8px;
                 padding-top: 8px;
                 border-top: 1px solid #e5e7eb;
@@ -1235,12 +1284,13 @@
                         <table class="modern-table" id="itemsTable">
                             <thead>
                                 <tr>
-                                    <th style="width: 8%;">No</th>
-                                    <th style="width: 35%;">カード名</th>
-                                    <th style="width: 10%;">数量</th>
-                                    <th style="width: 15%;">申告額</th>
-                                    <th style="width: 15%;">取得額</th>
-                                    <th style="width: 17%;">操作</th>
+                                    <th style="width: 6%;">No</th>
+                                    <th style="width: 28%;">カード名</th>
+                                    <th style="width: 8%;">数量</th>
+                                    <th style="width: 13%;">申告額</th>
+                                    <th style="width: 13%;">取得額</th>
+                                    <th style="width: 14%;">代行料</th>
+                                    <th style="width: 18%;">操作</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -1264,10 +1314,10 @@
                             <div class="form-group">
                                 <label class="form-label" for="plan">代行プラン<span class="required">*</span></label>
                                 <select id="plan" class="form-select" required>
-                                    <option value="normal">ノーマル 日本 (2.2%)</option>
-                                    <option value="guarantee">70％保証 日本 (3.3%)</option>
-                                    <option value="normal_usa">ノーマル アメリカ (3.3%)</option>
-                                    <option value="guarantee_usa">70％保証 アメリカ (5.0%)</option>
+                                    <option value="normal">ノーマル 日本 (4.7%)</option>
+                                    <option value="guarantee">70％保証 日本 (5.8%)</option>
+                                    <option value="normal_usa">ノーマル アメリカ (5.8%)</option>
+                                    <option value="guarantee_usa">70％保証 アメリカ (7.5%)</option>
                                 </select>
                             </div>
 
@@ -1388,10 +1438,14 @@
                     <h4 style="margin-bottom: 16px; color: #1e40af; font-weight: 700;">お支払いについて</h4>
 
                     <div style="background: linear-gradient(135deg, #f0f9ff, #dbeafe); padding: 16px; border-radius: 12px; margin-bottom: 16px; border-left: 4px solid #1e40af;">
-                        <h5 style="font-weight: 700; color: #1e293b; margin-bottom: 12px;">1回目のお支払い（サービス開始時）</h5>
+                        <h5 style="font-weight: 700; color: #1e293b; margin-bottom: 12px;">1回目のお支払い（カード決済・後払いなど対応）</h5>
                         <div class="fee-row">
                             <span>代行手数料</span>
                             <span id="confirmAgencyFee" style="font-weight: 700; color: #1e40af;">0円</span>
+                        </div>
+                        <div class="fee-row" id="confirmDiscountRow" style="display: none;">
+                            <span>🎉 早期申込割引（0.5%）</span>
+                            <span id="confirmDiscount" style="font-weight: 700; color: #dc2626;">-0円</span>
                         </div>
                         <div class="fee-row" style="border-top: 2px solid #1e40af; padding-top: 8px; margin-top: 8px;">
                             <span style="font-weight: 700;">小計</span>
@@ -1400,7 +1454,7 @@
                     </div>
 
                     <div style="background: linear-gradient(135deg, #fefce8, #fef08a); padding: 16px; border-radius: 12px; margin-bottom: 16px; border-left: 4px solid #ca8a04;">
-                        <h5 style="font-weight: 700; color: #1e293b; margin-bottom: 12px;">2回目のお支払い（カード受取時）</h5>
+                        <h5 style="font-weight: 700; color: #1e293b; margin-bottom: 12px;">2回目のお支払い（銀行振込推奨）</h5>
                         <div class="fee-row">
                             <span>鑑定料</span>
                             <span id="confirmEstimatedGradingFee" style="font-weight: 700; color: #ca8a04;">設定してください</span>
@@ -1408,6 +1462,10 @@
                         <div class="fee-row">
                             <span>輸出入送料</span>
                             <span style="font-weight: 700; color: #ca8a04;">実費精算</span>
+                        </div>
+                        <div class="fee-row">
+                            <span>通関手数料</span>
+                            <span id="confirmCustomsClearanceFee" style="font-weight: 700; color: #ca8a04;">¥1,000</span>
                         </div>
                         <div class="fee-row" id="taxRow">
                             <span>関税（発生時のみ）</span>
@@ -1425,8 +1483,8 @@
 
                     <div style="background: linear-gradient(135deg, #1e40af, #2563eb); padding: 16px; border-radius: 12px; color: white;">
                         <div class="fee-row" style="border-bottom: none;">
-                            <span style="font-weight: 700; font-size: 1.1rem;">総額（見込）</span>
-                            <span id="confirmTotalEstimatedFee" style="font-weight: 700; font-size: 1.3rem;">0円</span>
+                            <span style="font-weight: 700; font-size: 1.1rem; color: white;">総額（見込）</span>
+                            <span id="confirmTotalEstimatedFee" style="font-weight: 700; font-size: 1.3rem; color: white;">0円</span>
                         </div>
                     </div>
 
@@ -1506,13 +1564,19 @@
             }
         }
 
+        // プラン変更時にテーブルを再レンダリング
+        function handlePlanChange() {
+            renderTable();
+            updateTotalSummary();
+        }
+
         // イベントリスナー設定
         function setupEventListeners() {
             document.getElementById('itemForm').addEventListener('submit', handleItemSubmit);
             document.getElementById('contactForm').addEventListener('submit', handleContactSubmit);
             document.getElementById('deleteDataButton').addEventListener('click', deleteAllData);
-            document.getElementById('plan').addEventListener('change', updateTotalSummary);
-            document.getElementById('serviceOption').addEventListener('change', updateTotalSummary);
+            document.getElementById('plan').addEventListener('change', handlePlanChange);
+            document.getElementById('serviceOption').addEventListener('change', handlePlanChange);
             document.getElementById('closeConfirmationBtn').addEventListener('click', closeConfirmationModal);
             document.getElementById('finalSubmitBtn').addEventListener('click', sendEmail);
             document.getElementById('closeSuccessBtn').addEventListener('click', closeSuccessModal);
@@ -1612,6 +1676,10 @@
             const tbody = document.querySelector('#itemsTable tbody');
             tbody.innerHTML = '';
 
+            const plan = document.getElementById('plan').value;
+            const serviceOption = document.getElementById('serviceOption').value;
+            const feePercentage = getFeePercentage(plan, serviceOption);
+
             items.forEach((item, index) => {
                 const row = tbody.insertRow();
 
@@ -1620,12 +1688,28 @@
                     ? item.itemName.substring(0, 30) + '...'
                     : item.itemName;
 
+                // 代行料を計算（最低300円/枚を適用）
+                const itemFee = calculateAgencyFee(item.declaredValue, item.quantity, feePercentage);
+                const feePerCard = Math.max(item.declaredValue * feePercentage, 300);
+
+                // 代行料の表示（複数枚の場合は内訳を表示）
+                let feeDisplay = '';
+                if (item.quantity > 1) {
+                    feeDisplay = `<div style="line-height: 1.5;">
+                        <div style="font-size: 11px; color: #6b7280;">1枚: ¥${Math.round(feePerCard).toLocaleString()}</div>
+                        <div style="font-weight: 700; color: #7c3aed;">計: ¥${Math.round(itemFee).toLocaleString()}</div>
+                    </div>`;
+                } else {
+                    feeDisplay = `<span style="font-weight: 700; color: #7c3aed;">¥${Math.round(itemFee).toLocaleString()}</span>`;
+                }
+
                 row.innerHTML = `
                     <td>${index + 1}</td>
                     <td><div class="card-name-cell" title="${item.itemName}">${item.itemName}</div></td>
                     <td><span style="background: #f3f4f6; padding: 4px 8px; border-radius: 6px; font-weight: 600;">${item.quantity}</span></td>
                     <td><span style="color: #059669; font-weight: 700;">¥${Number(item.declaredValue).toLocaleString()}</span></td>
                     <td><span style="color: #0ea5e9; font-weight: 700;">${item.acquisitionValue ? '¥' + Number(item.acquisitionValue).toLocaleString() : '-'}</span></td>
+                    <td>${feeDisplay}</td>
                     <td>
                         <button class="action-btn edit" onclick="editItem(${index})">編集</button>
                         <button class="action-btn delete" onclick="deleteItem(${index})">削除</button>
@@ -1678,7 +1762,12 @@
             const plan = document.getElementById('plan').value;
             const serviceOption = document.getElementById('serviceOption').value;
             const feePercentage = getFeePercentage(plan, serviceOption);
-            const totalFee = totalDeclaredValue * feePercentage;
+
+            // 各カードに最低300円を適用して合計を計算
+            let totalFee = 0;
+            items.forEach(item => {
+                totalFee += calculateAgencyFee(item.declaredValue, item.quantity, feePercentage);
+            });
 
             document.getElementById('totalQuantity').textContent = totalQuantity + '枚';
             document.getElementById('totalFee').textContent = '¥' + Math.round(totalFee).toLocaleString();
@@ -1688,18 +1777,81 @@
             document.getElementById('fixedTotalFee').textContent = '¥' + Math.round(totalFee).toLocaleString();
         }
 
-        // 手数料率取得
-        function getFeePercentage(plan, serviceOption) {
-            if (plan === 'normal') return 0.022;
-            if (plan === 'guarantee') return 0.033;
-            if (plan === 'normal_usa') {
-                if (serviceOption === 'パック・雑誌鑑定' || serviceOption === '特殊鑑定') {
-                    return 0.05;
+        // 受付開始から3日以内かどうかを判定
+        function isWithinDiscountPeriod(plan) {
+            const now = new Date();
+            let acceptStart;
+
+            if (plan.includes('usa')) {
+                // アメリカ発送: 毎週火曜が発送日、その6日前が受付開始
+                const next = new Date();
+                const dayOfWeek = next.getDay();
+                const daysUntilTuesday = (2 - dayOfWeek + 7) % 7 || 7;
+                next.setDate(next.getDate() + daysUntilTuesday);
+                next.setHours(12, 0, 0, 0);
+                acceptStart = new Date(next);
+                acceptStart.setDate(acceptStart.getDate() - 6);
+            } else {
+                // 日本発送: 毎月15日が発送日、前月16日が受付開始
+                const next = new Date();
+                if (next.getDate() > 15) {
+                    next.setMonth(next.getMonth() + 1);
                 }
-                return 0.033;
+                next.setDate(15);
+                next.setHours(12, 0, 0, 0);
+                acceptStart = new Date(next);
+                acceptStart.setMonth(acceptStart.getMonth() - 1);
+                acceptStart.setDate(16);
             }
-            if (plan === 'guarantee_usa') return 0.05;
-            return 0;
+
+            const daysSinceStart = Math.floor((now - acceptStart) / (1000 * 60 * 60 * 24));
+            return daysSinceStart >= 0 && daysSinceStart < 3;
+        }
+
+        // 手数料率取得（全て2.5%引き上げ、受付開始から3日間は0.5%割引）
+        function getFeePercentage(plan, serviceOption) {
+            let baseRate;
+
+            if (plan === 'normal') baseRate = 0.047;  // 2.2% → 4.7%
+            else if (plan === 'guarantee') baseRate = 0.058;  // 3.3% → 5.8%
+            else if (plan === 'normal_usa') {
+                if (serviceOption === 'パック・雑誌鑑定' || serviceOption === '特殊鑑定') {
+                    baseRate = 0.075;  // 5.0% → 7.5%
+                } else {
+                    baseRate = 0.058;  // 3.3% → 5.8%
+                }
+            }
+            else if (plan === 'guarantee_usa') baseRate = 0.075;  // 5.0% → 7.5%
+            else baseRate = 0;
+
+            // 受付開始から3日以内なら0.5%割引
+            if (isWithinDiscountPeriod(plan)) {
+                return baseRate - 0.005;  // 0.5%割引
+            }
+
+            return baseRate;
+        }
+
+        // 割引額を計算
+        function calculateDiscount(plan, serviceOption) {
+            if (!isWithinDiscountPeriod(plan)) {
+                return 0;
+            }
+
+            // 0.5%割引
+            let totalDeclaredValue = 0;
+            items.forEach(item => {
+                totalDeclaredValue += item.declaredValue * item.quantity;
+            });
+
+            return totalDeclaredValue * 0.005;  // 0.5%の割引額
+        }
+
+        // 代行料計算（最低300円/枚を適用）
+        function calculateAgencyFee(declaredValue, quantity, feePercentage) {
+            const calculatedFeePerCard = declaredValue * feePercentage;
+            const actualFeePerCard = Math.max(calculatedFeePerCard, 300);  // 最低300円/枚
+            return actualFeePerCard * quantity;
         }
 
         // 鑑定料計算
@@ -1774,23 +1926,45 @@
             });
 
             const feePercentage = getFeePercentage(plan, serviceOption);
-            const totalFee = totalDeclaredValue * feePercentage;
+
+            // 各カードに最低300円を適用して合計を計算
+            let totalFee = 0;
+            items.forEach(item => {
+                totalFee += calculateAgencyFee(item.declaredValue, item.quantity, feePercentage);
+            });
+
             const gradingFee = calculateGradingFee(serviceOption, totalQuantity, plan);
             const estimatedTax = totalAcquisitionValue * 0.15;
+            const customsClearanceFee = 1000; // 通関手数料
 
             // 1回目の支払い（代行手数料のみ）
-            const firstPayment = Math.round(totalFee);
-            document.getElementById('confirmAgencyFee').textContent = '¥' + firstPayment.toLocaleString();
+            document.getElementById('confirmAgencyFee').textContent = '¥' + Math.round(totalFee).toLocaleString();
+
+            // 割引計算
+            const discountAmount = calculateDiscount(plan, serviceOption);
+            const discountRow = document.getElementById('confirmDiscountRow');
+            const discountElement = document.getElementById('confirmDiscount');
+
+            if (discountAmount > 0) {
+                discountRow.style.display = 'flex';
+                discountElement.textContent = '-¥' + Math.round(discountAmount).toLocaleString();
+            } else {
+                discountRow.style.display = 'none';
+            }
+
+            // 1回目の支払い合計（割引適用後）
+            const firstPayment = Math.round(totalFee - discountAmount);
             document.getElementById('confirmFirstPayment').textContent = '¥' + firstPayment.toLocaleString();
 
-            // 2回目の支払い（鑑定料 + 関税）
+            // 2回目の支払い（鑑定料 + 通関手数料 + 関税）
             document.getElementById('confirmEstimatedTax').textContent = '¥' + Math.round(estimatedTax).toLocaleString();
+            document.getElementById('confirmCustomsClearanceFee').textContent = '¥' + customsClearanceFee.toLocaleString();
 
             if (gradingFee !== null) {
-                const secondPayment = Math.round(gradingFee + estimatedTax);
+                const secondPayment = Math.round(gradingFee + customsClearanceFee + estimatedTax);
                 document.getElementById('confirmEstimatedGradingFee').textContent = '¥' + gradingFee.toLocaleString();
                 document.getElementById('confirmSecondPayment').textContent = '¥' + secondPayment.toLocaleString() + ' +実費';
-                document.getElementById('confirmTotalEstimatedFee').textContent = '¥' + Math.round(totalFee + gradingFee + estimatedTax).toLocaleString() + ' +実費';
+                document.getElementById('confirmTotalEstimatedFee').textContent = '¥' + Math.round(totalFee + gradingFee + customsClearanceFee + estimatedTax).toLocaleString() + ' +実費';
             } else {
                 document.getElementById('confirmEstimatedGradingFee').textContent = '別途見積もり';
                 document.getElementById('confirmSecondPayment').textContent = '見積もり後に表示';
@@ -1799,18 +1973,32 @@
 
             const planText = document.getElementById('plan').options[document.getElementById('plan').selectedIndex].text;
 
-            let cardsList = items.map((item, index) => `
-                <div style="padding: 12px; background: #f9fafb; border-radius: 8px; margin-bottom: 8px;">
-                    <strong>${index + 1}. ${item.itemName}</strong><br>
-                    <span>数量: ${item.quantity}枚</span> |
-                    <span>申告額: ¥${Number(item.declaredValue).toLocaleString()}</span>
-                    ${item.acquisitionValue ? ` | <span>取得額: ¥${Number(item.acquisitionValue).toLocaleString()}</span>` : ''}
-                </div>
-            `).join('');
+            let cardsList = items.map((item, index) => {
+                // 代行料を計算（最低300円/枚を適用）
+                const itemFee = calculateAgencyFee(item.declaredValue, item.quantity, feePercentage);
+                const feePerCard = Math.max(item.declaredValue * feePercentage, 300);
+
+                // 代行料の表示文字列を生成
+                let feeText = '';
+                if (item.quantity > 1) {
+                    feeText = ` | <span style="color: #7c3aed; font-weight: 600;">代行料: ¥${Math.round(feePerCard).toLocaleString()}/枚 (計¥${Math.round(itemFee).toLocaleString()})</span>`;
+                } else {
+                    feeText = ` | <span style="color: #7c3aed; font-weight: 600;">代行料: ¥${Math.round(itemFee).toLocaleString()}</span>`;
+                }
+
+                return `
+                    <div style="padding: 12px; background: #f9fafb; border-radius: 8px; margin-bottom: 8px;">
+                        <strong>${index + 1}. ${item.itemName}</strong><br>
+                        <span>数量: ${item.quantity}枚</span> |
+                        <span>申告額: ¥${Number(item.declaredValue).toLocaleString()}</span>
+                        ${item.acquisitionValue ? ` | <span>取得額: ¥${Number(item.acquisitionValue).toLocaleString()}</span>` : ''}${feeText}
+                    </div>
+                `;
+            }).join('');
 
             document.getElementById('confirmationDetails').innerHTML = `
                 <h4 style="margin-bottom: 16px; color: #1a202c; font-weight: 700;">基本情報</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+                <div class="confirmation-info-grid">
                     <div><strong>お名前:</strong> ${document.getElementById('contactName').value}</div>
                     <div><strong>メール:</strong> ${document.getElementById('contactEmail').value}</div>
                     <div><strong>PSAプラン:</strong> ${serviceOption}</div>
@@ -1846,6 +2034,11 @@
             submitBtn.disabled = true;
             submitBtn.textContent = '送信中...';
 
+            console.log('[Form] Starting email submission...');
+
+            // メールアドレスを事前に保存（モーダル更新前に取得）
+            const userEmail = document.getElementById('contactEmail').value;
+
             try {
                 const plan = document.getElementById('plan').value;
                 const serviceOption = document.getElementById('serviceOption').value;
@@ -1861,13 +2054,22 @@
                 });
 
                 const feePercentage = getFeePercentage(plan, serviceOption);
-                const totalFee = totalDeclaredValue * feePercentage;
+
+                // 各カードに最低300円を適用して合計を計算
+                let totalFee = 0;
+                items.forEach(item => {
+                    totalFee += calculateAgencyFee(item.declaredValue, item.quantity, feePercentage);
+                });
+
                 const gradingFee = calculateGradingFee(serviceOption, totalQuantity, plan);
                 const estimatedTax = totalAcquisitionValue * 0.15;
+                const customsClearanceFee = 1000; // 通関手数料
 
-                // タイムアウト付きfetch（30秒）
+                // タイムアウト付きfetch（60秒に延長）
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000);
+                const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+                console.log('[Form] Sending POST request to /api/rich-form-submit...');
 
                 const response = await fetch('/api/rich-form-submit', {
                     method: 'POST',
@@ -1876,7 +2078,7 @@
                     },
                     body: JSON.stringify({
                         contactName: document.getElementById('contactName').value,
-                        contactEmail: document.getElementById('contactEmail').value,
+                        contactEmail: userEmail,
                         items: items,
                         plan: document.getElementById('plan').options[document.getElementById('plan').selectedIndex].text,
                         serviceOption: serviceOption,
@@ -1887,39 +2089,107 @@
                         totalFee: Math.round(totalFee),
                         estimatedGradingFee: gradingFee,
                         estimatedTax: Math.round(estimatedTax),
+                        customsClearanceFee: customsClearanceFee,
                         totalQuantity: totalQuantity,
                         totalDeclaredValue: totalDeclaredValue,
                         totalAcquisitionValue: totalAcquisitionValue,
-                        totalEstimatedFee: Math.round(totalFee + (gradingFee || 0) + estimatedTax)
+                        totalEstimatedFee: Math.round(totalFee + (gradingFee || 0) + customsClearanceFee + estimatedTax)
                     }),
                     signal: controller.signal
                 });
 
                 clearTimeout(timeoutId);
 
-                if (response.ok) {
-                    closeConfirmationModal();
-                    document.getElementById('successModal').classList.add('show');
+                console.log('[Form] Response received. Status:', response.status, 'OK:', response.ok);
 
-                    // フォームリセット
-                    items = [];
-                    localStorage.removeItem('items');
-                    document.getElementById('contactForm').reset();
-                    document.getElementById('itemForm').reset();
-                    renderTable();
-                    updateTotalSummary();
+                if (response.ok) {
+                    console.log('[Form] Response is OK. Showing success message...');
+
+                    try {
+                        // 確認モーダルの内容を成功メッセージに置き換え
+                        const modalHeader = document.querySelector('#confirmationModal .modal-header');
+                        const modalBody = document.querySelector('#confirmationModal .modal-body');
+                        const modalFooter = document.querySelector('#confirmationModal .modal-footer');
+
+                        if (!modalHeader || !modalBody || !modalFooter) {
+                            throw new Error('Modal elements not found');
+                        }
+
+                        // ヘッダーを成功メッセージに変更
+                        modalHeader.innerHTML = `
+                            <h3 style="font-size: 2rem;">✅ 送信完了しました！</h3>
+                            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">ご依頼ありがとうございます</p>
+                        `;
+                        modalHeader.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+
+                        // 本文を成功メッセージに変更
+                        modalBody.innerHTML = `
+                            <div style="text-align: center; padding: 40px 20px;">
+                                <div style="font-size: 80px; margin-bottom: 24px;">✓</div>
+                                <h3 style="font-size: 1.5rem; color: #059669; margin-bottom: 16px; font-weight: 700;">
+                                    代行依頼を受け付けました
+                                </h3>
+                                <p style="font-size: 1.1rem; color: #1e293b; margin-bottom: 24px; line-height: 1.8;">
+                                    ${userEmail} 宛に<br>
+                                    確認メールをお送りしました。
+                                </p>
+                                <div style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); border-left: 4px solid #3b82f6; padding: 20px; border-radius: 12px; margin: 24px 0; text-align: left;">
+                                    <p style="margin: 0 0 12px 0; color: #1e40af; font-weight: 700; font-size: 1rem;">
+                                        📧 次のステップ
+                                    </p>
+                                    <ul style="margin: 0; padding-left: 20px; color: #1e293b; line-height: 1.8;">
+                                        <li>担当者が内容を確認後、1-2営業日以内にご連絡いたします</li>
+                                        <li>ご不明な点がございましたら、確認メールに返信してください</li>
+                                        <li>マイページで進捗状況を確認できます</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        `;
+
+                        // フッターを閉じるボタンのみに変更
+                        modalFooter.innerHTML = `
+                            <button class="btn btn-primary" onclick="location.reload()" style="width: 100%; font-size: 1.1rem; padding: 16px;">
+                                フォームを閉じる
+                            </button>
+                        `;
+
+                        console.log('[Form] Success message displayed in modal');
+
+                        // フォームリセット
+                        console.log('[Form] Resetting form data...');
+                        items = [];
+                        localStorage.removeItem('items');
+                        document.getElementById('contactForm').reset();
+                        document.getElementById('itemForm').reset();
+                        renderTable();
+                        updateTotalSummary();
+                        console.log('[Form] Form reset complete.');
+
+                    } catch (modalError) {
+                        console.error('[Form] Error updating modal:', modalError);
+                        // モーダル更新に失敗した場合はアラートで通知
+                        alert('✅ 送信完了しました！\n\n' + userEmail + ' 宛に確認メールをお送りしました。\n\n担当者が内容を確認後、1-2営業日以内にご連絡いたします。');
+                        location.reload();
+                    }
                 } else {
-                    const errorData = await response.json();
+                    console.error('[Form] Response NOT OK. Status:', response.status);
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    console.error('[Form] Error data:', errorData);
                     throw new Error(errorData.error || '送信に失敗しました');
                 }
             } catch (error) {
-                console.error('送信エラー:', error);
+                console.error('[Form] Exception caught:', error);
+                console.error('[Form] Error name:', error.name);
+                console.error('[Form] Error message:', error.message);
+                console.error('[Form] Error stack:', error.stack);
+
                 if (error.name === 'AbortError') {
-                    alert('送信がタイムアウトしました。サーバーが応答していない可能性があります。しばらくしてから再度お試しください。');
+                    alert('送信がタイムアウトしました。\n\nメールが送信されている可能性があります。\n確認メールが届いているかご確認ください。\n\n届いていない場合は、しばらくしてから再度お試しください。');
                 } else {
                     alert('送信に失敗しました: ' + error.message + '\n\nもう一度お試しください。');
                 }
             } finally {
+                console.log('[Form] Finally block: Re-enabling submit button...');
                 submitBtn.disabled = false;
                 submitBtn.textContent = '送信する';
             }

@@ -1,12 +1,13 @@
 const express = require('express');
 const path = require('path');
-const nodemailer = require('nodemailer');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const { init: initDatabase, submissionQueries, kaitoriQueries } = require('./database');
 const { getCustomerById, getCustomerOrders, listAllCustomers } = require('./shopify-client');
 const logger = require('./logger');
+const { sendEmail, validateEmailConfig } = require('./email-service');
+const { validateApiKey, sendEmailHandler } = require('./email-api-endpoint');
 const {
   apiLimiter,
   authLimiter,
@@ -43,7 +44,7 @@ app.use(requestLogger);
 // CORS設定（外部管理画面用）
 app.use((req, res, next) => {
   const allowedOrigins = [
-    'https://new-daiko-form.onrender.com',
+    'https://daiko.kanucard.com',
     'http://localhost:3000',
     'http://localhost:3443',
     'https://kanucard.com',
@@ -78,6 +79,17 @@ logger.info('Server initializing', {
   port
 });
 
+// メール設定の検証
+const emailConfig = validateEmailConfig();
+if (!emailConfig.valid) {
+  logger.warn('Email configuration issues', { issues: emailConfig.issues });
+} else {
+  logger.info('Email service ready', {
+    fallbackEnabled: emailConfig.fallbackEnabled,
+    apiConfigured: emailConfig.apiConfigured
+  });
+}
+
 // 静的ファイルの配信（優先）
 app.use(express.static(__dirname, {
   maxAge: '1d',
@@ -87,22 +99,6 @@ app.use(express.static(__dirname, {
     }
   }
 }));
-
-// Nodemailer設定
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'sv10210.xserver.jp',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER || 'collection@kanucard.com',
-    pass: process.env.SMTP_PASS
-  },
-  connectionTimeout: 60000, // 60秒
-  greetingTimeout: 30000, // 30秒
-  socketTimeout: 60000, // 60秒
-  logger: process.env.NODE_ENV !== 'production', // 開発環境でログを有効化
-  debug: process.env.NODE_ENV !== 'production' // 開発環境でデバッグを有効化
-});
 
 // リッチフォーム送信API
 app.post('/api/rich-form-submit', async (req, res) => {
@@ -405,70 +401,121 @@ app.post('/api/rich-form-submit', async (req, res) => {
       `
     };
 
-    // メール送信
-    await transporter.sendMail(customerMailOptions);
-    await transporter.sendMail(adminMailOptions);
+    // データベースに保存
+    let submissionId = null;
+    try {
+      const result = submissionQueries.create.run(
+        null, // user_id (後でShopify連携時に使用)
+        contactEmail,
+        contactName,
+        plan,
+        serviceOption,
+        purchaseOffer || null,
+        returnMethod || null,
+        inspectionOption || null,
+        JSON.stringify(items), // items配列をJSON文字列に変換
+        totalQuantity,
+        totalDeclaredValue,
+        totalAcquisitionValue,
+        totalFee,
+        estimatedTax,
+        estimatedGradingFee,
+        totalEstimatedFee,
+        contactBody || null
+      );
+      submissionId = result.lastInsertRowid;
 
-    // 管理者側データベースにも保存（タイムアウト付き）
-    const saveToAdminDatabase = async () => {
-      try {
-        const adminApiUrl = process.env.ADMIN_API_URL || 'https://kanucard-daiko-support.onrender.com';
+      logger.info('Form submission saved to database', {
+        submissionId,
+        email: contactEmail,
+        name: contactName
+      });
+    } catch (dbError) {
+      logger.error('Database save error', { error: dbError.message });
+      // DBエラーでもメール送信は継続
+    }
 
-        // タイムアウト付きfetch（10秒）
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-        const adminResponse = await fetch(`${adminApiUrl}/api/public/form-submit`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            contactName,
-            contactEmail,
-            contactBody,
-            plan,
-            serviceOption,
-            purchaseOffer,
-            returnMethod,
-            inspectionOption,
-            items,
-            totalQuantity,
-            totalDeclaredValue,
-            totalAcquisitionValue,
-            totalFee,
-            estimatedTax,
-            estimatedGradingFee,
-            totalEstimatedFee
-          }),
-          signal: controller.signal
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!adminResponse.ok) {
-          console.error('管理者DBへの保存失敗:', await adminResponse.text());
-        } else {
-          const adminData = await adminResponse.json();
-          console.log('管理者DBに保存成功:', adminData);
-        }
-      } catch (adminError) {
-        if (adminError.name === 'AbortError') {
-          console.error('管理者API通信タイムアウト（10秒）');
-        } else {
-          console.error('管理者API通信エラー:', adminError);
-        }
-        // メール送信は成功しているので、エラーを握りつぶす
-      }
-    };
-
-    // 管理者DBへの保存を非同期で実行（レスポンスをブロックしない）
-    saveToAdminDatabase();
-
-    // すぐにレスポンスを返す
+    // 即座にレスポンスを返す（ユーザーを待たせない）
     res.json({
       success: true,
-      message: 'お申し込みありがとうございました。確認メールをお送りしました。'
+      message: 'お申し込みありがとうございました。確認メールをお送りしました。',
+      submissionId: submissionId // 申請IDを返す
+    });
+
+    // メール送信と管理者DB保存をバックグラウンドで非同期実行
+    setImmediate(async () => {
+      try {
+        console.log('[Background] Starting email and DB save process...');
+
+        // メール送信（フォールバック機能付き）
+        try {
+          await sendEmail(customerMailOptions);
+          console.log('[Background] Customer email sent successfully');
+        } catch (emailError) {
+          console.error('[Background] Customer email send error:', emailError);
+        }
+
+        try {
+          await sendEmail(adminMailOptions);
+          console.log('[Background] Admin email sent successfully');
+        } catch (emailError) {
+          console.error('[Background] Admin email send error:', emailError);
+        }
+
+        // 管理者側データベースにも保存
+        try {
+          const adminApiUrl = process.env.ADMIN_API_URL || 'https://kanucard-daiko-support.onrender.com';
+
+          // タイムアウト付きfetch（10秒）
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+          const adminResponse = await fetch(`${adminApiUrl}/api/public/form-submit`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              contactName,
+              contactEmail,
+              contactBody,
+              plan,
+              serviceOption,
+              purchaseOffer,
+              returnMethod,
+              inspectionOption,
+              items,
+              totalQuantity,
+              totalDeclaredValue,
+              totalAcquisitionValue,
+              totalFee,
+              estimatedTax,
+              estimatedGradingFee,
+              totalEstimatedFee
+            }),
+            signal: controller.signal
+          });
+
+          clearTimeout(timeoutId);
+
+          if (!adminResponse.ok) {
+            console.error('[Background] 管理者DBへの保存失敗:', await adminResponse.text());
+          } else {
+            const adminData = await adminResponse.json();
+            console.log('[Background] 管理者DBに保存成功:', adminData);
+          }
+        } catch (adminError) {
+          if (adminError.name === 'AbortError') {
+            console.error('[Background] 管理者API通信タイムアウト（10秒）');
+          } else {
+            console.error('[Background] 管理者API通信エラー:', adminError);
+          }
+        }
+
+        console.log('[Background] All background processes completed');
+      } catch (error) {
+        console.error('[Background] Unexpected error in background process:', error);
+      }
     });
 
   } catch (error) {
@@ -559,9 +606,9 @@ app.post('/api/contact', async (req, res) => {
       `
     };
 
-    // メール送信
-    await transporter.sendMail(adminMailOptions);
-    await transporter.sendMail(customerMailOptions);
+    // メール送信（フォールバック機能付き）
+    await sendEmail(adminMailOptions);
+    await sendEmail(customerMailOptions);
 
     res.json({
       success: true,
@@ -574,6 +621,11 @@ app.post('/api/contact', async (req, res) => {
     });
   }
 });
+
+// ===== XserverVPS メール送信API =====
+
+// メール送信APIエンドポイント（VPS上でのみ有効）
+app.post('/api/send-email', validateApiKey, sendEmailHandler);
 
 // ===== テスト/ヘルスチェックAPI =====
 
@@ -959,6 +1011,164 @@ app.post('/api/kaitori/respond', async (req, res) => {
     console.error('Kaitori respond error:', error);
     logger.error('Kaitori respond error', { error: error.message });
     res.status(500).json({ error: '送信に失敗しました' });
+  }
+});
+
+// ===== 利用者向け申請管理API =====
+
+// 申請履歴取得
+app.get('/api/my-submissions', async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'メールアドレスが必要です'
+      });
+    }
+
+    // メールアドレスのバリデーション
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        error: '有効なメールアドレスを入力してください'
+      });
+    }
+
+    const submissions = submissionQueries.findByEmail.all(email);
+
+    // items列（JSON文字列）をパースして返す
+    const submissionsWithParsedItems = submissions.map(sub => ({
+      ...sub,
+      items: sub.items ? JSON.parse(sub.items) : []
+    }));
+
+    logger.info('Submissions retrieved', {
+      email,
+      count: submissions.length
+    });
+
+    res.json({
+      success: true,
+      count: submissions.length,
+      submissions: submissionsWithParsedItems
+    });
+  } catch (error) {
+    console.error('Get submissions error:', error);
+    logger.error('Get submissions error', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'データの取得に失敗しました'
+    });
+  }
+});
+
+// 申請詳細取得
+app.get('/api/submission/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'メールアドレスが必要です'
+      });
+    }
+
+    const submission = submissionQueries.findById.get(id);
+
+    if (!submission) {
+      return res.status(404).json({
+        success: false,
+        error: '申請が見つかりません'
+      });
+    }
+
+    // セキュリティ: メールアドレスが一致する場合のみ返す
+    if (submission.email !== email) {
+      return res.status(403).json({
+        success: false,
+        error: 'アクセス権限がありません'
+      });
+    }
+
+    // items列（JSON文字列）をパース
+    const submissionWithParsedItems = {
+      ...submission,
+      items: submission.items ? JSON.parse(submission.items) : []
+    };
+
+    logger.info('Submission detail retrieved', {
+      submissionId: id,
+      email: submission.email
+    });
+
+    res.json({
+      success: true,
+      submission: submissionWithParsedItems
+    });
+  } catch (error) {
+    console.error('Get submission detail error:', error);
+    logger.error('Get submission detail error', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'データの取得に失敗しました'
+    });
+  }
+});
+
+// 申請ステータス確認（ID + メールアドレス）
+app.get('/api/status/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'メールアドレスが必要です'
+      });
+    }
+
+    const submission = submissionQueries.findById.get(id);
+
+    if (!submission) {
+      return res.status(404).json({
+        success: false,
+        error: '申請が見つかりません'
+      });
+    }
+
+    // セキュリティチェック
+    if (submission.email !== email) {
+      return res.status(403).json({
+        success: false,
+        error: 'アクセス権限がありません'
+      });
+    }
+
+    logger.info('Status checked', {
+      submissionId: id,
+      status: submission.status
+    });
+
+    res.json({
+      success: true,
+      id: submission.id,
+      status: submission.status,
+      created_at: submission.created_at,
+      updated_at: submission.updated_at
+    });
+  } catch (error) {
+    console.error('Get status error:', error);
+    logger.error('Get status error', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'ステータスの取得に失敗しました'
+    });
   }
 });
 

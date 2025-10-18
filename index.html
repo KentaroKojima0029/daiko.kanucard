@@ -85,7 +85,7 @@
 
         .countdown-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
         }
 
@@ -135,6 +135,61 @@
         .countdown-date {
             font-size: 0.9rem;
             color: #64748b;
+            margin-bottom: 12px;
+        }
+
+        .schedule-info {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .schedule-info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .schedule-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .schedule-info-label {
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .schedule-info-value {
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .discount-badge {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-top: 12px;
+            text-align: center;
+            animation: pulse 2s infinite;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.9;
+            }
         }
 
         .progress-bar {
@@ -760,6 +815,19 @@
                     <div class="progress-bar">
                         <div class="progress-fill" id="usaProgress"></div>
                     </div>
+                    <div class="schedule-info">
+                        <div class="schedule-info-item">
+                            <span class="schedule-info-label">受付締切</span>
+                            <span class="schedule-info-value" id="usaAcceptEnd">-</span>
+                        </div>
+                        <div class="schedule-info-item">
+                            <span class="schedule-info-label">※弊社必着</span>
+                            <span class="schedule-info-value" id="usaArrival">-</span>
+                        </div>
+                    </div>
+                    <div class="discount-badge" id="usaDiscountBadge" style="display: none;">
+                        🎉 <span id="usaDiscountText">申込日以内で代行料割引！</span>
+                    </div>
                 </div>
                 <div class="countdown-card japan">
                     <div class="country-label">
@@ -770,6 +838,19 @@
                     <div class="countdown-date" id="japanDate"></div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="japanProgress"></div>
+                    </div>
+                    <div class="schedule-info">
+                        <div class="schedule-info-item">
+                            <span class="schedule-info-label">受付締切</span>
+                            <span class="schedule-info-value" id="japanAcceptEnd">-</span>
+                        </div>
+                        <div class="schedule-info-item">
+                            <span class="schedule-info-label">※弊社必着</span>
+                            <span class="schedule-info-value" id="japanArrival">-</span>
+                        </div>
+                    </div>
+                    <div class="discount-badge" id="japanDiscountBadge" style="display: none;">
+                        🎉 <span id="japanDiscountText">申込日以内で代行料割引！</span>
                     </div>
                 </div>
             </div>
@@ -869,6 +950,47 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
+        // 残り日数に応じてグラデーション色を取得
+        function getGradientColorByDays(days) {
+            // 残り日数で色分け
+            if (days >= 10) {
+                // 青 - 10日以上（時間に余裕あり）
+                return {
+                    text: '#3b82f6',
+                    gradient: 'linear-gradient(135deg, #3b82f6, #1e40af)',
+                    border: 'linear-gradient(135deg, #3b82f6, #1e40af)'
+                };
+            } else if (days >= 6) {
+                // 緑 - 6〜9日（まだ余裕あり）
+                return {
+                    text: '#10b981',
+                    gradient: 'linear-gradient(135deg, #10b981, #059669)',
+                    border: 'linear-gradient(135deg, #10b981, #059669)'
+                };
+            } else if (days >= 4) {
+                // 黄色 - 4〜5日（やや注意）
+                return {
+                    text: '#f59e0b',
+                    gradient: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                    border: 'linear-gradient(135deg, #fbbf24, #f59e0b)'
+                };
+            } else if (days >= 2) {
+                // オレンジ - 2〜3日（締切接近）
+                return {
+                    text: '#f97316',
+                    gradient: 'linear-gradient(135deg, #fb923c, #f97316)',
+                    border: 'linear-gradient(135deg, #fb923c, #f97316)'
+                };
+            } else {
+                // 赤 - 1日以内（締切間近）
+                return {
+                    text: '#ef4444',
+                    gradient: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                    border: 'linear-gradient(135deg, #ef4444, #dc2626)'
+                };
+            }
+        }
+
         // カウントダウン機能
         function updateCountdowns() {
             const now = new Date();
@@ -931,14 +1053,17 @@
                 const progress = Math.max(0, 100 - (usaCountdown.total / (7 * 24 * 60 * 60 * 1000) * 100));
                 usaProgressElement.style.width = progress + '%';
 
-                // 締切が近い場合の色変更
-                if (usaCountdown.days < 1) {
-                    usaElement.style.color = '#dc2626';
-                    usaProgressElement.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
-                } else if (usaCountdown.days < 3) {
-                    usaElement.style.color = '#f59e0b';
-                    usaProgressElement.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
-                }
+                // 残り日数に応じてグラデーション色を適用
+                const usaColors = getGradientColorByDays(usaCountdown.days);
+
+                // カウントダウンテキストとプログレスバーに色を適用
+                usaElement.style.color = usaColors.text;
+                usaProgressElement.style.setProperty('background', usaColors.gradient, 'important');
+
+                // カードの上部ボーダーにも色を適用
+                const usaCard = document.querySelector('.countdown-card.usa');
+                const usaBefore = usaCard.querySelector('::before') || usaCard;
+                usaCard.style.borderTop = `4px solid ${usaColors.text}`;
             }
 
             // 日本発送カウントダウン
@@ -960,14 +1085,75 @@
                 const progress = Math.max(0, 100 - (japanCountdown.total / (30 * 24 * 60 * 60 * 1000) * 100));
                 japanProgressElement.style.width = progress + '%';
 
-                // 締切が近い場合の色変更
-                if (japanCountdown.days < 3) {
-                    japanElement.style.color = '#dc2626';
-                    japanProgressElement.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
-                } else if (japanCountdown.days < 7) {
-                    japanElement.style.color = '#f59e0b';
-                    japanProgressElement.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
-                }
+                // 残り日数に応じてグラデーション色を適用
+                const japanColors = getGradientColorByDays(japanCountdown.days);
+
+                // カウントダウンテキストとプログレスバーに色を適用
+                japanElement.style.color = japanColors.text;
+                japanProgressElement.style.setProperty('background', japanColors.gradient, 'important');
+
+                // カードの上部ボーダーにも色を適用
+                const japanCard = document.querySelector('.countdown-card.japan');
+                japanCard.style.borderTop = `4px solid ${japanColors.text}`;
+            }
+
+            // 受付日時・貨物到着日・割引バッジの表示
+            // アメリカ発送の日程情報を更新
+            const usaAcceptStart = new Date(usaShipping);
+            usaAcceptStart.setDate(usaAcceptStart.getDate() - 6); // 発送日の6日前から受付開始
+            const usaArrival = new Date(usaShipping);
+            usaArrival.setDate(usaArrival.getDate() + 6); // 発送から6日後に到着
+
+            document.getElementById('usaAcceptEnd').textContent = usaShipping.toLocaleDateString('ja-JP', {
+                month: 'numeric',
+                day: 'numeric'
+            }) + '日';
+            document.getElementById('usaArrival').textContent = usaArrival.toLocaleDateString('ja-JP', {
+                month: 'numeric',
+                day: 'numeric'
+            }) + '日';
+
+            // 日本発送の日程情報を更新
+            const japanAcceptStart = new Date(japanShipping);
+            japanAcceptStart.setMonth(japanAcceptStart.getMonth() - 1);
+            japanAcceptStart.setDate(16); // 前月16日から受付開始
+            const japanArrival = new Date(japanShipping);
+            japanArrival.setDate(25); // 当月25日に到着
+
+            document.getElementById('japanAcceptEnd').textContent = japanShipping.toLocaleDateString('ja-JP', {
+                month: 'numeric',
+                day: 'numeric'
+            }) + '日';
+            document.getElementById('japanArrival').textContent = japanArrival.toLocaleDateString('ja-JP', {
+                month: 'numeric',
+                day: 'numeric'
+            }) + '日';
+
+            // 割引バッジの表示（受付開始から3日間のみ）
+            const usaDiscountBadge = document.getElementById('usaDiscountBadge');
+            const japanDiscountBadge = document.getElementById('japanDiscountBadge');
+            const usaDiscountText = document.getElementById('usaDiscountText');
+            const japanDiscountText = document.getElementById('japanDiscountText');
+
+            // アメリカ発送：受付開始からの経過日数を計算
+            const usaDaysSinceStart = Math.floor((now - usaAcceptStart) / (1000 * 60 * 60 * 24));
+            if (usaDaysSinceStart >= 0 && usaDaysSinceStart < 3) {
+                // 割引率: 0.5% (5.8% → 5.3%, 7.5% → 7.0%)
+                // 各プランの割引例を表示
+                usaDiscountText.textContent = '受付開始から3日間限定！全プラン0.5%割引';
+                usaDiscountBadge.style.display = 'block';
+            } else {
+                usaDiscountBadge.style.display = 'none';
+            }
+
+            // 日本発送：受付開始からの経過日数を計算
+            const japanDaysSinceStart = Math.floor((now - japanAcceptStart) / (1000 * 60 * 60 * 24));
+            if (japanDaysSinceStart >= 0 && japanDaysSinceStart < 3) {
+                // 割引率: 0.5% (4.7% → 4.2%, 5.8% → 5.3%)
+                japanDiscountText.textContent = '受付開始から3日間限定！全プラン0.5%割引';
+                japanDiscountBadge.style.display = 'block';
+            } else {
+                japanDiscountBadge.style.display = 'none';
             }
         }
 
