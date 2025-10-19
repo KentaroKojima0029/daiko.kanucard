@@ -76,11 +76,20 @@ function createGraphQLClient() {
 
 // メールアドレスで顧客を検索
 async function findCustomerByEmail(email) {
+  console.log('============== SHOPIFY CUSTOMER SEARCH ==============');
+  console.log('[Shopify] Finding customer by email:', email);
+  console.log('[Shopify] Environment:', process.env.NODE_ENV);
+  console.log('[Shopify] Shop configured:', !!SHOPIFY_SHOP);
+  console.log('[Shopify] Token configured:', !!SHOPIFY_ACCESS_TOKEN);
+
   const client = createGraphQLClient();
 
   if (!client) {
-    console.warn('Shopify client not available');
-    return null;
+    console.error('[Shopify] ❌ Client not available - missing configuration');
+    console.error('[Shopify] Shop name:', SHOPIFY_SHOP || 'MISSING');
+    console.error('[Shopify] Access token:', SHOPIFY_ACCESS_TOKEN ? '✓ Set' : '✗ MISSING');
+    console.log('====================================================');
+    throw new Error('Shopify client not configured. Check SHOPIFY_SHOP_NAME and SHOPIFY_ADMIN_ACCESS_TOKEN environment variables.');
   }
 
   try {
@@ -115,19 +124,45 @@ async function findCustomerByEmail(email) {
     console.log('[Shopify Debug] GraphQL request details:', {
       shop: `${SHOPIFY_SHOP}.myshopify.com`,
       hasToken: !!SHOPIFY_ACCESS_TOKEN,
+      tokenLength: SHOPIFY_ACCESS_TOKEN?.length || 0,
       query: `email:${email}`
     });
 
-    const response = await client.request(query, {
-      variables: {
-        query: `email:${email}`,
-      },
-    });
+    let response;
+    try {
+      response = await client.request(query, {
+        variables: {
+          query: `email:${email}`,
+        },
+      });
+    } catch (apiError) {
+      console.error('[Shopify] ❌ GraphQL API call failed');
+      console.error('[Shopify] Error type:', apiError.constructor.name);
+      console.error('[Shopify] Error message:', apiError.message);
+      console.error('[Shopify] Error details:', apiError);
+
+      // Check for specific error types
+      if (apiError.message?.includes('401') || apiError.message?.includes('Unauthorized')) {
+        console.error('[Shopify] ⚠️  Authorization error - check SHOPIFY_ADMIN_ACCESS_TOKEN');
+        throw new Error('Shopify authentication failed. Invalid or expired access token.');
+      }
+      if (apiError.message?.includes('404')) {
+        console.error('[Shopify] ⚠️  Shop not found - check SHOPIFY_SHOP_NAME');
+        throw new Error('Shopify shop not found. Check SHOPIFY_SHOP_NAME configuration.');
+      }
+
+      throw apiError;
+    }
 
     console.log('[Shopify Debug] GraphQL response received:', {
-      hasData: !!response.data,
-      customersCount: response.data?.customers?.edges?.length || 0
+      hasData: !!response?.data,
+      hasErrors: !!response?.errors,
+      customersCount: response?.data?.customers?.edges?.length || 0
     });
+
+    if (response?.errors) {
+      console.error('[Shopify] GraphQL errors:', response.errors);
+    }
 
     const customers = response.data.customers.edges;
 
@@ -143,10 +178,15 @@ async function findCustomerByEmail(email) {
     }
 
     console.warn('[Shopify Debug] No customer found for email:', email);
+    console.log('====================================================');
     return null;
   } catch (error) {
-    console.error('Shopify customer lookup error:', error);
-    return null;
+    console.error('============== SHOPIFY ERROR ==============');
+    console.error('[Shopify] Customer lookup failed');
+    console.error('[Shopify] Error:', error.message);
+    console.error('[Shopify] Stack:', error.stack);
+    console.log('====================================================');
+    throw error; // Propagate the error so server.js can handle it properly
   }
 }
 

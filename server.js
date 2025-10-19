@@ -765,9 +765,65 @@ app.post('/api/auth/verify-shopify-customer', async (req, res) => {
 
     logger.info('OTP request for customer', { email });
 
+    // デバッグ情報を出力（本番環境でのトラブルシューティング用）
+    const isProduction = process.env.NODE_ENV === 'production';
+    console.log('============== OTP REQUEST DEBUG ==============');
+    console.log(`[OTP] Timestamp: ${new Date().toISOString()}`);
+    console.log(`[OTP] Email: ${email}`);
+    console.log(`[OTP] Environment: ${process.env.NODE_ENV}`);
+    console.log(`[OTP] Shopify Shop: ${process.env.SHOPIFY_SHOP_NAME}`);
+    console.log(`[OTP] API Version: ${process.env.SHOPIFY_API_VERSION}`);
+    console.log(`[OTP] Token exists: ${!!process.env.SHOPIFY_ADMIN_ACCESS_TOKEN}`);
+    console.log(`[OTP] Token length: ${process.env.SHOPIFY_ADMIN_ACCESS_TOKEN?.length || 0}`);
+    console.log(`[OTP] SMTP Host: ${process.env.SMTP_HOST}`);
+    console.log(`[OTP] SMTP Port: ${process.env.SMTP_PORT}`);
+    console.log(`[OTP] SMTP User: ${process.env.SMTP_USER}`);
+    console.log(`[OTP] FROM Email: ${process.env.FROM_EMAIL}`);
+    console.log(`[OTP] Email service fallback: ${process.env.USE_XSERVER_FALLBACK}`);
+    console.log('==============================================');
+
     // Shopifyで顧客が存在するか確認
-    const { findCustomerByEmail } = require('./shopify-client');
-    const customer = await findCustomerByEmail(email);
+    let customer;
+    try {
+      console.log('[OTP] Attempting to find customer in Shopify...');
+      const { findCustomerByEmail } = require('./shopify-client');
+      customer = await findCustomerByEmail(email);
+      console.log(`[OTP] Shopify customer found: ${!!customer}`);
+      if (customer) {
+        console.log(`[OTP] Customer ID: ${customer.id}`);
+        console.log(`[OTP] Customer name: ${customer.firstName} ${customer.lastName}`);
+      }
+    } catch (shopifyError) {
+      console.error('============== SHOPIFY API ERROR ==============');
+      console.error('[OTP] Shopify API Error:', shopifyError);
+      console.error('[OTP] Error type:', shopifyError.constructor.name);
+      console.error('[OTP] Error message:', shopifyError.message);
+      console.error('[OTP] Error code:', shopifyError.code);
+      console.error('[OTP] Error response:', shopifyError.response);
+      console.error('[OTP] Full error:', JSON.stringify(shopifyError, null, 2));
+      console.error('==============================================');
+
+      logger.error('Shopify API Error', {
+        error: shopifyError.message,
+        stack: shopifyError.stack,
+        email,
+        errorDetails: {
+          code: shopifyError.code,
+          response: shopifyError.response
+        }
+      });
+
+      // 本番環境では詳細なエラーを返さない
+      const errorMessage = isProduction
+        ? 'システムエラーが発生しました。しばらくしてからお試しください。'
+        : `Shopify API Error: ${shopifyError.message}`;
+
+      return res.status(500).json({
+        success: false,
+        message: errorMessage,
+        ...(isProduction ? {} : { debug: shopifyError.message })
+      });
+    }
 
     if (!customer) {
       logger.warn('Unregistered email attempted login', { email });
@@ -835,7 +891,20 @@ app.post('/api/auth/verify-shopify-customer', async (req, res) => {
     `;
 
     try {
-      await sendEmail({
+      // メール送信前のデバッグ情報
+      console.log('============== EMAIL SEND DEBUG ==============');
+      console.log('[OTP] Attempting to send email:', {
+        from: process.env.FROM_EMAIL || 'collection@kanucard.com',
+        to: email,
+        smtpHost: process.env.SMTP_HOST,
+        smtpPort: process.env.SMTP_PORT,
+        smtpUser: process.env.SMTP_USER,
+        smtpPassExists: !!process.env.SMTP_PASS,
+        fallbackEnabled: process.env.USE_XSERVER_FALLBACK
+      });
+      console.log('==============================================');
+
+      const emailResult = await sendEmail({
         from: process.env.FROM_EMAIL || 'collection@kanucard.com',
         to: email,
         subject: '【PSA代行サービス】ログイン認証コード',
@@ -843,13 +912,31 @@ app.post('/api/auth/verify-shopify-customer', async (req, res) => {
         html: emailHtml
       });
 
-      logger.info('OTP sent successfully', { email });
+      console.log('[OTP] Email send result:', emailResult);
+      logger.info('OTP sent successfully', { email, result: emailResult });
+      console.log('[OTP] ✅ Email sent successfully to:', email);
     } catch (emailError) {
-      console.error('Failed to send OTP email:', emailError);
+      console.error('============== EMAIL SEND ERROR ==============');
+      console.error('[OTP] Failed to send OTP email:', emailError);
+      console.error('[OTP] Error type:', emailError.constructor.name);
+      console.error('[OTP] Error message:', emailError.message);
+      console.error('[OTP] Error code:', emailError.code);
+      console.error('[OTP] Error command:', emailError.command);
+      console.error('[OTP] Error response:', emailError.response);
+      console.error('[OTP] Error responseCode:', emailError.responseCode);
+      console.error('[OTP] Full error:', JSON.stringify(emailError, null, 2));
+      console.error('==============================================');
+
       logger.error('Failed to send OTP email', {
         error: emailError.message,
         email: email,
-        stack: emailError.stack
+        stack: emailError.stack,
+        errorDetails: {
+          code: emailError.code,
+          command: emailError.command,
+          response: emailError.response,
+          responseCode: emailError.responseCode
+        }
       });
       throw new Error('認証メールの送信に失敗しました。しばらくしてからお試しください。');
     }

@@ -114,14 +114,35 @@ async function sendViaXserverAPI(mailOptions) {
  * 直接SMTP送信を試行
  */
 async function sendViaSMTP(mailOptions) {
+  console.log('============== SMTP SEND DEBUG ==============');
+  console.log('[SMTP] Host:', process.env.SMTP_HOST);
+  console.log('[SMTP] Port:', process.env.SMTP_PORT);
+  console.log('[SMTP] User:', process.env.SMTP_USER);
+  console.log('[SMTP] Pass configured:', !!process.env.SMTP_PASS);
+  console.log('[SMTP] From:', mailOptions.from);
+  console.log('[SMTP] To:', mailOptions.to);
+  console.log('[SMTP] Subject:', mailOptions.subject);
+  console.log('==============================================');
+
   logger.info('Attempting to send via direct SMTP', {
     to: mailOptions.to,
     subject: mailOptions.subject,
     host: process.env.SMTP_HOST
   });
 
+  // Check if credentials are configured
+  if (!process.env.SMTP_PASS) {
+    const error = new Error('SMTP_PASS not configured');
+    console.error('[SMTP] ❌ SMTP_PASS environment variable not set!');
+    throw error;
+  }
+
   try {
     const info = await transporter.sendMail(mailOptions);
+
+    console.log('[SMTP] ✅ Email sent successfully');
+    console.log('[SMTP] Message ID:', info.messageId);
+    console.log('[SMTP] Response:', info.response);
 
     logger.info('Email sent successfully via SMTP', {
       to: mailOptions.to,
@@ -133,13 +154,27 @@ async function sendViaSMTP(mailOptions) {
     return {
       success: true,
       method: 'smtp',
-      messageId: info.messageId
+      messageId: info.messageId,
+      response: info.response
     };
 
   } catch (error) {
+    console.error('============== SMTP ERROR ==============');
+    console.error('[SMTP] ❌ Failed to send email');
+    console.error('[SMTP] Error type:', error.constructor.name);
+    console.error('[SMTP] Error message:', error.message);
+    console.error('[SMTP] Error code:', error.code);
+    console.error('[SMTP] Error command:', error.command);
+    console.error('[SMTP] Error response:', error.response);
+    console.error('[SMTP] Error responseCode:', error.responseCode);
+    console.error('==========================================');
+
     logger.error('SMTP send error', {
       error: error.message,
       code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode,
       to: mailOptions.to,
       subject: mailOptions.subject
     });
