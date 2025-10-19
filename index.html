@@ -584,6 +584,8 @@
             sendBtn.innerHTML = '<span class="loading-spinner"></span>送信中...';
 
             try {
+                console.log('[Login] Sending OTP request for:', email);
+
                 const response = await fetch('/api/auth/verify-shopify-customer', {
                     method: 'POST',
                     headers: {
@@ -594,17 +596,29 @@
                     })
                 });
 
+                console.log('[Login] Response status:', response.status);
+
                 const data = await response.json();
+                console.log('[Login] Response data:', data);
 
                 if (!response.ok) {
-                    throw new Error(data.message || '認証コードの送信に失敗しました');
+                    console.error('[Login] Error response:', data);
+                    const errorMsg = data.message || '認証コードの送信に失敗しました';
+                    // デバッグ情報も表示（本番環境のトラブルシューティング用）
+                    if (data.debug) {
+                        console.error('[Login] Debug info:', data.debug);
+                        throw new Error(`${errorMsg}\n詳細: ${data.debug}`);
+                    }
+                    throw new Error(errorMsg);
                 }
 
+                console.log('[Login] OTP sent successfully');
                 showSuccess('認証コードを送信しました');
                 showStep2();
                 startResendTimer();
 
             } catch (error) {
+                console.error('[Login] Error:', error);
                 // 未登録ユーザーの場合は特別な処理
                 if (error.message === '登録されていないメールアドレスです') {
                     showUnregisteredMessage();
