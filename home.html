@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSA代行サービス - ホーム</title>
+    <script>
+        // 認証チェック
+        (function() {
+            console.log('Home: 認証チェック開始');
+            const authToken = sessionStorage.getItem('auth_token');
+            const userEmail = sessionStorage.getItem('user_email');
+            const userData = sessionStorage.getItem('user_data');
+
+            console.log('Home: セッション確認', {
+                hasToken: !!authToken,
+                hasEmail: !!userEmail,
+                hasUserData: !!userData
+            });
+
+            if (!authToken) {
+                console.log('Home: トークンなし、ログインページへリダイレクト');
+                // 未認証の場合はログインページへリダイレクト
+                window.location.href = '/';
+                return;
+            }
+
+            // トークンの有効性を簡易チェック
+            try {
+                const tokenParts = authToken.split('.');
+                console.log('Home: トークン部分数:', tokenParts.length);
+
+                if (tokenParts.length === 3) {
+                    const payload = JSON.parse(atob(tokenParts[1]));
+                    console.log('Home: トークンペイロード:', payload);
+
+                    // 有効期限チェック
+                    if (payload.exp && payload.exp * 1000 < Date.now()) {
+                        console.log('Home: トークン期限切れ');
+                        // トークンが期限切れ
+                        sessionStorage.clear();
+                        window.location.href = '/';
+                        return;
+                    }
+                    console.log('Home: 認証成功');
+                } else {
+                    console.log('Home: トークン形式が不正');
+                }
+            } catch (e) {
+                console.error('Home: トークン検証エラー:', e);
+                // トークンが無効 - エラーの詳細を記録
+                console.log('Home: エラーのため再ログインが必要');
+                // sessionStorage.clear(); // 一時的にコメントアウト
+                // window.location.href = '/';
+            }
+        })();
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ヘッダー */
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .user-name {
+            font-size: 1.1rem;
+        }
+
+        .logout-btn {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .welcome-message {
+            font-size: 1.2rem;
+            color: #1e293b;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* カウントダウンセクション */
+        .countdown-section {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .countdown-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .countdown-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .countdown-card {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .countdown-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+        }
+
+        .countdown-card.usa::before {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .countdown-card.japan::before {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .country-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 12px;
+        }
+
+        .countdown-time {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .countdown-date {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+
+        .schedule-info {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .schedule-info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .schedule-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .schedule-info-label {
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .schedule-info-value {
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .discount-badge {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-top: 12px;
+            text-align: center;
+            animation: pulse 2s infinite;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.9;
+            }
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        /* サービスボタングリッド */
+        .services-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .service-card {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            border-radius: 24px;
+            padding: 40px 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            box-shadow:
+                0 4px 6px rgba(0, 0, 0, 0.05),
+                0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                inset 0 -3px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #3b82f6);
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .service-card:hover::before {
+            opacity: 1;
+        }
+
+        .service-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            padding: 2px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-mask:
+                linear-gradient(#fff 0 0) content-box,
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .service-card:hover::after {
+            opacity: 0.5;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow:
+                0 20px 25px -5px rgba(0, 0, 0, 0.15),
+                0 10px 10px -5px rgba(0, 0, 0, 0.04),
+                0 0 40px rgba(59, 130, 246, 0.15);
+        }
+
+        .service-card.form { background: linear-gradient(145deg, #fef3c7, #fde68a); }
+        .service-card.status { background: linear-gradient(145deg, #dbeafe, #bfdbfe); }
+        .service-card.message { background: linear-gradient(145deg, #e0e7ff, #c7d2fe); }
+        .service-card.approval { background: linear-gradient(145deg, #d1fae5, #a7f3d0); }
+
+        .service-icon-wrapper {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            box-shadow:
+                0 4px 6px rgba(0, 0, 0, 0.1),
+                inset 0 2px 4px rgba(255, 255, 255, 1);
+            transition: all 0.3s ease;
+        }
+
+        .service-card:hover .service-icon-wrapper {
+            transform: rotate(-5deg) scale(1.1);
+            box-shadow:
+                0 8px 12px rgba(0, 0, 0, 0.15),
+                inset 0 2px 4px rgba(255, 255, 255, 1);
+        }
+
+        .service-icon {
+            font-size: 2.5rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .service-card.form .service-icon { color: #f59e0b; }
+        .service-card.status .service-icon { color: #3b82f6; }
+        .service-card.message .service-icon { color: #6366f1; }
+        .service-card.approval .service-icon { color: #10b981; }
+
+        .service-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
+        }
+
+        .service-description {
+            font-size: 0.95rem;
+            color: #475569;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        /* ステータスセクション */
+        .status-section {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .status-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ボタングリッド */
+        .status-button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .status-button {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border: 2px solid rgba(59, 130, 246, 0.1);
+            border-radius: 16px;
+            padding: 25px 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .status-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #3b82f6);
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .status-button:hover::before {
+            opacity: 1;
+        }
+
+        .status-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .status-button:active {
+            transform: translateY(-2px);
+        }
+
+        .status-button-icon {
+            font-size: 2.5rem;
+            display: block;
+        }
+
+        .status-button-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status-button-label {
+            font-size: 1rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .status-button-arrow {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .status-button:hover .status-button-arrow {
+            transform: translateX(5px);
+            color: #3b82f6;
+        }
+
+        /* モーダル */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 30px;
+            border-bottom: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: white;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-close:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        /* モーダル内のコンテンツスタイル */
+        .detail-section {
+            margin-bottom: 25px;
+        }
+
+        .detail-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .order-detail-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .order-detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .chart-detail-container {
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .grading-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+            border-radius: 12px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        .roi-detail-display {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(145deg, #f0fdf4, #dcfce7);
+            border-radius: 16px;
+        }
+
+        .roi-big-number {
+            font-size: 4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10b981, #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .buyback-detail-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .buyback-detail-item {
+            padding: 20px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+        }
+
+        .buyback-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .btn-request {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-request:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        /* 通知バッジ */
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ef4444;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 12px;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .header {
+                padding: 20px;
+                border-radius: 16px;
+                margin-bottom: 20px;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            .countdown-section,
+            .status-section {
+                padding: 20px;
+                border-radius: 16px;
+                margin-bottom: 20px;
+            }
+
+            .services-section {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .service-card {
+                padding: 20px;
+                min-height: 140px;
+                border-radius: 16px;
+            }
+
+            .service-icon-wrapper {
+                width: 60px;
+                height: 60px;
+                margin-bottom: 15px;
+            }
+
+            .service-icon {
+                font-size: 2rem;
+            }
+
+            .service-title {
+                font-size: 1rem;
+            }
+
+            .service-description {
+                display: none;
+            }
+
+            .countdown-time {
+                font-size: 1.4rem;
+            }
+
+            .status-button-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .status-button {
+                padding: 20px 15px;
+            }
+
+            .status-button-icon {
+                font-size: 2rem;
+            }
+
+            .status-button-value {
+                font-size: 1.5rem;
+            }
+
+            .status-button-label {
+                font-size: 0.9rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                border-radius: 16px;
+            }
+
+            .modal-header {
+                padding: 20px;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
+
+            .chart-detail-container {
+                height: 250px;
+            }
+
+            .buyback-detail-item > div {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .btn-request {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .status-button-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .status-button {
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 18px 20px;
+            }
+
+            .status-button-icon {
+                font-size: 1.8rem;
+            }
+
+            .status-button-value {
+                font-size: 1.3rem;
+            }
+
+            .grading-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .modal-header h3 {
+                font-size: 1.2rem;
+            }
+
+            .roi-big-number {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダー -->
+        <header class="header">
+            <div class="header-top">
+                <div class="user-info">
+                    <span>👤</span>
+                    <span class="user-name" id="userName">読み込み中...</span>
+                </div>
+                <button class="logout-btn" onclick="handleLogout()">ログアウト</button>
+            </div>
+            <div class="logo">PSA代行サービス</div>
+            <div class="subtitle">トレーディングカードのPSA鑑定代行</div>
+            <div class="welcome-message" id="welcomeMessage">ようこそ！</div>
+        </header>
+
+        <!-- カウントダウンセクション -->
+        <section class="countdown-section">
+            <h2 class="countdown-title">
+                🚀 次回発送スケジュール
+            </h2>
+            <div class="countdown-grid">
+                <div class="countdown-card usa">
+                    <div class="country-label">
+                        <span>🇺🇸</span>
+                        <span>アメリカ発送</span>
+                    </div>
+                    <div class="countdown-time" id="usaCountdown">計算中...</div>
+                    <div class="countdown-date" id="usaDate"></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="usaProgress"></div>
+                    </div>
+                    <div class="schedule-info">
+                        <div class="schedule-info-item">
+                            <span class="schedule-info-label">受付締切</span>
+                            <span class="schedule-info-value" id="usaAcceptEnd">-</span>
+                        </div>
+                        <div class="schedule-info-item">
+                            <span class="schedule-info-label">※弊社必着</span>
+                            <span class="schedule-info-value" id="usaArrival">-</span>
+                        </div>
+                    </div>
+                    <div class="discount-badge" id="usaDiscountBadge" style="display: none;">
+                        🎉 <span id="usaDiscountText">申込日以内で代行料割引！</span>
+                    </div>
+                </div>
+                <div class="countdown-card japan">
+                    <div class="country-label">
+                        <span>🇯🇵</span>
+                        <span>日本発送</span>
+                    </div>
+                    <div class="countdown-time" id="japanCountdown">計算中...</div>
+                    <div class="countdown-date" id="japanDate"></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="japanProgress"></div>
+                    </div>
+                    <div class="schedule-info">
+                        <div class="schedule-info-item">
+                            <span class="schedule-info-label">受付締切</span>
+                            <span class="schedule-info-value" id="japanAcceptEnd">-</span>
+                        </div>
+                        <div class="schedule-info-item">
+                            <span class="schedule-info-label">※弊社必着</span>
+                            <span class="schedule-info-value" id="japanArrival">-</span>
+                        </div>
+                    </div>
+                    <div class="discount-badge" id="japanDiscountBadge" style="display: none;">
+                        🎉 <span id="japanDiscountText">申込日以内で代行料割引！</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- サービスボタン -->
+        <section class="services-section">
+            <a href="/form" class="service-card form">
+                <span class="badge" id="newBadge" style="display: none;">NEW</span>
+                <div class="service-icon-wrapper">
+                    <div class="service-icon">📝</div>
+                </div>
+                <div class="service-title">代行申込</div>
+                <div class="service-description">PSA鑑定の代行申込フォーム</div>
+            </a>
+
+            <a href="/status" class="service-card status">
+                <div class="service-icon-wrapper">
+                    <div class="service-icon">📊</div>
+                </div>
+                <div class="service-title">進捗確認</div>
+                <div class="service-description">申込状況をリアルタイムで確認</div>
+            </a>
+
+            <a href="/chat" class="service-card message">
+                <span class="badge" id="messageBadge" style="display: none;">0</span>
+                <div class="service-icon-wrapper">
+                    <div class="service-icon">💬</div>
+                </div>
+                <div class="service-title">メッセージ</div>
+                <div class="service-description">お問い合わせ・サポート対応</div>
+            </a>
+
+            <a href="/approval" class="service-card approval">
+                <span class="badge" id="approvalBadge" style="display: none;">0</span>
+                <div class="service-icon-wrapper">
+                    <div class="service-icon">✅</div>
+                </div>
+                <div class="service-title">買取承認</div>
+                <div class="service-description">査定結果の確認と承認</div>
+            </a>
+
+            <a href="/mypage.html" class="service-card mypage">
+                <div class="service-icon-wrapper">
+                    <div class="service-icon">👤</div>
+                </div>
+                <div class="service-title">マイページ</div>
+                <div class="service-description">注文履歴・会員情報の確認</div>
+            </a>
+        </section>
+
+        <!-- サービス利用状況セクション -->
+        <section class="status-section">
+            <h2 class="status-title">
+                📊 サービス利用状況
+            </h2>
+
+            <!-- ボタングリッド表示 -->
+            <div class="status-button-grid">
+                <button class="status-button" onclick="showStatusDetail('orders')">
+                    <span class="status-button-icon">📦</span>
+                    <span class="status-button-value">3</span>
+                    <span class="status-button-label">受付中</span>
+                    <span class="status-button-arrow">→</span>
+                </button>
+
+                <button class="status-button" onclick="showStatusDetail('grading')">
+                    <span class="status-button-icon">📈</span>
+                    <span class="status-button-value">42.8%</span>
+                    <span class="status-button-label">PSA10率</span>
+                    <span class="status-button-arrow">→</span>
+                </button>
+
+                <button class="status-button" onclick="showStatusDetail('roi')">
+                    <span class="status-button-icon">💰</span>
+                    <span class="status-button-value">+258%</span>
+                    <span class="status-button-label">ROI</span>
+                    <span class="status-button-arrow">→</span>
+                </button>
+
+                <button class="status-button" onclick="showStatusDetail('buyback')">
+                    <span class="status-button-icon">💴</span>
+                    <span class="status-button-value">2</span>
+                    <span class="status-button-label">買取可能</span>
+                    <span class="status-button-arrow">→</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 詳細モーダル -->
+        <div id="statusDetailModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">詳細情報</h3>
+                    <button class="modal-close" onclick="closeStatusDetail()">×</button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- 動的にコンテンツを挿入 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js ライブラリ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // 残り日数に応じてグラデーション色を取得
+        function getGradientColorByDays(days) {
+            // 残り日数で色分け
+            if (days >= 10) {
+                // 青 - 10日以上（時間に余裕あり）
+                return {
+                    text: '#3b82f6',
+                    gradient: 'linear-gradient(135deg, #3b82f6, #1e40af)',
+                    border: 'linear-gradient(135deg, #3b82f6, #1e40af)'
+                };
+            } else if (days >= 6) {
+                // 緑 - 6〜9日（まだ余裕あり）
+                return {
+                    text: '#10b981',
+                    gradient: 'linear-gradient(135deg, #10b981, #059669)',
+                    border: 'linear-gradient(135deg, #10b981, #059669)'
+                };
+            } else if (days >= 4) {
+                // 黄色 - 4〜5日（やや注意）
+                return {
+                    text: '#f59e0b',
+                    gradient: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                    border: 'linear-gradient(135deg, #fbbf24, #f59e0b)'
+                };
+            } else if (days >= 2) {
+                // オレンジ - 2〜3日（締切接近）
+                return {
+                    text: '#f97316',
+                    gradient: 'linear-gradient(135deg, #fb923c, #f97316)',
+                    border: 'linear-gradient(135deg, #fb923c, #f97316)'
+                };
+            } else {
+                // 赤 - 1日以内（締切間近）
+                return {
+                    text: '#ef4444',
+                    gradient: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                    border: 'linear-gradient(135deg, #ef4444, #dc2626)'
+                };
+            }
+        }
+
+        // カウントダウン機能
+        function updateCountdowns() {
+            const now = new Date();
+
+            // 次回発送日の設定（例: アメリカは毎週火曜、日本は毎月15日）
+            const getNextUSAShipping = () => {
+                const next = new Date();
+                const dayOfWeek = next.getDay();
+                const daysUntilTuesday = (2 - dayOfWeek + 7) % 7 || 7;
+                next.setDate(next.getDate() + daysUntilTuesday);
+                next.setHours(12, 0, 0, 0);
+                return next;
+            };
+
+            const getNextJapanShipping = () => {
+                const next = new Date();
+                if (next.getDate() > 15) {
+                    next.setMonth(next.getMonth() + 1);
+                }
+                next.setDate(15);
+                next.setHours(12, 0, 0, 0);
+                return next;
+            };
+
+            const usaShipping = getNextUSAShipping();
+            const japanShipping = getNextJapanShipping();
+
+            // カウントダウン計算
+            const calculateCountdown = (targetDate) => {
+                const diff = targetDate - now;
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+                return {
+                    days,
+                    hours,
+                    minutes,
+                    total: diff
+                };
+            };
+
+            // アメリカ発送カウントダウン
+            const usaCountdown = calculateCountdown(usaShipping);
+            const usaElement = document.getElementById('usaCountdown');
+            const usaDateElement = document.getElementById('usaDate');
+            const usaProgressElement = document.getElementById('usaProgress');
+
+            if (usaCountdown.total > 0) {
+                usaElement.textContent = `${usaCountdown.days}日 ${usaCountdown.hours}時間 ${usaCountdown.minutes}分`;
+                usaDateElement.textContent = usaShipping.toLocaleDateString('ja-JP', {
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'short',
+                    hour: 'numeric',
+                    minute: 'numeric'
+                });
+
+                // プログレスバー（7日間を100%として）
+                const progress = Math.max(0, 100 - (usaCountdown.total / (7 * 24 * 60 * 60 * 1000) * 100));
+                usaProgressElement.style.width = progress + '%';
+
+                // 残り日数に応じてグラデーション色を適用
+                const usaColors = getGradientColorByDays(usaCountdown.days);
+
+                // カウントダウンテキストとプログレスバーに色を適用
+                usaElement.style.color = usaColors.text;
+                usaProgressElement.style.setProperty('background', usaColors.gradient, 'important');
+
+                // カードの上部ボーダーにも色を適用
+                const usaCard = document.querySelector('.countdown-card.usa');
+                const usaBefore = usaCard.querySelector('::before') || usaCard;
+                usaCard.style.borderTop = `4px solid ${usaColors.text}`;
+            }
+
+            // 日本発送カウントダウン
+            const japanCountdown = calculateCountdown(japanShipping);
+            const japanElement = document.getElementById('japanCountdown');
+            const japanDateElement = document.getElementById('japanDate');
+            const japanProgressElement = document.getElementById('japanProgress');
+
+            if (japanCountdown.total > 0) {
+                japanElement.textContent = `${japanCountdown.days}日 ${japanCountdown.hours}時間 ${japanCountdown.minutes}分`;
+                japanDateElement.textContent = japanShipping.toLocaleDateString('ja-JP', {
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric'
+                });
+
+                // プログレスバー（30日を100%として）
+                const progress = Math.max(0, 100 - (japanCountdown.total / (30 * 24 * 60 * 60 * 1000) * 100));
+                japanProgressElement.style.width = progress + '%';
+
+                // 残り日数に応じてグラデーション色を適用
+                const japanColors = getGradientColorByDays(japanCountdown.days);
+
+                // カウントダウンテキストとプログレスバーに色を適用
+                japanElement.style.color = japanColors.text;
+                japanProgressElement.style.setProperty('background', japanColors.gradient, 'important');
+
+                // カードの上部ボーダーにも色を適用
+                const japanCard = document.querySelector('.countdown-card.japan');
+                japanCard.style.borderTop = `4px solid ${japanColors.text}`;
+            }
+
+            // 受付日時・貨物到着日・割引バッジの表示
+            // アメリカ発送の日程情報を更新
+            const usaAcceptStart = new Date(usaShipping);
+            usaAcceptStart.setDate(usaAcceptStart.getDate() - 6); // 発送日の6日前から受付開始
+            const usaArrival = new Date(usaShipping);
+            usaArrival.setDate(usaArrival.getDate() + 6); // 発送から6日後に到着
+
+            document.getElementById('usaAcceptEnd').textContent = usaShipping.toLocaleDateString('ja-JP', {
+                month: 'numeric',
+                day: 'numeric'
+            }) + '日';
+            document.getElementById('usaArrival').textContent = usaArrival.toLocaleDateString('ja-JP', {
+                month: 'numeric',
+                day: 'numeric'
+            }) + '日';
+
+            // 日本発送の日程情報を更新
+            const japanAcceptStart = new Date(japanShipping);
+            japanAcceptStart.setMonth(japanAcceptStart.getMonth() - 1);
+            japanAcceptStart.setDate(16); // 前月16日から受付開始
+            const japanArrival = new Date(japanShipping);
+            japanArrival.setDate(25); // 当月25日に到着
+
+            document.getElementById('japanAcceptEnd').textContent = japanShipping.toLocaleDateString('ja-JP', {
+                month: 'numeric',
+                day: 'numeric'
+            }) + '日';
+            document.getElementById('japanArrival').textContent = japanArrival.toLocaleDateString('ja-JP', {
+                month: 'numeric',
+                day: 'numeric'
+            }) + '日';
+
+            // 割引バッジの表示（受付開始から3日間のみ）
+            const usaDiscountBadge = document.getElementById('usaDiscountBadge');
+            const japanDiscountBadge = document.getElementById('japanDiscountBadge');
+            const usaDiscountText = document.getElementById('usaDiscountText');
+            const japanDiscountText = document.getElementById('japanDiscountText');
+
+            // アメリカ発送：受付開始からの経過日数を計算
+            const usaDaysSinceStart = Math.floor((now - usaAcceptStart) / (1000 * 60 * 60 * 24));
+            if (usaDaysSinceStart >= 0 && usaDaysSinceStart < 3) {
+                // 割引率: 0.5% (5.8% → 5.3%, 7.5% → 7.0%)
+                // 各プランの割引例を表示
+                usaDiscountText.textContent = '受付開始から3日間限定！全プラン0.5%割引';
+                usaDiscountBadge.style.display = 'block';
+            } else {
+                usaDiscountBadge.style.display = 'none';
+            }
+
+            // 日本発送：受付開始からの経過日数を計算
+            const japanDaysSinceStart = Math.floor((now - japanAcceptStart) / (1000 * 60 * 60 * 24));
+            if (japanDaysSinceStart >= 0 && japanDaysSinceStart < 3) {
+                // 割引率: 0.5% (4.7% → 4.2%, 5.8% → 5.3%)
+                japanDiscountText.textContent = '受付開始から3日間限定！全プラン0.5%割引';
+                japanDiscountBadge.style.display = 'block';
+            } else {
+                japanDiscountBadge.style.display = 'none';
+            }
+        }
+
+        // 通知バッジの更新（デモ用）
+        function updateBadges() {
+            // ローカルストレージから未読数を取得（実際はAPIから取得）
+            const unreadMessages = localStorage.getItem('unreadMessages') || 0;
+            const pendingApprovals = localStorage.getItem('pendingApprovals') || 0;
+
+            const messageBadge = document.getElementById('messageBadge');
+            const approvalBadge = document.getElementById('approvalBadge');
+
+            if (unreadMessages > 0) {
+                messageBadge.textContent = unreadMessages;
+                messageBadge.style.display = 'block';
+            }
+
+            if (pendingApprovals > 0) {
+                approvalBadge.textContent = pendingApprovals;
+                approvalBadge.style.display = 'block';
+            }
+        }
+
+        // モーダル表示
+        let currentChart = null;
+
+        function showStatusDetail(type) {
+            const modal = document.getElementById('statusDetailModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            // モーダルタイトル設定
+            const titles = {
+                orders: '📦 受付状況詳細',
+                grading: '📈 鑑定実績詳細',
+                roi: '💰 投資収益率詳細',
+                buyback: '💴 買取依頼管理'
+            };
+            modalTitle.textContent = titles[type];
+
+            // コンテンツ生成
+            let content = '';
+
+            switch (type) {
+                case 'orders':
+                    content = `
+                        <div class="detail-section">
+                            <h4 class="detail-title">コース別受付状況</h4>
+                            <div class="order-detail-list">
+                                <div class="order-detail-item">
+                                    <span>🇯🇵 日本レギュラーコース</span>
+                                    <strong style="color: #3b82f6;">1件</strong>
+                                </div>
+                                <div class="order-detail-item">
+                                    <span>🇺🇸 アメリカバリューバルク</span>
+                                    <strong style="color: #3b82f6;">1件</strong>
+                                </div>
+                                <div class="order-detail-item">
+                                    <span>🚀 アメリカエクスプレス</span>
+                                    <strong style="color: #3b82f6;">1件</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <h4 class="detail-title">受付済みカード内訳</h4>
+                            <div class="grading-stats">
+                                <div class="stat-card">
+                                    <div class="stat-value">45</div>
+                                    <div class="stat-label">総カード枚数</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">¥135,000</div>
+                                    <div class="stat-label">合計金額</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'grading':
+                    content = `
+                        <div class="detail-section">
+                            <h4 class="detail-title">PSA鑑定結果分析</h4>
+                            <div class="chart-detail-container">
+                                <canvas id="modalGradingChart"></canvas>
+                            </div>
+                            <div class="grading-stats">
+                                <div class="stat-card">
+                                    <div class="stat-value">156</div>
+                                    <div class="stat-label">総鑑定枚数</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" style="color: #10b981;">67</div>
+                                    <div class="stat-label">PSA10獲得</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">42.8%</div>
+                                    <div class="stat-label">PSA10率</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">88</div>
+                                    <div class="stat-label">PSA9以下</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'roi':
+                    content = `
+                        <div class="detail-section">
+                            <div class="roi-detail-display">
+                                <div class="roi-big-number">+258%</div>
+                                <div style="font-size: 1.2rem; color: #059669; font-weight: 600; margin-bottom: 30px;">
+                                    価値向上率
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; text-align: center;">
+                                    <div>
+                                        <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 10px;">投資総額</div>
+                                        <div style="font-size: 1.8rem; font-weight: 700; color: #1e293b;">¥450,000</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 10px;">現在価値</div>
+                                        <div style="font-size: 1.8rem; font-weight: 700; color: #10b981;">¥1,611,000</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <h4 class="detail-title">コース別ROI</h4>
+                            <div class="order-detail-list">
+                                <div class="order-detail-item">
+                                    <span>日本レギュラー</span>
+                                    <strong style="color: #10b981;">+285%</strong>
+                                </div>
+                                <div class="order-detail-item">
+                                    <span>USバリューバルク</span>
+                                    <strong style="color: #10b981;">+245%</strong>
+                                </div>
+                                <div class="order-detail-item">
+                                    <span>USエクスプレス</span>
+                                    <strong style="color: #10b981;">+265%</strong>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'buyback':
+                    content = `
+                        <div class="detail-section">
+                            <h4 class="detail-title">買取可能な鑑定品</h4>
+                            <div class="buyback-detail-list">
+                                <div class="buyback-detail-item">
+                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                        <div>
+                                            <h5 style="margin: 0 0 10px 0; color: #1e293b;">2025年1月返却分</h5>
+                                            <div style="color: #64748b; font-size: 0.9rem;">
+                                                PSA10: 12枚 / PSA9: 8枚 / PSA8: 5枚
+                                            </div>
+                                            <div style="margin-top: 10px; color: #10b981; font-weight: 600;">
+                                                推定価値: ¥580,000
+                                            </div>
+                                        </div>
+                                        <button class="btn-request" onclick="requestBuyback('2025-01')">
+                                            買取依頼
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="buyback-detail-item">
+                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                        <div>
+                                            <h5 style="margin: 0 0 10px 0; color: #1e293b;">2024年12月返却分</h5>
+                                            <div style="color: #64748b; font-size: 0.9rem;">
+                                                PSA10: 8枚 / PSA9: 5枚 / PSA8: 3枚
+                                            </div>
+                                            <div style="margin-top: 10px; color: #10b981; font-weight: 600;">
+                                                推定価値: ¥420,000
+                                            </div>
+                                        </div>
+                                        <button class="btn-request" onclick="requestBuyback('2024-12')">
+                                            買取依頼
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+
+            modalBody.innerHTML = content;
+            modal.style.display = 'flex';
+
+            // グラフが必要な場合は描画
+            if (type === 'grading') {
+                setTimeout(() => {
+                    drawModalGradingChart();
+                }, 100);
+            }
+        }
+
+        function closeStatusDetail() {
+            const modal = document.getElementById('statusDetailModal');
+            modal.style.display = 'none';
+
+            // グラフのクリーンアップ
+            if (currentChart) {
+                currentChart.destroy();
+                currentChart = null;
+            }
+        }
+
+        // モーダル内のグラフ描画
+        function drawModalGradingChart() {
+            const canvas = document.getElementById('modalGradingChart');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+
+            // 既存のチャートがあれば破棄
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            const gradingData = {
+                labels: ['日本レギュラー', 'USバリュー', 'USエクスプレス'],
+                datasets: [
+                    {
+                        label: 'PSA10',
+                        data: [45, 38, 52],
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'PSA9',
+                        data: [28, 35, 25],
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'PSA8以下',
+                        data: [15, 20, 18],
+                        backgroundColor: 'rgba(156, 163, 175, 0.8)',
+                        borderColor: 'rgba(156, 163, 175, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            };
+
+            currentChart = new Chart(ctx, {
+                type: 'bar',
+                data: gradingData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y + '枚';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '枚';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 買取依頼処理
+        function requestBuyback(period) {
+            // 実際はAPIに送信
+            alert(`${period}の鑑定品について買取依頼を受け付けました。担当者より連絡いたします。`);
+            // メッセージページへ遷移してもよい
+            // window.location.href = '/chat';
+        }
+
+        // モーダル外クリックで閉じる
+        window.onclick = function(event) {
+            const modal = document.getElementById('statusDetailModal');
+            if (event.target === modal) {
+                closeStatusDetail();
+            }
+        }
+
+        // ROI計算（デモ用）
+        function calculateROI() {
+            // 実際はユーザーの実データから計算
+            const totalCards = 156;
+            const psa10Cards = 67;
+            const avgCardCost = 2884; // 平均仕入れ価格
+            const avgPSA10Value = 24045; // PSA10の平均価値
+
+            const totalInvestment = totalCards * avgCardCost;
+            const currentValue = psa10Cards * avgPSA10Value + (totalCards - psa10Cards) * avgCardCost;
+            const roi = ((currentValue - totalInvestment) / totalInvestment * 100).toFixed(0);
+
+            // DOM更新は既にHTML内でハードコード済み
+            // 実際のアプリケーションではここでDOMを更新
+        }
+
+        // データ更新（実際はAPIから取得）
+        function updateDashboardData() {
+            // ユーザー固有のデータを取得
+            // fetch('/api/user/dashboard')
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         // 各セクションのデータを更新
+            //     });
+        }
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            // ユーザー情報を取得して表示
+            loadUserInfo();
+
+            updateCountdowns();
+            updateBadges();
+            updateDashboardData();
+
+            // 1分ごとにカウントダウン更新
+            setInterval(updateCountdowns, 60000);
+
+            // 5分ごとにダッシュボードデータ更新
+            setInterval(updateDashboardData, 300000);
+        });
+
+        // ユーザー情報を取得して表示
+        function loadUserInfo() {
+            const userData = sessionStorage.getItem('user_data');
+            const userEmail = sessionStorage.getItem('user_email');
+
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    const fullName = `${user.lastName || ''} ${user.firstName || ''}`.trim();
+                    const displayName = fullName || userEmail || 'お客様';
+
+                    document.getElementById('userName').textContent = displayName;
+                    document.getElementById('welcomeMessage').textContent = `ようこそ、${displayName}様！`;
+                } catch (e) {
+                    document.getElementById('userName').textContent = userEmail || 'お客様';
+                    document.getElementById('welcomeMessage').textContent = `ようこそ！`;
+                }
+            }
+        }
+
+        // ログアウト処理
+        function handleLogout() {
+            if (confirm('ログアウトしますか？')) {
+                sessionStorage.clear();
+                window.location.href = '/';
+            }
+        }
+
+        // サービスカードのクリックアニメーション
+        document.querySelectorAll('.service-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // リップル効果
+                const ripple = document.createElement('span');
+                ripple.style.position = 'absolute';
+                ripple.style.borderRadius = '50%';
+                ripple.style.background = 'rgba(59, 130, 246, 0.3)';
+                ripple.style.width = '100px';
+                ripple.style.height = '100px';
+                ripple.style.transform = 'translate(-50%, -50%)';
+                ripple.style.pointerEvents = 'none';
+                ripple.style.animation = 'ripple 0.6s ease-out';
+
+                const rect = this.getBoundingClientRect();
+                ripple.style.left = (e.clientX - rect.left) + 'px';
+                ripple.style.top = (e.clientY - rect.top) + 'px';
+
+                this.appendChild(ripple);
+
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // リップルアニメーション
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: translate(-50%, -50%) scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

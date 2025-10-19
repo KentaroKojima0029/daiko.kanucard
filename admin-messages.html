@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メッセージ管理 - PSA代行サービス管理画面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        /* ヘッダー */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* メインコンテナ */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 120px);
+        }
+
+        /* サイドバー（メッセージリスト） */
+        .sidebar {
+            width: 350px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .message-list {
+            list-style: none;
+        }
+
+        .message-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .message-item:hover {
+            background: #f8f9fa;
+        }
+
+        .message-item.active {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+        }
+
+        .message-item.unread {
+            font-weight: bold;
+        }
+
+        .message-item.unread::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background: #3b82f6;
+            border-radius: 50%;
+        }
+
+        .message-sender {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .message-preview {
+            font-size: 13px;
+            color: #64748b;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-bottom: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        /* コンテンツエリア（メッセージ詳細） */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .content-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .sender-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .sender-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .sender-details h2 {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .sender-email {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .message-status {
+            margin-left: auto;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-unread {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        .status-read {
+            background: #d1fae5;
+            color: #10b981;
+        }
+
+        /* メッセージ表示エリア */
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+
+        .chat-message {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-message.user {
+            justify-content: flex-start;
+        }
+
+        .chat-message.admin {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .user .message-bubble {
+            background: white;
+            border: 1px solid #e0e0e0;
+        }
+
+        .admin .message-bubble {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .message-text {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 4px;
+        }
+
+        .message-timestamp {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        /* 返信エリア */
+        .reply-container {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            background: white;
+        }
+
+        .reply-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .reply-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #2c3e50;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        /* 空の状態 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #94a3b8;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-text {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .empty-subtext {
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        /* バッジ */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #ef4444;
+            color: white;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: 40%;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <div class="header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>メッセージ管理</h1>
+                <p style="opacity: 0.9; font-size: 14px;">利用者からのお問い合わせ管理</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;" onclick="window.location.href='/admin.html'">
+                    管理画面へ戻る
+                </button>
+            </div>
+        </div>
+        <div class="header-stats">
+            <div class="stat-item">
+                <span class="stat-value" id="unreadCount">0</span>
+                <span class="stat-label">未読メッセージ</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="totalCount">0</span>
+                <span class="stat-label">総メッセージ数</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="todayCount">0</span>
+                <span class="stat-label">本日のメッセージ</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- メインコンテナ -->
+    <div class="main-container">
+        <!-- サイドバー（メッセージリスト） -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <input type="text" class="search-box" placeholder="メッセージを検索..." id="searchInput">
+            </div>
+            <ul class="message-list" id="messageList"></ul>
+        </div>
+
+        <!-- コンテンツエリア（メッセージ詳細） -->
+        <div class="content">
+            <div id="emptyState" class="empty-state">
+                <div class="empty-icon">💬</div>
+                <div class="empty-text">メッセージを選択してください</div>
+                <div class="empty-subtext">左側のリストからメッセージを選択すると詳細が表示されます</div>
+            </div>
+
+            <div id="messageDetail" style="display: none; height: 100%; display: flex; flex-direction: column;">
+                <!-- メッセージヘッダー -->
+                <div class="content-header">
+                    <div class="sender-info">
+                        <div class="sender-avatar" id="senderAvatar">👤</div>
+                        <div class="sender-details">
+                            <h2 id="senderName">-</h2>
+                            <div class="sender-email" id="senderEmail">-</div>
+                        </div>
+                        <div class="message-status" id="messageStatus">-</div>
+                    </div>
+                </div>
+
+                <!-- メッセージ表示エリア -->
+                <div class="messages-container" id="messagesContainer"></div>
+
+                <!-- 返信エリア -->
+                <div class="reply-container">
+                    <form class="reply-form" id="replyForm">
+                        <textarea
+                            class="reply-input"
+                            id="replyInput"
+                            placeholder="返信を入力..."
+                            rows="3"
+                        ></textarea>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <button type="submit" class="btn btn-primary">返信送信</button>
+                            <button type="button" class="btn btn-secondary" onclick="markAsRead()">既読にする</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // グローバル変数
+        let messages = [];
+        let currentMessage = null;
+        let refreshInterval = null;
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMessages();
+            setupEventListeners();
+
+            // 10秒ごとに自動更新
+            refreshInterval = setInterval(loadMessages, 10000);
+        });
+
+        // イベントリスナーの設定
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', filterMessages);
+            document.getElementById('replyForm').addEventListener('submit', handleReply);
+        }
+
+        // メッセージ一覧を読み込み
+        async function loadMessages() {
+            try {
+                const response = await fetch('/api/messages');
+                const result = await response.json();
+
+                if (result.success) {
+                    messages = result.messages;
+                    updateStats();
+                    displayMessageList();
+                }
+            } catch (error) {
+                console.error('メッセージ読み込みエラー:', error);
+            }
+        }
+
+        // 統計情報を更新
+        function updateStats() {
+            const unreadCount = messages.filter(m => !m.is_read).length;
+            const totalCount = messages.length;
+            const today = new Date().toDateString();
+            const todayCount = messages.filter(m =>
+                new Date(m.timestamp).toDateString() === today
+            ).length;
+
+            document.getElementById('unreadCount').textContent = unreadCount;
+            document.getElementById('totalCount').textContent = totalCount;
+            document.getElementById('todayCount').textContent = todayCount;
+        }
+
+        // メッセージリストを表示
+        function displayMessageList() {
+            const messageList = document.getElementById('messageList');
+            messageList.innerHTML = '';
+
+            // 日付でソート（新しい順）
+            const sortedMessages = [...messages].sort((a, b) =>
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
+
+            sortedMessages.forEach(msg => {
+                const li = document.createElement('li');
+                li.className = `message-item ${!msg.is_read ? 'unread' : ''}`;
+                li.onclick = () => selectMessage(msg);
+
+                const time = new Date(msg.timestamp).toLocaleString('ja-JP', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                li.innerHTML = `
+                    <div class="message-sender">${msg.sender_name || 'ゲスト'}</div>
+                    <div class="message-preview">${msg.message.substring(0, 50)}${msg.message.length > 50 ? '...' : ''}</div>
+                    <div class="message-time">${time}</div>
+                `;
+
+                messageList.appendChild(li);
+            });
+        }
+
+        // メッセージを選択
+        function selectMessage(message) {
+            currentMessage = message;
+
+            // リストのアクティブ状態を更新
+            document.querySelectorAll('.message-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // 詳細表示
+            showMessageDetail(message);
+
+            // 自動的に既読にする
+            if (!message.is_read) {
+                markAsRead();
+            }
+        }
+
+        // メッセージ詳細を表示
+        function showMessageDetail(message) {
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('messageDetail').style.display = 'flex';
+
+            // 送信者情報
+            document.getElementById('senderName').textContent = message.sender_name || 'ゲスト';
+            document.getElementById('senderEmail').textContent = message.sender_email || 'メールアドレスなし';
+
+            // アバターの初期文字
+            const initial = (message.sender_name || 'G')[0].toUpperCase();
+            document.getElementById('senderAvatar').textContent = initial;
+
+            // ステータス
+            const statusEl = document.getElementById('messageStatus');
+            if (message.is_read) {
+                statusEl.className = 'message-status status-read';
+                statusEl.textContent = '既読';
+            } else {
+                statusEl.className = 'message-status status-unread';
+                statusEl.textContent = '未読';
+            }
+
+            // メッセージ内容
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = '';
+
+            // ユーザーメッセージ
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-message user';
+            userMsg.innerHTML = `
+                <div class="message-bubble">
+                    <div class="message-text">${message.message.replace(/\n/g, '<br>')}</div>
+                    <div class="message-timestamp">${new Date(message.timestamp).toLocaleString('ja-JP')}</div>
+                </div>
+            `;
+            container.appendChild(userMsg);
+
+            // 管理者の返信があれば表示
+            if (message.reply_message) {
+                const adminMsg = document.createElement('div');
+                adminMsg.className = 'chat-message admin';
+                adminMsg.innerHTML = `
+                    <div class="message-bubble">
+                        <div class="message-text">${message.reply_message.replace(/\n/g, '<br>')}</div>
+                        <div class="message-timestamp">${new Date(message.replied_at).toLocaleString('ja-JP')}</div>
+                    </div>
+                `;
+                container.appendChild(adminMsg);
+            }
+        }
+
+        // メッセージを既読にする
+        async function markAsRead() {
+            if (!currentMessage || currentMessage.is_read) return;
+
+            try {
+                const response = await fetch(`/api/messages/${currentMessage.id}/read`, {
+                    method: 'PUT'
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    currentMessage.is_read = true;
+                    loadMessages(); // リストを更新
+                }
+            } catch (error) {
+                console.error('既読更新エラー:', error);
+            }
+        }
+
+        // 返信処理
+        async function handleReply(e) {
+            e.preventDefault();
+
+            if (!currentMessage) return;
+
+            const replyInput = document.getElementById('replyInput');
+            const reply = replyInput.value.trim();
+
+            if (!reply) return;
+
+            try {
+                const response = await fetch(`/api/messages/${currentMessage.id}/reply`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reply })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    replyInput.value = '';
+                    alert('返信を送信しました');
+                    loadMessages();
+
+                    // 返信を画面に追加
+                    const container = document.getElementById('messagesContainer');
+                    const adminMsg = document.createElement('div');
+                    adminMsg.className = 'chat-message admin';
+                    adminMsg.innerHTML = `
+                        <div class="message-bubble">
+                            <div class="message-text">${reply.replace(/\n/g, '<br>')}</div>
+                            <div class="message-timestamp">${new Date().toLocaleString('ja-JP')}</div>
+                        </div>
+                    `;
+                    container.appendChild(adminMsg);
+                }
+            } catch (error) {
+                console.error('返信エラー:', error);
+                alert('返信の送信に失敗しました');
+            }
+        }
+
+        // メッセージをフィルタ
+        function filterMessages() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const messageItems = document.querySelectorAll('.message-item');
+
+            messageItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // ページ離脱時にインターバルをクリア
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>

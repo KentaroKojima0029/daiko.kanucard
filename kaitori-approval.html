@@ -97,6 +97,36 @@
             height: 18px;
         }
 
+        .btn-logout {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-logout svg {
+            width: 18px;
+            height: 18px;
+        }
+
         .content {
             padding: 40px;
         }
@@ -388,6 +418,12 @@
                     </svg>
                     ホームへ戻る
                 </a>
+                <button onclick="handleLogout()" class="btn-logout">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                    </svg>
+                    ログアウト
+                </button>
                 <h1>買取承認</h1>
                 <p>カード査定結果をご確認ください</p>
             </div>
@@ -478,7 +514,7 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('id');
+        const token = urlParams.get('id') || urlParams.get('key'); // id または key パラメータをサポート
         let requestData = null;
 
         // ページ読み込み時
@@ -487,6 +523,50 @@
                 showError('無効なURLです');
                 return;
             }
+
+            // 認証チェック - セッションストレージに認証トークンがあるか確認
+            const customerAuth = sessionStorage.getItem('customer_auth_token');
+
+            if (!customerAuth) {
+                // 未認証の場合、ログインページにリダイレクト
+                window.location.href = `/customer-approval-login.html?id=${token}`;
+                return;
+            }
+
+            // トークンの検証（簡易的なチェック）
+            try {
+                // JWTトークンのペイロード部分をデコード（簡易的）
+                const tokenParts = customerAuth.split('.');
+                if (tokenParts.length === 3) {
+                    const payload = JSON.parse(atob(tokenParts[1]));
+
+                    // トークンタイプと承認キーをチェック
+                    if (payload.type !== 'kaitori_approval' || payload.approvalKey !== token) {
+                        // 承認キーが一致しない場合は再ログインが必要
+                        sessionStorage.removeItem('customer_auth_token');
+                        sessionStorage.removeItem('customer_email');
+                        window.location.href = `/customer-approval-login.html?key=${token}`;
+                        return;
+                    }
+
+                    // トークンの有効期限をチェック
+                    if (payload.exp && payload.exp * 1000 < Date.now()) {
+                        // トークンが期限切れ
+                        sessionStorage.removeItem('customer_auth_token');
+                        sessionStorage.removeItem('customer_email');
+                        window.location.href = `/customer-approval-login.html?key=${token}`;
+                        return;
+                    }
+                }
+            } catch (e) {
+                // トークンのデコードに失敗した場合は再ログイン
+                sessionStorage.removeItem('customer_auth_token');
+                sessionStorage.removeItem('customer_email');
+                window.location.href = `/customer-approval-login.html?key=${token}`;
+                return;
+            }
+
+            // 認証済みの場合、データを読み込む
             loadRequestData();
         });
 
@@ -650,6 +730,18 @@
             setTimeout(() => {
                 successMessage.classList.remove('show');
             }, 5000);
+        }
+
+        // ログアウト処理
+        function handleLogout() {
+            if (confirm('ログアウトしますか？')) {
+                // セッションをクリア
+                sessionStorage.removeItem('customer_auth_token');
+                sessionStorage.removeItem('customer_email');
+
+                // ログインページにリダイレクト
+                window.location.href = `/customer-approval-login.html?id=${token}`;
+            }
         }
     </script>
 </body>

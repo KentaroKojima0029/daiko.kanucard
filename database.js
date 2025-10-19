@@ -411,6 +411,7 @@ module.exports = {
   db,
   init,
   initDatabase,
+  getDatabase: () => db,
   get userQueries() { return userQueries; },
   get verificationQueries() { return verificationQueries; },
   get submissionQueries() { return submissionQueries; },

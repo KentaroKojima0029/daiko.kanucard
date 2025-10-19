@@ -203,8 +203,13 @@
             flex-direction: row-reverse;
         }
 
-        .message-content {
+        .message-wrapper {
             max-width: 70%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-content {
             padding: 12px 16px;
             border-radius: 16px;
             word-wrap: break-word;
@@ -224,19 +229,24 @@
             border-bottom-right-radius: 4px;
         }
 
-        .message-time {
-            font-size: 11px;
-            opacity: 0.7;
+        /* 枠外の時間表示とステータス表示 */
+        .message-info-wrapper {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
             margin-top: 4px;
+            padding-right: 4px;
         }
 
-        .message.support .message-time {
-            color: #64748b;
+        .message-time-outside {
+            font-size: 11px;
+            color: #94a3b8;
         }
 
-        .message.user .message-time {
-            color: rgba(255, 255, 255, 0.9);
-            text-align: right;
+        .message-status {
+            font-size: 11px;
+            font-weight: 500;
         }
 
         /* 日付区切り */
@@ -489,7 +499,7 @@
                 max-width: 100%;
             }
 
-            .message-content {
+            .message-wrapper {
                 max-width: 85%;
             }
 
@@ -567,10 +577,12 @@
 
                 <!-- サポートからの初期メッセージ -->
                 <div class="message support">
-                    <div class="message-content">
-                        こんにちは！PSA代行サービスのサポートです。
-                        <br>ご相談や買取のお問い合わせなど、お気軽にメッセージをお送りください。
-                        <div class="message-time">10:00</div>
+                    <div class="message-wrapper">
+                        <div class="message-content">
+                            こんにちは！PSA代行サービスのサポートです。
+                            <br>ご相談や買取のお問い合わせなど、お気軽にメッセージをお送りください。
+                        </div>
+                        <div class="message-time-outside" style="font-size: 11px; color: #94a3b8; margin-top: 4px; padding-left: 4px;">10:00</div>
                     </div>
                 </div>
 
@@ -656,20 +668,50 @@
         const userAvatar = document.getElementById('userAvatar');
 
         // 初期化
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             checkAuth();
             initializeEventListeners();
-            loadMessages();
+            await loadMessages();
         });
 
         // 認証チェック
         function checkAuth() {
-            const savedUser = localStorage.getItem('chatUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
+            // sessionStorageからユーザー情報を取得
+            const userData = sessionStorage.getItem('user_data');
+            const userEmail = sessionStorage.getItem('user_email');
+
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    currentUser = {
+                        id: user.id || 'user_' + Date.now(),
+                        name: `${user.lastName || ''} ${user.firstName || ''}`.trim() || userEmail,
+                        email: userEmail,
+                        avatar: '👤'
+                    };
+                } catch (e) {
+                    currentUser = {
+                        id: 'user_' + Date.now(),
+                        name: userEmail || 'ゲスト',
+                        email: userEmail || '',
+                        avatar: '👤'
+                    };
+                }
                 updateUserDisplay();
             } else {
-                // 未ログインの場合はモーダル表示
+                // ログインしていない場合でもゲストとして利用可能
+                currentUser = {
+                    id: 'guest_' + Date.now(),
+                    name: 'ゲスト',
+                    email: '',
+                    avatar: '👤'
+                };
+                updateUserDisplay();
+            }
+
+            // ログインモーダルは表示しない
+            if (false) {
+                // 削除（モーダル表示を無効化）
                 setTimeout(() => {
                     loginModal.classList.add('show');
                 }, 1000);
@@ -681,7 +723,9 @@
             // メッセージ入力
             messageInput.addEventListener('input', () => {
                 adjustTextareaHeight();
-                btnSend.disabled = !messageInput.value.trim();
+                const hasText = messageInput.value.trim().length > 0;
+                btnSend.disabled = !hasText;
+                console.log('Input changed, hasText:', hasText, 'disabled:', btnSend.disabled);
             });
 
             // Enterキーで送信（Shift+Enterで改行）
@@ -695,7 +739,10 @@
             });
 
             // 送信ボタン
-            btnSend.addEventListener('click', sendMessage);
+            btnSend.addEventListener('click', () => {
+                console.log('Send button clicked');
+                sendMessage();
+            });
 
             // ファイル添付ボタン
             btnAttach.addEventListener('click', () => {
@@ -724,43 +771,87 @@
 
         // メッセージ送信
         async function sendMessage() {
+            console.log('sendMessage called, input value:', messageInput.value);
+
             if (!currentUser) {
-                loginModal.classList.add('show');
-                return;
+                // ログインしていない場合はゲストとして処理
+                currentUser = {
+                    id: 'guest_' + Date.now(),
+                    name: 'ゲスト',
+                    email: '',
+                    avatar: '👤'
+                };
+                updateUserDisplay();
             }
 
             const messageText = messageInput.value.trim();
-            if (!messageText) return;
+            if (!messageText) {
+                console.log('No text to send');
+                return;
+            }
 
             // UIをリセット
             messageInput.value = '';
             messageInput.style.height = 'auto';
             btnSend.disabled = true;
 
-            // メッセージを追加
-            addMessage({
-                id: Date.now(),
-                text: messageText,
-                sender: 'user',
-                timestamp: new Date(),
-                userName: currentUser.name
-            });
-
-            // サーバーに送信（バックエンドが実装されたら）
             try {
-                await sendMessageToServer(messageText);
-                // サポートからの自動返信（デモ用）
-                simulateSupportReply();
+                // サーバーにメッセージを送信
+                const response = await fetch('/api/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: currentUser.email,
+                        name: currentUser.name,
+                        message: messageText
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // メッセージを画面に追加（未読状態で）
+                    const newMessage = {
+                        id: result.messageId,
+                        text: messageText,
+                        sender: 'user',
+                        timestamp: new Date(),
+                        userName: currentUser.name,
+                        isRead: false
+                    };
+                    addMessage(newMessage);
+
+                    // メッセージ履歴を保存
+                    if (currentUser.email) {
+                        localStorage.setItem(`chatMessages_${currentUser.email}`, JSON.stringify(messages));
+                    }
+
+                    // 5秒ごとに既読状態をチェック
+                    startReadStatusCheck(result.messageId);
+                } else {
+                    console.error('メッセージ送信失敗:', result.error);
+                    alert('メッセージの送信に失敗しました');
+                }
             } catch (error) {
                 console.error('メッセージ送信エラー:', error);
+                alert('ネットワークエラーが発生しました');
+            } finally {
+                // 送信ボタンは入力欄が空なので無効のままにする
+                btnSend.disabled = messageInput.value.trim().length === 0;
             }
         }
 
         // 画像送信
         async function sendImage(file) {
             if (!currentUser) {
-                loginModal.classList.add('show');
-                return;
+                // ログインしていない場合はゲストとして処理
+                currentUser = {
+                    id: 'guest_' + Date.now(),
+                    name: 'ゲスト',
+                    email: '',
+                    avatar: '👤'
+                };
+                updateUserDisplay();
             }
 
             // 画像をBase64に変換
@@ -774,18 +865,33 @@
                     userName: currentUser.name
                 });
 
-                // サポートからの自動返信（デモ用）
-                simulateSupportReply('画像を確認しました。');
+                // 自動返信は送らない
             };
             reader.readAsDataURL(file);
         }
 
         // メッセージをUIに追加
         function addMessage(message) {
-            messages.push(message);
+            // 既に表示されているメッセージかチェック
+            if (message.id && document.querySelector(`[data-message-id="${message.id}"]`)) {
+                console.log('メッセージは既に表示されています:', message.id);
+                return;
+            }
+
+            // メッセージ配列に追加（重複チェック）
+            if (!messages.find(m => m.id === message.id)) {
+                messages.push(message);
+            }
 
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${message.sender}`;
+            if (message.id) {
+                messageDiv.setAttribute('data-message-id', message.id);
+            }
+
+            // メッセージラッパー（コンテンツとステータスを含む）
+            const messageWrapper = document.createElement('div');
+            messageWrapper.className = 'message-wrapper';
 
             const contentDiv = document.createElement('div');
             contentDiv.className = 'message-content';
@@ -793,18 +899,55 @@
             if (message.text) {
                 contentDiv.innerHTML = `
                     ${message.text.replace(/\n/g, '<br>')}
-                    <div class="message-time">${formatTime(message.timestamp)}</div>
                 `;
             }
 
             if (message.image) {
                 contentDiv.innerHTML = `
                     <img src="${message.image}" class="message-image" onclick="openImage('${message.image}')" alt="送信画像">
-                    <div class="message-time">${formatTime(message.timestamp)}</div>
                 `;
             }
 
-            messageDiv.appendChild(contentDiv);
+            messageWrapper.appendChild(contentDiv);
+
+            // 時間と既読・未読ステータスを枠外に表示（ユーザーのメッセージのみ）
+            if (message.sender === 'user') {
+                const statusWrapper = document.createElement('div');
+                statusWrapper.className = 'message-info-wrapper';
+                statusWrapper.style.cssText = `
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    gap: 8px;
+                    margin-top: 4px;
+                    padding-right: 4px;
+                `;
+
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'message-time-outside';
+                timeDiv.style.cssText = 'font-size: 11px; color: #94a3b8;';
+                timeDiv.textContent = formatTime(message.timestamp);
+
+                const statusDiv = document.createElement('div');
+                statusDiv.className = 'message-status';
+                const status = message.isRead ? '既読' : '未読';
+                const statusColor = message.isRead ? '#10b981' : '#6b7280';
+                statusDiv.style.cssText = `font-size: 11px; color: ${statusColor}; font-weight: 500;`;
+                statusDiv.textContent = status;
+
+                statusWrapper.appendChild(timeDiv);
+                statusWrapper.appendChild(statusDiv);
+                messageWrapper.appendChild(statusWrapper);
+            } else {
+                // サポートメッセージの時間表示
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'message-time-outside';
+                timeDiv.style.cssText = 'font-size: 11px; color: #94a3b8; margin-top: 4px; padding-left: 4px;';
+                timeDiv.textContent = formatTime(message.timestamp);
+                messageWrapper.appendChild(timeDiv);
+            }
+
+            messageDiv.appendChild(messageWrapper);
 
             // タイピングインジケーターの前に挿入
             messagesContainer.insertBefore(messageDiv, typingIndicator);
@@ -814,30 +957,92 @@
         }
 
         // サポートからの返信をシミュレート
+        // 既読状態をチェック
+        let readStatusIntervals = {};
+
+        function startReadStatusCheck(messageId) {
+            // 既存のチェックがあればクリア
+            if (readStatusIntervals[messageId]) {
+                clearInterval(readStatusIntervals[messageId]);
+            }
+
+            // 5秒ごとに既読状態をチェック（最大30回 = 2分30秒）
+            let checkCount = 0;
+            readStatusIntervals[messageId] = setInterval(async () => {
+                checkCount++;
+
+                try {
+                    const response = await fetch('/api/messages');
+                    const result = await response.json();
+
+                    if (result.success) {
+                        const message = result.messages.find(m => m.id === messageId);
+                        if (message && message.is_read) {
+                            // 既読になったら表示を更新
+                            updateMessageReadStatus(messageId, true, message.read_at);
+                            clearInterval(readStatusIntervals[messageId]);
+                            delete readStatusIntervals[messageId];
+                        }
+
+                        // 返信があれば表示
+                        if (message && message.reply_message) {
+                            addMessage({
+                                id: Date.now(),
+                                text: message.reply_message,
+                                sender: 'support',
+                                timestamp: new Date(message.replied_at),
+                                userName: 'サポート'
+                            });
+                            clearInterval(readStatusIntervals[messageId]);
+                            delete readStatusIntervals[messageId];
+                        }
+                    }
+                } catch (error) {
+                    console.error('既読状態チェックエラー:', error);
+                }
+
+                // 30回チェックしたら停止
+                if (checkCount >= 30) {
+                    clearInterval(readStatusIntervals[messageId]);
+                    delete readStatusIntervals[messageId];
+                }
+            }, 5000);
+        }
+
+        // メッセージの既読状態を更新
+        function updateMessageReadStatus(messageId, isRead, readAt) {
+            const messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageEl) {
+                const statusEl = messageEl.querySelector('.message-status');
+                if (statusEl) {
+                    if (isRead) {
+                        statusEl.textContent = '既読';
+                        statusEl.style.color = '#10b981';
+                        if (readAt) {
+                            const readTime = new Date(readAt).toLocaleTimeString('ja-JP', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                            statusEl.title = `既読 ${readTime}`;
+                        }
+                    }
+                }
+            }
+
+            // ローカルストレージのメッセージも更新
+            const messageIndex = messages.findIndex(m => m.id === messageId);
+            if (messageIndex !== -1) {
+                messages[messageIndex].isRead = isRead;
+                if (currentUser.email) {
+                    localStorage.setItem(`chatMessages_${currentUser.email}`, JSON.stringify(messages));
+                }
+            }
+        }
+
+        // 旧自動返信関数（無効化）
         function simulateSupportReply(customMessage) {
-            // タイピングインジケーターを表示
-            typingIndicator.classList.add('show');
-            scrollToBottom();
-
-            setTimeout(() => {
-                typingIndicator.classList.remove('show');
-
-                const replies = customMessage ? [customMessage] : [
-                    'ご連絡ありがとうございます。確認させていただきます。',
-                    'お問い合わせありがとうございます。詳細を確認いたします。',
-                    'メッセージを受け取りました。少々お待ちください。',
-                    'ご質問について確認中です。しばらくお待ちください。'
-                ];
-
-                const replyText = customMessage || replies[Math.floor(Math.random() * replies.length)];
-
-                addMessage({
-                    id: Date.now(),
-                    text: replyText,
-                    sender: 'support',
-                    timestamp: new Date()
-                });
-            }, 1500);
+            // 何もしない - 自動返信は無効化
+            return;
         }
 
         // ログイン処理
@@ -880,8 +1085,98 @@
 
         // メッセージ履歴の読み込み
         async function loadMessages() {
-            // バックエンドから履歴を取得（実装後）
-            // デモ用データは初期メッセージのみ
+            try {
+                // ユーザーのメールアドレスを取得
+                const userEmail = currentUser?.email || sessionStorage.getItem('user_email');
+
+                // すべてのメッセージまたは特定ユーザーのメッセージを取得
+                let url = '/api/messages';
+                if (userEmail) {
+                    url += `?email=${encodeURIComponent(userEmail)}`;
+                }
+
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.success && result.messages) {
+                    console.log(`メッセージ履歴を取得: ${result.messages.length}件`);
+
+                    // タイピングインジケーター以外の動的に追加されたメッセージをクリア
+                    const dynamicMessages = document.querySelectorAll('.message[data-message-id]');
+                    dynamicMessages.forEach(msg => {
+                        msg.remove();
+                    });
+
+                    // messages配列もクリア（初期メッセージを保持）
+                    messages = [];
+
+                    // サーバーから取得したメッセージを表示（新しい順から古い順に並び替え）
+                    const sortedMessages = result.messages.sort((a, b) =>
+                        new Date(a.timestamp) - new Date(b.timestamp)
+                    );
+
+                    sortedMessages.forEach(msg => {
+                        // ユーザーが送信したメッセージを追加
+                        const messageObj = {
+                            id: msg.id,
+                            text: msg.message,
+                            sender: 'user',
+                            timestamp: new Date(msg.timestamp),
+                            userName: msg.sender_name || currentUser?.name || 'ゲスト',
+                            isRead: msg.is_read === 1
+                        };
+
+                        // メッセージを追加
+                        addMessage(messageObj);
+
+                        // 既読状態のチェックを開始（未読の場合）
+                        if (!messageObj.isRead) {
+                            startReadStatusCheck(messageObj.id);
+                        }
+
+                        // 返信がある場合は表示
+                        if (msg.reply_message) {
+                            const replyObj = {
+                                id: 'reply_' + msg.id,
+                                text: msg.reply_message,
+                                sender: 'support',
+                                timestamp: new Date(msg.replied_at || msg.timestamp),
+                                userName: 'サポート'
+                            };
+
+                            // 返信を追加（重複チェック）
+                            if (!messages.find(m => m.id === replyObj.id)) {
+                                addMessage(replyObj);
+                            }
+                        }
+                    });
+
+                    // スクロールを最下部へ
+                    scrollToBottom();
+                }
+            } catch (error) {
+                console.error('メッセージ履歴の取得に失敗:', error);
+
+                // エラー時はローカルストレージから復元を試みる
+                if (currentUser && currentUser.email) {
+                    const savedMessages = localStorage.getItem(`chatMessages_${currentUser.email}`);
+                    if (savedMessages) {
+                        try {
+                            const localMessages = JSON.parse(savedMessages);
+                            console.log(`ローカルストレージから復元: ${localMessages.length}件`);
+
+                            localMessages.forEach(msg => {
+                                // 重複チェック
+                                if (!messages.find(m => m.id === msg.id)) {
+                                    addMessage(msg);
+                                }
+                            });
+                        } catch (e) {
+                            console.error('ローカルストレージの解析エラー:', e);
+                        }
+                    }
+                }
+            }
         }
 
         // サーバーへメッセージ送信

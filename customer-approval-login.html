@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PSA代行サービス - ログイン</title>
+    <title>買取承認 - ログイン | PSA代行サービス</title>
     <style>
         * {
             margin: 0;
@@ -49,34 +49,8 @@
         .header {
             background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
             color: white;
-            padding: 40px 32px;
+            padding: 36px 32px;
             text-align: center;
-            position: relative;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
-            opacity: 0.1;
-        }
-
-        .logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            position: relative;
-            z-index: 1;
         }
 
         .header h1 {
@@ -84,15 +58,11 @@
             font-weight: 700;
             margin-bottom: 8px;
             letter-spacing: 0.02em;
-            position: relative;
-            z-index: 1;
         }
 
         .header p {
             font-size: 0.95rem;
             opacity: 0.9;
-            position: relative;
-            z-index: 1;
         }
 
         .content {
@@ -201,12 +171,6 @@
 
         .form-input.error {
             border-color: #ef4444;
-        }
-
-        .input-hint {
-            font-size: 12px;
-            color: #64748b;
-            margin-top: 6px;
         }
 
         .otp-container {
@@ -387,26 +351,6 @@
             text-decoration: underline;
         }
 
-        .quick-links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .quick-link {
-            color: #64748b;
-            text-decoration: none;
-            font-size: 13px;
-            transition: color 0.2s;
-        }
-
-        .quick-link:hover {
-            color: #3b82f6;
-        }
-
         @media (max-width: 480px) {
             .content {
                 padding: 32px 24px;
@@ -421,10 +365,6 @@
             .step-line {
                 width: 40px;
             }
-
-            .header {
-                padding: 32px 24px;
-            }
         }
     </style>
 </head>
@@ -432,9 +372,8 @@
     <div class="container">
         <div class="card">
             <div class="header">
-                <div class="logo">🎯</div>
-                <h1>PSA代行サービス</h1>
-                <p>お客様専用ポータルへようこそ</p>
+                <h1>買取承認システム</h1>
+                <p>ご本人様確認のため認証をお願いします</p>
             </div>
 
             <div class="content">
@@ -455,7 +394,7 @@
                     <form id="emailForm">
                         <div class="form-group">
                             <label class="form-label" for="email">
-                                メールアドレス
+                                Shopifyに登録されているメールアドレス
                             </label>
                             <input
                                 type="email"
@@ -465,20 +404,11 @@
                                 required
                                 autocomplete="email"
                             >
-                            <div class="input-hint">
-                                ※ Shopifyストアにご登録のメールアドレスをご入力ください
-                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary" id="sendOtpBtn">
                             認証コードを送信
                         </button>
                     </form>
-
-                    <div class="quick-links">
-                        <a href="/admin/index.html" class="quick-link">管理者ログイン</a>
-                        <a href="https://daiko.kanucard.com" class="quick-link">公式サイト</a>
-                        <a href="/chat" class="quick-link">お問い合わせ</a>
-                    </div>
                 </div>
 
                 <!-- ステップ2: OTP入力 -->
@@ -521,10 +451,6 @@
 
             <div class="footer">
                 <p>
-                    初めてご利用の方は、Shopifyストアでアカウント作成後<br>
-                    ログインしてください
-                </p>
-                <p style="margin-top: 12px;">
                     ご不明な点がございましたら<br>
                     <a href="mailto:collection@kanucard.com">collection@kanucard.com</a><br>
                     までお問い合わせください
@@ -538,29 +464,22 @@
         let resendTimer = null;
         let resendCountdown = 60;
 
+        // URLパラメータから承認キーを取得（idまたはkeyをサポート）
+        const urlParams = new URLSearchParams(window.location.search);
+        const approvalKey = urlParams.get('id') || urlParams.get('key');
+
         // 初期化
         document.addEventListener('DOMContentLoaded', () => {
-            // 既にログイン済みの場合はホーム画面へリダイレクト
-            const authToken = sessionStorage.getItem('auth_token');
-            if (authToken) {
-                // トークンの有効性を簡易チェック
-                try {
-                    const tokenParts = authToken.split('.');
-                    if (tokenParts.length === 3) {
-                        const payload = JSON.parse(atob(tokenParts[1]));
+            if (!approvalKey) {
+                showError('承認キーが指定されていません。メールのリンクから再度アクセスしてください。');
+                document.getElementById('emailForm').style.display = 'none';
+                return;
+            }
 
-                        // 有効期限チェック
-                        if (payload.exp && payload.exp * 1000 > Date.now()) {
-                            // 有効なトークンがある場合はホームへ
-                            window.location.href = '/home.html';
-                            return;
-                        }
-                    }
-                } catch (e) {
-                    // トークンが無効な場合はクリア
-                    sessionStorage.removeItem('auth_token');
-                    sessionStorage.removeItem('user_email');
-                }
+            // 既にログイン済みの場合は承認画面へリダイレクト
+            const customerAuth = sessionStorage.getItem('customer_auth_token');
+            if (customerAuth) {
+                redirectToApprovalPage();
             }
 
             setupOtpInputs();
@@ -584,20 +503,21 @@
             sendBtn.innerHTML = '<span class="loading-spinner"></span>送信中...';
 
             try {
-                const response = await fetch('/api/auth/verify-shopify-customer', {
+                const response = await fetch('/api/auth/customer-otp', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        email: email
+                        email: email,
+                        approvalKey: approvalKey
                     })
                 });
 
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.message || '認証コードの送信に失敗しました');
+                    throw new Error(data.error || '認証コードの送信に失敗しました');
                 }
 
                 showSuccess('認証コードを送信しました');
@@ -605,12 +525,7 @@
                 startResendTimer();
 
             } catch (error) {
-                // 未登録ユーザーの場合は特別な処理
-                if (error.message === '登録されていないメールアドレスです') {
-                    showUnregisteredMessage();
-                } else {
-                    showError(error.message);
-                }
+                showError(error.message);
                 sendBtn.disabled = false;
                 sendBtn.innerHTML = '認証コードを送信';
             }
@@ -632,48 +547,35 @@
             verifyBtn.innerHTML = '<span class="loading-spinner"></span>確認中...';
 
             try {
-                console.log('OTP検証開始:', { email: currentEmail, otp });
-
-                const response = await fetch('/api/auth/verify-otp', {
+                const response = await fetch('/api/auth/verify-customer-otp', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
                         email: currentEmail,
-                        otp: otp
+                        otp: otp,
+                        approvalKey: approvalKey
                     })
                 });
 
-                console.log('Response status:', response.status);
                 const data = await response.json();
-                console.log('Response data:', data);
 
                 if (!response.ok) {
-                    throw new Error(data.message || '認証に失敗しました');
-                }
-
-                // データの存在確認
-                if (!data.token || !data.user) {
-                    console.error('レスポンスデータが不完全:', data);
-                    throw new Error('認証レスポンスが不正です');
+                    throw new Error(data.error || '認証に失敗しました');
                 }
 
                 // セッションに保存
-                sessionStorage.setItem('auth_token', data.token);
-                sessionStorage.setItem('user_email', currentEmail);
-                sessionStorage.setItem('user_data', JSON.stringify(data.user));
+                sessionStorage.setItem('customer_auth_token', data.token);
+                sessionStorage.setItem('customer_email', currentEmail);
 
-                console.log('セッション保存完了、リダイレクト準備');
-                showSuccess('認証に成功しました。ホーム画面へ移動します...');
+                showSuccess('認証に成功しました。承認画面へ移動します...');
 
                 setTimeout(() => {
-                    console.log('リダイレクト実行: /home.html');
-                    window.location.href = '/home.html';
+                    redirectToApprovalPage();
                 }, 1500);
 
             } catch (error) {
-                console.error('OTP検証エラー:', error);
                 showError(error.message);
                 verifyBtn.disabled = false;
                 verifyBtn.innerHTML = 'ログイン';
@@ -699,20 +601,21 @@
             resendBtn.disabled = true;
 
             try {
-                const response = await fetch('/api/auth/verify-shopify-customer', {
+                const response = await fetch('/api/auth/customer-otp', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        email: currentEmail
+                        email: currentEmail,
+                        approvalKey: approvalKey
                     })
                 });
 
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.message || '認証コードの再送信に失敗しました');
+                    throw new Error(data.error || '認証コードの再送信に失敗しました');
                 }
 
                 showInfo('認証コードを再送信しました');
@@ -852,6 +755,11 @@
             }
         }
 
+        // 承認画面へリダイレクト
+        function redirectToApprovalPage() {
+            window.location.href = `/kaitori-approval.html?id=${approvalKey}`;
+        }
+
         // メールアドレス検証
         function validateEmail(email) {
             const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -886,23 +794,6 @@
             setTimeout(() => {
                 infoMessage.classList.remove('show');
             }, 3000);
-        }
-
-        // 未登録ユーザーメッセージ表示
-        function showUnregisteredMessage() {
-            const errorMessage = document.getElementById('errorMessage');
-            errorMessage.innerHTML = `
-                <div>
-                    <strong>アカウントが見つかりません</strong><br>
-                    このメールアドレスは登録されていません。<br>
-                    <a href="https://shop.kanucard.com/account/login"
-                       style="color: #3b82f6; font-weight: 600; text-decoration: underline; margin-top: 8px; display: inline-block;"
-                       target="_blank">
-                        こちらからアカウントを作成してください →
-                    </a>
-                </div>
-            `;
-            errorMessage.classList.add('show');
         }
     </script>
 </body>

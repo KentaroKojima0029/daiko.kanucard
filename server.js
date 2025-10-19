@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const { init: initDatabase, submissionQueries, kaitoriQueries } = require('./database');
+const { init: initDatabase, submissionQueries, kaitoriQueries, getDatabase } = require('./database');
 const { getCustomerById, getCustomerOrders, listAllCustomers } = require('./shopify-client');
 const logger = require('./logger');
 const { sendEmail, validateEmailConfig } = require('./email-service');
@@ -770,15 +770,25 @@ app.post('/api/auth/verify-shopify-customer', async (req, res) => {
     const customer = await findCustomerByEmail(email);
 
     if (!customer) {
+      logger.warn('Unregistered email attempted login', { email });
       return res.status(404).json({
         success: false,
-        message: '登録されていないメールアドレスです'
+        message: '登録されていないメールアドレスです',
+        isUnregistered: true,
+        registerUrl: 'https://shop.kanucard.com/account/login'
       });
     }
 
     // OTP生成
     const otp = generateOTP();
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10分間有効
+
+    // デバッグ用: OTPをコンソールに出力
+    console.log('================================');
+    console.log(`🔐 OTP生成: ${otp}`);
+    console.log(`📧 送信先: ${email}`);
+    console.log(`⏱️ 有効期限: ${new Date(expiresAt).toLocaleString('ja-JP')}`);
+    console.log('================================');
 
     // OTPをストアに保存
     otpStore.set(email, {
@@ -824,14 +834,25 @@ app.post('/api/auth/verify-shopify-customer', async (req, res) => {
       </div>
     `;
 
-    await sendEmail({
-      to: email,
-      subject: '【PSA代行サービス】ログイン認証コード',
-      text: `PSA代行サービスのログイン認証コードは ${otp} です。このコードは10分間有効です。`,
-      html: emailHtml
-    });
+    try {
+      await sendEmail({
+        from: process.env.FROM_EMAIL || 'collection@kanucard.com',
+        to: email,
+        subject: '【PSA代行サービス】ログイン認証コード',
+        text: `PSA代行サービスのログイン認証コードは ${otp} です。このコードは10分間有効です。`,
+        html: emailHtml
+      });
 
-    logger.info('OTP sent successfully', { email });
+      logger.info('OTP sent successfully', { email });
+    } catch (emailError) {
+      console.error('Failed to send OTP email:', emailError);
+      logger.error('Failed to send OTP email', {
+        error: emailError.message,
+        email: email,
+        stack: emailError.stack
+      });
+      throw new Error('認証メールの送信に失敗しました。しばらくしてからお試しください。');
+    }
 
     res.json({
       success: true,
@@ -893,8 +914,16 @@ app.post('/api/auth/verify-otp', async (req, res) => {
     }
 
     // OTP検証
+    console.log(`OTP検証: 保存されたOTP="${otpData.otp}", 入力されたOTP="${otp}"`);
+
     if (otpData.otp !== otp) {
       otpData.attempts += 1;
+      logger.warn('Invalid OTP attempt', {
+        email,
+        expectedOtp: otpData.otp,
+        providedOtp: otp,
+        attempts: otpData.attempts
+      });
       return res.status(401).json({
         success: false,
         message: '認証コードが正しくありません',
@@ -1057,6 +1086,437 @@ app.get('/api/shopify/customer/:email/orders', authenticateToken, async (req, re
       success: false,
       error: '注文履歴の取得に失敗しました',
       message: error.message
+    });
+  }
+});
+
+// ===== メッセージ管理API =====
+
+// メッセージテーブルの作成
+const db = getDatabase();
+db.exec(`
+  CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sender_email TEXT,
+    sender_name TEXT,
+    message TEXT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_read BOOLEAN DEFAULT 0,
+    read_at DATETIME,
+    reply_message TEXT,
+    replied_at DATETIME
+  )
+`);
+logger.info('Messages table ready');
+
+// メッセージ送信
+app.post('/api/messages', async (req, res) => {
+  try {
+    const { email, name, message } = req.body;
+
+    if (!message) {
+      return res.status(400).json({
+        success: false,
+        error: 'メッセージが必要です'
+      });
+    }
+
+    const stmt = db.prepare(`
+      INSERT INTO messages (sender_email, sender_name, message)
+      VALUES (?, ?, ?)
+    `);
+
+    try {
+      const result = stmt.run(email || '', name || 'ゲスト', message);
+      const messageId = result.lastInsertRowid;
+      logger.info('Message saved', { id: messageId, sender: name || 'ゲスト' });
+
+      res.json({
+        success: true,
+        messageId: Number(messageId),
+        timestamp: new Date()
+      });
+    } catch (err) {
+      logger.error('Failed to save message', { error: err });
+      return res.status(500).json({
+        success: false,
+        error: 'メッセージの保存に失敗しました'
+      });
+    }
+
+  } catch (error) {
+    logger.error('Message API error', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'システムエラーが発生しました'
+    });
+  }
+});
+
+// メッセージ一覧取得
+app.get('/api/messages', (req, res) => {
+  try {
+    const { email } = req.query;
+
+    let query = `
+      SELECT id, sender_email, sender_name, message, timestamp,
+             is_read, read_at, reply_message, replied_at
+      FROM messages
+    `;
+
+    const params = [];
+
+    // メールアドレスでフィルタ（オプション）
+    if (email) {
+      query += ' WHERE sender_email = ?';
+      params.push(email);
+    }
+
+    query += ' ORDER BY timestamp DESC LIMIT 100';
+
+    const stmt = db.prepare(query);
+    const rows = params.length > 0 ? stmt.all(params[0]) : stmt.all();
+
+    res.json({
+      success: true,
+      messages: rows
+    });
+  } catch (err) {
+    logger.error('Failed to fetch messages', { error: err });
+    return res.status(500).json({
+      success: false,
+      error: 'メッセージの取得に失敗しました'
+    });
+  }
+});
+
+// メッセージを既読にする
+app.put('/api/messages/:id/read', (req, res) => {
+  try {
+    const messageId = req.params.id;
+
+    const stmt = db.prepare(`
+      UPDATE messages
+      SET is_read = 1, read_at = CURRENT_TIMESTAMP
+      WHERE id = ? AND is_read = 0
+    `);
+
+    const result = stmt.run(messageId);
+    logger.info('Message marked as read', { messageId, changes: result.changes });
+
+    res.json({
+      success: true,
+      updated: result.changes > 0
+    });
+  } catch (err) {
+    logger.error('Failed to mark message as read', { error: err, messageId: req.params.id });
+    return res.status(500).json({
+      success: false,
+      error: '既読状態の更新に失敗しました'
+    });
+  }
+});
+
+// 未読メッセージ数取得
+app.get('/api/messages/unread-count', (req, res) => {
+  try {
+    const stmt = db.prepare('SELECT COUNT(*) as count FROM messages WHERE is_read = 0');
+    const row = stmt.get();
+
+    res.json({
+      success: true,
+      count: row.count
+    });
+  } catch (err) {
+    logger.error('Failed to get unread count', { error: err });
+    return res.status(500).json({
+      success: false,
+      error: '未読数の取得に失敗しました'
+    });
+  }
+});
+
+// 管理者がメッセージに返信
+app.post('/api/messages/:id/reply', (req, res) => {
+  try {
+    const messageId = req.params.id;
+    const { reply } = req.body;
+
+    if (!reply) {
+      return res.status(400).json({
+        success: false,
+        error: '返信内容が必要です'
+      });
+    }
+
+    const stmt = db.prepare(`
+      UPDATE messages
+      SET reply_message = ?, replied_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `);
+
+    const result = stmt.run(reply, messageId);
+    logger.info('Reply saved', { messageId, changes: result.changes });
+
+    res.json({
+      success: true,
+      updated: result.changes > 0
+    });
+  } catch (err) {
+    logger.error('Failed to save reply', { error: err, messageId: req.params.id });
+    return res.status(500).json({
+      success: false,
+      error: '返信の保存に失敗しました'
+    });
+  }
+});
+
+// ===== 買取承認用 2段階認証API =====
+
+// 買取承認用OTP送信
+app.post('/api/auth/customer-otp', async (req, res) => {
+  try {
+    const { email, approvalKey } = req.body;
+
+    if (!email || !approvalKey) {
+      return res.status(400).json({
+        success: false,
+        error: 'メールアドレスと承認キーが必要です'
+      });
+    }
+
+    logger.info('Customer OTP request for kaitori approval', { email, hasKey: !!approvalKey });
+
+    // まず承認キーの妥当性を確認（買取依頼が存在するか）
+    const kaitoriRequest = kaitoriQueries.findByToken.get(approvalKey);
+
+    if (!kaitoriRequest) {
+      return res.status(404).json({
+        success: false,
+        error: '無効な承認キーです'
+      });
+    }
+
+    // 有効期限チェック
+    if (new Date(kaitoriRequest.valid_until) < new Date()) {
+      return res.status(400).json({
+        success: false,
+        error: 'この依頼は有効期限切れです'
+      });
+    }
+
+    // Shopifyで顧客が存在するか確認
+    const { findCustomerByEmail } = require('./shopify-client');
+    const customer = await findCustomerByEmail(email);
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        error: 'Shopifyに登録されていないメールアドレスです'
+      });
+    }
+
+    // OTP生成
+    const otp = generateOTP();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10分間有効
+
+    // デバッグ用: OTPをコンソールに出力
+    console.log('================================');
+    console.log(`🔐 OTP生成: ${otp}`);
+    console.log(`📧 送信先: ${email}`);
+    console.log(`⏱️ 有効期限: ${new Date(expiresAt).toLocaleString('ja-JP')}`);
+    console.log('================================');
+
+    // 買取承認用のOTPストアキーを作成（通常のOTPと区別）
+    const storeKey = `kaitori_${email}_${approvalKey}`;
+
+    // OTPをストアに保存
+    otpStore.set(storeKey, {
+      otp,
+      expiresAt,
+      attempts: 0,
+      approvalKey,
+      customerData: {
+        id: customer.id,
+        firstName: customer.firstName || '',
+        lastName: customer.lastName || '',
+        email: customer.email
+      },
+      kaitoriData: {
+        id: kaitoriRequest.id,
+        cardName: kaitoriRequest.card_name
+      }
+    });
+
+    // OTPメール送信
+    const emailHtml = `
+      <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 30px 20px; text-align: center; border-radius: 12px 12px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">買取承認システム</h1>
+          <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0 0; font-size: 16px;">PSA代行サービス</p>
+        </div>
+        <div style="padding: 40px 20px; background-color: #f9fafb;">
+          <h2 style="color: #1a202c; margin-bottom: 20px; font-size: 22px;">認証コード</h2>
+
+          <p style="color: #4a5568; line-height: 1.8; margin-bottom: 30px; font-size: 16px;">
+            <strong>${customer.firstName || ''} ${customer.lastName || ''}</strong> 様<br>
+            買取承認画面へのアクセスに必要な認証コードをお送りします。
+          </p>
+
+          <div style="background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 12px; padding: 30px; margin: 30px 0; text-align: center; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);">
+            <p style="color: white; font-size: 14px; margin: 0 0 15px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">認証コード</p>
+            <div style="background: rgba(255, 255, 255, 0.95); border-radius: 8px; padding: 20px; display: inline-block;">
+              <span style="font-size: 36px; font-weight: bold; color: #2563eb; letter-spacing: 10px; font-family: 'Courier New', monospace;">
+                ${otp}
+              </span>
+            </div>
+          </div>
+
+          <div style="background: #fff; border: 2px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 25px 0;">
+            <h3 style="color: #1e293b; margin: 0 0 12px 0; font-size: 16px;">承認対象カード</h3>
+            <p style="color: #64748b; margin: 0; font-size: 15px; line-height: 1.6;">
+              <strong style="color: #1e293b;">カード名:</strong> ${kaitoriRequest.card_name}<br>
+              ${kaitoriRequest.card_condition ? `<strong style="color: #1e293b;">コンディション:</strong> ${kaitoriRequest.card_condition}` : ''}
+            </p>
+          </div>
+
+          <p style="color: #718096; font-size: 14px; line-height: 1.7; margin: 25px 0;">
+            ※ この認証コードは<strong>10分間</strong>有効です。<br>
+            ※ このメールに心当たりがない場合は、無視してください。<br>
+            ※ 認証コードは他者に共有しないでください。
+          </p>
+        </div>
+        <div style="padding: 20px; background: linear-gradient(135deg, #f3f4f6, #e5e7eb); text-align: center; border-radius: 0 0 12px 12px;">
+          <p style="color: #64748b; font-size: 12px; margin: 0 0 8px 0;">
+            ご不明な点がございましたら
+          </p>
+          <p style="color: #64748b; font-size: 12px; margin: 0;">
+            <a href="mailto:collection@kanucard.com" style="color: #667eea; text-decoration: none; font-weight: 600;">collection@kanucard.com</a><br>
+            までお問い合わせください
+          </p>
+        </div>
+      </div>
+    `;
+
+    await sendEmail({
+      to: email,
+      from: process.env.FROM_EMAIL || 'collection@kanucard.com',
+      subject: '【買取承認】認証コード - PSA代行サービス',
+      text: `PSA代行サービスの買取承認用認証コードは ${otp} です。このコードは10分間有効です。`,
+      html: emailHtml
+    });
+
+    logger.info('Customer OTP sent successfully', { email });
+
+    res.json({
+      success: true,
+      message: '認証コードを送信しました'
+    });
+
+  } catch (error) {
+    console.error('Customer OTP generation error:', error);
+    logger.error('Customer OTP generation error', {
+      error: error.message,
+      email: req.body.email
+    });
+
+    res.status(500).json({
+      success: false,
+      error: 'システムエラーが発生しました'
+    });
+  }
+});
+
+// 買取承認用OTP検証
+app.post('/api/auth/verify-customer-otp', async (req, res) => {
+  try {
+    const { email, otp, approvalKey } = req.body;
+
+    if (!email || !otp || !approvalKey) {
+      return res.status(400).json({
+        success: false,
+        error: '必要な情報が不足しています'
+      });
+    }
+
+    // 買取承認用のOTPストアキーを作成
+    const storeKey = `kaitori_${email}_${approvalKey}`;
+
+    // OTPストアから情報を取得
+    const otpData = otpStore.get(storeKey);
+
+    if (!otpData) {
+      return res.status(400).json({
+        success: false,
+        error: '認証コードの有効期限が切れています'
+      });
+    }
+
+    // 試行回数チェック
+    if (otpData.attempts >= 5) {
+      otpStore.delete(storeKey);
+      return res.status(429).json({
+        success: false,
+        error: '試行回数の上限を超えました。もう一度最初からやり直してください'
+      });
+    }
+
+    // 有効期限チェック
+    if (Date.now() > otpData.expiresAt) {
+      otpStore.delete(storeKey);
+      return res.status(400).json({
+        success: false,
+        error: '認証コードの有効期限が切れています'
+      });
+    }
+
+    // OTP検証
+    if (otpData.otp !== otp) {
+      otpData.attempts += 1;
+      return res.status(401).json({
+        success: false,
+        error: '認証コードが正しくありません',
+        remainingAttempts: 5 - otpData.attempts
+      });
+    }
+
+    // JWT トークン生成（買取承認用）
+    const token = jwt.sign(
+      {
+        type: 'kaitori_approval',
+        customerId: otpData.customerData.id,
+        email: otpData.customerData.email,
+        firstName: otpData.customerData.firstName,
+        lastName: otpData.customerData.lastName,
+        approvalKey: otpData.approvalKey,
+        kaitoriId: otpData.kaitoriData.id
+      },
+      JWT_SECRET,
+      { expiresIn: '1h' } // 買取承認は1時間のみ有効
+    );
+
+    // OTPストアから削除
+    otpStore.delete(storeKey);
+
+    logger.info('Customer authenticated for kaitori approval', { email, kaitoriId: otpData.kaitoriData.id });
+
+    res.json({
+      success: true,
+      message: '認証に成功しました',
+      token,
+      user: otpData.customerData
+    });
+
+  } catch (error) {
+    console.error('Customer OTP verification error:', error);
+    logger.error('Customer OTP verification error', {
+      error: error.message,
+      email: req.body.email
+    });
+
+    res.status(500).json({
+      success: false,
+      error: 'システムエラーが発生しました'
     });
   }
 });
@@ -1439,6 +1899,11 @@ app.get('/messages', (req, res) => {
 // お問い合わせページ（メッセージページへリダイレクト）
 app.get('/contact', (req, res) => {
   res.redirect('/chat');
+});
+
+// ホームページ（認証後のダッシュボード）
+app.get('/home', (req, res) => {
+  res.sendFile(path.join(__dirname, 'home.html'));
 });
 
 // SPAのフォールバック（HTMLファイルのみ）

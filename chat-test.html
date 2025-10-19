@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>チャットテスト</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        textarea {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 60px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover:not(:disabled) {
+            background: #2563eb;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+        .messages {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            background: #e8f4ff;
+            border-radius: 4px;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>チャット送信テスト</h1>
+
+        <div class="status">
+            <p><strong>サーバーURL:</strong> http://localhost:3000/api/messages</p>
+            <p id="connectionStatus">接続状態を確認中...</p>
+        </div>
+
+        <div class="input-group">
+            <textarea id="messageInput" placeholder="メッセージを入力してください"></textarea>
+            <button id="sendBtn" disabled>送信</button>
+        </div>
+
+        <div id="result"></div>
+
+        <div class="messages">
+            <h3>送信履歴</h3>
+            <div id="messageHistory"></div>
+        </div>
+    </div>
+
+    <script>
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const result = document.getElementById('result');
+        const messageHistory = document.getElementById('messageHistory');
+        const connectionStatus = document.getElementById('connectionStatus');
+
+        // サーバー接続確認
+        async function checkConnection() {
+            try {
+                const response = await fetch('/api/messages');
+                if (response.ok) {
+                    connectionStatus.innerHTML = '<span class="success">✅ サーバーに接続済み</span>';
+                } else {
+                    connectionStatus.innerHTML = '<span class="error">⚠️ サーバーエラー: ' + response.status + '</span>';
+                }
+            } catch (error) {
+                connectionStatus.innerHTML = '<span class="error">❌ サーバーに接続できません: ' + error.message + '</span>';
+            }
+        }
+
+        // 入力監視
+        messageInput.addEventListener('input', () => {
+            const hasText = messageInput.value.trim().length > 0;
+            sendBtn.disabled = !hasText;
+            console.log('入力変更 - テキスト:', messageInput.value, '送信ボタン無効:', sendBtn.disabled);
+        });
+
+        // Enterキーで送信
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey && messageInput.value.trim()) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // 送信ボタンクリック
+        sendBtn.addEventListener('click', sendMessage);
+
+        // メッセージ送信
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) {
+                result.innerHTML = '<span class="error">メッセージが空です</span>';
+                return;
+            }
+
+            console.log('送信開始:', text);
+            result.innerHTML = '送信中...';
+            sendBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        name: 'テストユーザー',
+                        message: text
+                    })
+                });
+
+                const data = await response.json();
+                console.log('レスポンス:', data);
+
+                if (data.success) {
+                    result.innerHTML = '<span class="success">✅ 送信成功 (ID: ' + data.messageId + ')</span>';
+
+                    // 履歴に追加
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = 'message';
+                    msgDiv.innerHTML = `
+                        <strong>ID ${data.messageId}:</strong> ${text}
+                        <br><small>${new Date(data.timestamp).toLocaleString()}</small>
+                    `;
+                    messageHistory.insertBefore(msgDiv, messageHistory.firstChild);
+
+                    // 入力欄をクリア
+                    messageInput.value = '';
+                    messageInput.focus();
+                } else {
+                    result.innerHTML = '<span class="error">❌ エラー: ' + (data.error || '不明なエラー') + '</span>';
+                }
+            } catch (error) {
+                console.error('送信エラー:', error);
+                result.innerHTML = '<span class="error">❌ ネットワークエラー: ' + error.message + '</span>';
+            } finally {
+                // ボタン状態を更新
+                sendBtn.disabled = messageInput.value.trim().length === 0;
+            }
+        }
+
+        // 初期化
+        checkConnection();
+        messageInput.focus();
+    </script>
+</body>
+</html>
