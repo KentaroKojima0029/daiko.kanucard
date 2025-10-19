@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理画面 - PSA代行サービス</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            color: white;
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px 20px;
+        }
+
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .card-description {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .card-stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .stat {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .quick-actions {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .quick-actions h2 {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #2c3e50;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダー -->
+        <div class="header">
+            <h1>🎯 管理画面ダッシュボード</h1>
+            <p>PSA代行サービス - 総合管理システム</p>
+        </div>
+
+        <!-- ダッシュボードグリッド -->
+        <div class="dashboard-grid">
+            <!-- 申請管理 -->
+            <a href="/admin-submissions.html" class="card">
+                <div class="card-icon">📋</div>
+                <div class="card-title">申請管理</div>
+                <div class="card-description">
+                    顧客からのPSA代行申請を管理します。申請の確認、ステータス更新、詳細情報の閲覧が可能です。
+                </div>
+                <div class="card-stats">
+                    <div class="stat">
+                        <div class="stat-value" id="submissionsCount">-</div>
+                        <div class="stat-label">総申請数</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="pendingSubmissions">-</div>
+                        <div class="stat-label">保留中</div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- メッセージ管理 -->
+            <a href="/admin-messages.html" class="card">
+                <div class="card-icon">💬</div>
+                <div class="card-title">メッセージ管理</div>
+                <div class="card-description">
+                    顧客からのお問い合わせメッセージを管理します。メッセージへの返信、既読管理が可能です。
+                </div>
+                <div class="card-stats">
+                    <div class="stat">
+                        <div class="stat-value" id="messagesCount">-</div>
+                        <div class="stat-label">総メッセージ数</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="unreadMessages">-</div>
+                        <div class="stat-label">未読</div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 買取管理 -->
+            <a href="/kaitori-admin.html" class="card">
+                <div class="card-icon">💰</div>
+                <div class="card-title">買取管理</div>
+                <div class="card-description">
+                    カードの買取申請を管理します。査定価格の設定、顧客への承認依頼送信が可能です。
+                </div>
+                <div class="card-stats">
+                    <div class="stat">
+                        <div class="stat-value" id="kaitoriCount">-</div>
+                        <div class="stat-label">買取申請数</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="pendingKaitori">-</div>
+                        <div class="stat-label">保留中</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- クイックアクション -->
+        <div class="quick-actions">
+            <h2>クイックアクション</h2>
+            <div class="action-buttons">
+                <a href="/form.html" class="btn btn-secondary">📝 新規申請フォーム</a>
+                <a href="/status.html" class="btn btn-secondary">📊 進捗確認</a>
+                <a href="/contact.html" class="btn btn-secondary">📧 お問い合わせ</a>
+                <a href="/" class="btn btn-secondary">🏠 トップページへ</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ダッシュボード統計を読み込み
+        async function loadDashboardStats() {
+            try {
+                // 申請数を取得
+                const submissionsRes = await fetch('/api/admin/submissions');
+                if (submissionsRes.ok) {
+                    const submissionsData = await submissionsRes.json();
+                    if (submissionsData.success) {
+                        document.getElementById('submissionsCount').textContent = submissionsData.count;
+                        const pending = submissionsData.submissions.filter(s => s.status === 'pending').length;
+                        document.getElementById('pendingSubmissions').textContent = pending;
+                    }
+                }
+
+                // メッセージ数を取得
+                const messagesRes = await fetch('/api/messages');
+                if (messagesRes.ok) {
+                    const messagesData = await messagesRes.json();
+                    if (messagesData.success) {
+                        document.getElementById('messagesCount').textContent = messagesData.messages.length;
+                        const unread = messagesData.messages.filter(m => !m.is_read).length;
+                        document.getElementById('unreadMessages').textContent = unread;
+                    }
+                }
+
+                // 買取申請数を取得（エンドポイントがあれば）
+                // TODO: 買取API実装後に有効化
+                document.getElementById('kaitoriCount').textContent = '-';
+                document.getElementById('pendingKaitori').textContent = '-';
+
+            } catch (error) {
+                console.error('統計情報の読み込みエラー:', error);
+            }
+        }
+
+        // ページ読み込み時に統計を取得
+        document.addEventListener('DOMContentLoaded', loadDashboardStats);
+    </script>
+</body>
+</html>

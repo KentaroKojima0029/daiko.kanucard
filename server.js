@@ -1975,7 +1975,148 @@ app.get('/api/status/:id', async (req, res) => {
   }
 });
 
+// ===== 管理者向け申請管理API =====
+
+// 全申請データ取得（管理者用）
+app.get('/api/admin/submissions', async (req, res) => {
+  try {
+    const db = getDatabase();
+    const allSubmissions = db.prepare('SELECT * FROM form_submissions ORDER BY created_at DESC').all();
+
+    // items列（JSON文字列）をパース
+    const submissionsWithParsedItems = allSubmissions.map(sub => ({
+      ...sub,
+      items: sub.items ? JSON.parse(sub.items) : []
+    }));
+
+    logger.info('Admin: All submissions retrieved', {
+      count: allSubmissions.length
+    });
+
+    res.json({
+      success: true,
+      count: allSubmissions.length,
+      submissions: submissionsWithParsedItems
+    });
+  } catch (error) {
+    console.error('Admin: Get all submissions error:', error);
+    logger.error('Admin: Get all submissions error', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'データの取得に失敗しました'
+    });
+  }
+});
+
+// 申請詳細取得（管理者用）
+app.get('/api/admin/submission/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const submission = submissionQueries.findById.get(id);
+
+    if (!submission) {
+      return res.status(404).json({
+        success: false,
+        error: '申請が見つかりません'
+      });
+    }
+
+    // items列（JSON文字列）をパース
+    const submissionWithParsedItems = {
+      ...submission,
+      items: submission.items ? JSON.parse(submission.items) : []
+    };
+
+    logger.info('Admin: Submission detail retrieved', {
+      submissionId: id,
+      email: submission.email
+    });
+
+    res.json({
+      success: true,
+      submission: submissionWithParsedItems
+    });
+  } catch (error) {
+    console.error('Admin: Get submission detail error:', error);
+    logger.error('Admin: Get submission detail error', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'データの取得に失敗しました'
+    });
+  }
+});
+
+// 申請ステータス更新（管理者用）
+app.put('/api/admin/submission/:id/status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        error: 'ステータスが必要です'
+      });
+    }
+
+    // ステータスの検証
+    const validStatuses = ['pending', 'processing', 'completed', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: '無効なステータスです'
+      });
+    }
+
+    const submission = submissionQueries.findById.get(id);
+
+    if (!submission) {
+      return res.status(404).json({
+        success: false,
+        error: '申請が見つかりません'
+      });
+    }
+
+    submissionQueries.updateStatus.run(status, id);
+
+    logger.info('Admin: Submission status updated', {
+      submissionId: id,
+      oldStatus: submission.status,
+      newStatus: status
+    });
+
+    res.json({
+      success: true,
+      message: 'ステータスを更新しました',
+      submission: {
+        id: parseInt(id),
+        status
+      }
+    });
+  } catch (error) {
+    console.error('Admin: Update status error:', error);
+    logger.error('Admin: Update status error', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'ステータスの更新に失敗しました'
+    });
+  }
+});
+
 // ===== HTMLページルーティング =====
+
+// 管理画面ダッシュボード
+app.get('/admin.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+app.get('/admin-submissions.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin-submissions.html'));
+});
+
+app.get('/admin-messages.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin-messages.html'));
+});
 
 // 代行申込フォームページ
 app.get('/form', (req, res) => {

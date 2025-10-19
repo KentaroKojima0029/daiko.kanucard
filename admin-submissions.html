@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>申請管理 - PSA代行サービス管理画面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        /* ヘッダー */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* メインコンテナ */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 120px);
+        }
+
+        /* サイドバー（申請リスト） */
+        .sidebar {
+            width: 400px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .filter-tab {
+            padding: 6px 12px;
+            border: none;
+            background: #f0f0f0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .filter-tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .submission-list {
+            list-style: none;
+        }
+
+        .submission-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .submission-item:hover {
+            background: #f8f9fa;
+        }
+
+        .submission-item.active {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+        }
+
+        .submission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .submission-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .submission-status {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-processing {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .submission-plan {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .submission-time {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        /* コンテンツエリア（申請詳細） */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .submission-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .customer-info h2 {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .customer-details {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .status-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #2c3e50;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        /* 申請詳細 */
+        .detail-container {
+            padding: 30px;
+        }
+
+        .detail-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        /* カード情報テーブル */
+        .cards-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .cards-table th,
+        .cards-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .cards-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .cards-table td {
+            font-size: 14px;
+        }
+
+        /* 空の状態 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #94a3b8;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-text {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .empty-subtext {
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: 40%;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <div class="header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>📋 申請管理</h1>
+                <p style="opacity: 0.9; font-size: 14px;">PSA代行サービス申請の管理</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;" onclick="window.location.href='/admin.html'">
+                    管理画面へ戻る
+                </button>
+            </div>
+        </div>
+        <div class="header-stats">
+            <div class="stat-item">
+                <span class="stat-value" id="pendingCount">0</span>
+                <span class="stat-label">保留中</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="processingCount">0</span>
+                <span class="stat-label">処理中</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="completedCount">0</span>
+                <span class="stat-label">完了</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="totalCount">0</span>
+                <span class="stat-label">総申請数</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- メインコンテナ -->
+    <div class="main-container">
+        <!-- サイドバー（申請リスト） -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <input type="text" class="search-box" placeholder="申請を検索..." id="searchInput">
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="all">すべて</button>
+                    <button class="filter-tab" data-filter="pending">保留中</button>
+                    <button class="filter-tab" data-filter="processing">処理中</button>
+                    <button class="filter-tab" data-filter="completed">完了</button>
+                </div>
+            </div>
+            <ul class="submission-list" id="submissionList"></ul>
+        </div>
+
+        <!-- コンテンツエリア（申請詳細） -->
+        <div class="content">
+            <div id="emptyState" class="empty-state">
+                <div class="empty-icon">📄</div>
+                <div class="empty-text">申請を選択してください</div>
+                <div class="empty-subtext">左側のリストから申請を選択すると詳細が表示されます</div>
+            </div>
+
+            <div id="submissionDetail" style="display: none;">
+                <!-- ヘッダー -->
+                <div class="content-header">
+                    <div class="submission-info">
+                        <div class="customer-info">
+                            <h2 id="customerName">-</h2>
+                            <div class="customer-details">
+                                <div>📧 <span id="customerEmail">-</span></div>
+                                <div>📅 申請日: <span id="submissionDate">-</span></div>
+                                <div>🆔 ID: <span id="submissionId">-</span></div>
+                            </div>
+                        </div>
+                        <div class="status-actions">
+                            <select id="statusSelect" class="btn btn-secondary">
+                                <option value="pending">保留中</option>
+                                <option value="processing">処理中</option>
+                                <option value="completed">完了</option>
+                                <option value="cancelled">キャンセル</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="updateStatus()">ステータス更新</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 詳細表示 -->
+                <div class="detail-container">
+                    <!-- 基本情報 -->
+                    <div class="detail-section">
+                        <div class="section-title">基本情報</div>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">プラン</div>
+                                <div class="detail-value" id="plan">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">サービスオプション</div>
+                                <div class="detail-value" id="serviceOption">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">購入代行</div>
+                                <div class="detail-value" id="purchaseOffer">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">返送方法</div>
+                                <div class="detail-value" id="returnMethod">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">鑑定オプション</div>
+                                <div class="detail-value" id="inspectionOption">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- カード情報 -->
+                    <div class="detail-section">
+                        <div class="section-title">カード情報（<span id="totalQuantity">0</span>枚）</div>
+                        <table class="cards-table" id="cardsTable">
+                            <thead>
+                                <tr>
+                                    <th>カード名</th>
+                                    <th>数量</th>
+                                    <th>申告価格</th>
+                                    <th>取得価格</th>
+                                    <th>グレーディング費</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cardsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 費用情報 -->
+                    <div class="detail-section">
+                        <div class="section-title">費用情報</div>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">総申告価格</div>
+                                <div class="detail-value" id="totalDeclaredValue">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">総取得価格</div>
+                                <div class="detail-value" id="totalAcquisitionValue">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">代行手数料</div>
+                                <div class="detail-value" id="totalFee">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">予想関税</div>
+                                <div class="detail-value" id="estimatedTax">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">予想グレーディング費</div>
+                                <div class="detail-value" id="estimatedGradingFee">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">総予想費用</div>
+                                <div class="detail-value" style="color: #667eea; font-size: 18px; font-weight: 700;" id="totalEstimatedFee">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- メッセージ -->
+                    <div class="detail-section" id="messageSection" style="display: none;">
+                        <div class="section-title">お客様からのメッセージ</div>
+                        <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; line-height: 1.6;">
+                            <p id="messageContent">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // グローバル変数
+        let submissions = [];
+        let currentSubmission = null;
+        let currentFilter = 'all';
+        let refreshInterval = null;
+
+        // ステータスラベル
+        const statusLabels = {
+            pending: '保留中',
+            processing: '処理中',
+            completed: '完了',
+            cancelled: 'キャンセル'
+        };
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSubmissions();
+            setupEventListeners();
+
+            // 30秒ごとに自動更新
+            refreshInterval = setInterval(loadSubmissions, 30000);
+        });
+
+        // イベントリスナーの設定
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', filterSubmissions);
+
+            // フィルタータブ
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentFilter = e.target.dataset.filter;
+                    filterSubmissions();
+                });
+            });
+        }
+
+        // 申請一覧を読み込み
+        async function loadSubmissions() {
+            try {
+                const response = await fetch('/api/admin/submissions');
+                const result = await response.json();
+
+                if (result.success) {
+                    submissions = result.submissions;
+                    updateStats();
+                    displaySubmissionList();
+                }
+            } catch (error) {
+                console.error('申請読み込みエラー:', error);
+            }
+        }
+
+        // 統計情報を更新
+        function updateStats() {
+            const pendingCount = submissions.filter(s => s.status === 'pending').length;
+            const processingCount = submissions.filter(s => s.status === 'processing').length;
+            const completedCount = submissions.filter(s => s.status === 'completed').length;
+            const totalCount = submissions.length;
+
+            document.getElementById('pendingCount').textContent = pendingCount;
+            document.getElementById('processingCount').textContent = processingCount;
+            document.getElementById('completedCount').textContent = completedCount;
+            document.getElementById('totalCount').textContent = totalCount;
+        }
+
+        // 申請リストを表示
+        function displaySubmissionList() {
+            const submissionList = document.getElementById('submissionList');
+            submissionList.innerHTML = '';
+
+            // フィルタリング
+            let filteredSubmissions = submissions;
+            if (currentFilter !== 'all') {
+                filteredSubmissions = submissions.filter(s => s.status === currentFilter);
+            }
+
+            // 検索
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (searchTerm) {
+                filteredSubmissions = filteredSubmissions.filter(s =>
+                    s.name.toLowerCase().includes(searchTerm) ||
+                    s.email.toLowerCase().includes(searchTerm) ||
+                    s.plan.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            filteredSubmissions.forEach(sub => {
+                const li = document.createElement('li');
+                li.className = 'submission-item';
+                if (currentSubmission && currentSubmission.id === sub.id) {
+                    li.classList.add('active');
+                }
+                li.onclick = () => selectSubmission(sub);
+
+                const time = new Date(sub.created_at).toLocaleString('ja-JP', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                li.innerHTML = `
+                    <div class="submission-header">
+                        <div class="submission-name">${sub.name}</div>
+                        <div class="submission-status status-${sub.status}">${statusLabels[sub.status]}</div>
+                    </div>
+                    <div class="submission-plan">${sub.plan} - ${sub.items.length}枚</div>
+                    <div class="submission-time">${time}</div>
+                `;
+
+                submissionList.appendChild(li);
+            });
+        }
+
+        // 申請を選択
+        function selectSubmission(submission) {
+            currentSubmission = submission;
+
+            // リストのアクティブ状態を更新
+            document.querySelectorAll('.submission-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // 詳細表示
+            showSubmissionDetail(submission);
+        }
+
+        // 申請詳細を表示
+        function showSubmissionDetail(sub) {
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('submissionDetail').style.display = 'block';
+
+            // ヘッダー情報
+            document.getElementById('customerName').textContent = sub.name;
+            document.getElementById('customerEmail').textContent = sub.email;
+            document.getElementById('submissionDate').textContent = new Date(sub.created_at).toLocaleString('ja-JP');
+            document.getElementById('submissionId').textContent = sub.id;
+            document.getElementById('statusSelect').value = sub.status;
+
+            // 基本情報
+            document.getElementById('plan').textContent = sub.plan;
+            document.getElementById('serviceOption').textContent = sub.service_option || '-';
+            document.getElementById('purchaseOffer').textContent = sub.purchase_offer || '-';
+            document.getElementById('returnMethod').textContent = sub.return_method || '-';
+            document.getElementById('inspectionOption').textContent = sub.inspection_option || '-';
+
+            // カード情報
+            document.getElementById('totalQuantity').textContent = sub.total_quantity || sub.items.length;
+            const cardsTableBody = document.getElementById('cardsTableBody');
+            cardsTableBody.innerHTML = '';
+
+            sub.items.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.cardName || '-'}</td>
+                    <td>${item.quantity || 1}枚</td>
+                    <td>$${item.declaredValue || 0}</td>
+                    <td>$${item.acquisitionValue || 0}</td>
+                    <td>$${item.gradingFee || 0}</td>
+                `;
+                cardsTableBody.appendChild(row);
+            });
+
+            // 費用情報
+            document.getElementById('totalDeclaredValue').textContent = `$${sub.total_declared_value || 0}`;
+            document.getElementById('totalAcquisitionValue').textContent = `$${sub.total_acquisition_value || 0}`;
+            document.getElementById('totalFee').textContent = sub.total_fee || '-';
+            document.getElementById('estimatedTax').textContent = sub.estimated_tax || '-';
+            document.getElementById('estimatedGradingFee').textContent = sub.estimated_grading_fee || '-';
+            document.getElementById('totalEstimatedFee').textContent = sub.total_estimated_fee || '-';
+
+            // メッセージ
+            if (sub.message && sub.message.trim()) {
+                document.getElementById('messageSection').style.display = 'block';
+                document.getElementById('messageContent').textContent = sub.message;
+            } else {
+                document.getElementById('messageSection').style.display = 'none';
+            }
+        }
+
+        // ステータス更新
+        async function updateStatus() {
+            if (!currentSubmission) return;
+
+            const newStatus = document.getElementById('statusSelect').value;
+            if (newStatus === currentSubmission.status) {
+                alert('ステータスに変更がありません');
+                return;
+            }
+
+            if (!confirm(`ステータスを「${statusLabels[newStatus]}」に変更しますか？`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/submission/${currentSubmission.id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert('ステータスを更新しました');
+                    currentSubmission.status = newStatus;
+                    loadSubmissions(); // リストを更新
+                    showSubmissionDetail(currentSubmission); // 詳細を再表示
+                } else {
+                    alert('エラー: ' + result.error);
+                }
+            } catch (error) {
+                console.error('ステータス更新エラー:', error);
+                alert('ステータスの更新に失敗しました');
+            }
+        }
+
+        // フィルタリング
+        function filterSubmissions() {
+            displaySubmissionList();
+        }
+
+        // ページ離脱時にインターバルをクリア
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>
