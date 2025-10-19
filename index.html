@@ -541,7 +541,7 @@
         // 初期化
         document.addEventListener('DOMContentLoaded', () => {
             // 既にログイン済みの場合はホーム画面へリダイレクト
-            const authToken = sessionStorage.getItem('auth_token');
+            const authToken = localStorage.getItem('kanucard_auth_token');
             if (authToken) {
                 // トークンの有効性を簡易チェック
                 try {
@@ -552,14 +552,18 @@
                         // 有効期限チェック
                         if (payload.exp && payload.exp * 1000 > Date.now()) {
                             // 有効なトークンがある場合はホームへ
-                            window.location.href = '/home.html';
+                            console.log('[Index] Valid token found, redirecting to home...');
+                            window.location.href = '/home';
                             return;
+                        } else {
+                            console.log('[Index] Token expired, clearing...');
                         }
                     }
                 } catch (e) {
+                    console.log('[Index] Invalid token, clearing...');
                     // トークンが無効な場合はクリア
-                    sessionStorage.removeItem('auth_token');
-                    sessionStorage.removeItem('user_email');
+                    localStorage.removeItem('kanucard_auth_token');
+                    localStorage.removeItem('kanucard_user_data');
                 }
             }
 
