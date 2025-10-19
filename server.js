@@ -163,7 +163,7 @@ app.post('/api/rich-form-submit', async (req, res) => {
 
     // 顧客向けメール
     const customerMailOptions = {
-      from: process.env.FROM_EMAIL || 'collection@kanucard.com',
+      from: process.env.FROM_EMAIL || 'contact@kanucard.com',
       to: contactEmail,
       subject: 'PSA代行サービス - お申し込みありがとうございます',
       html: `
@@ -310,7 +310,7 @@ app.post('/api/rich-form-submit', async (req, res) => {
 
     // 管理者向けメール
     const adminMailOptions = {
-      from: process.env.FROM_EMAIL || 'collection@kanucard.com',
+      from: process.env.FROM_EMAIL || 'contact@kanucard.com',
       to: process.env.ADMIN_EMAIL || 'contact@kanucard.com',
       replyTo: contactEmail,
       subject: `【新規申込】PSA代行サービス - ${contactName}様`,
@@ -553,7 +553,7 @@ app.post('/api/contact', async (req, res) => {
 
     // 管理者向けメール
     const adminMailOptions = {
-      from: process.env.FROM_EMAIL || 'collection@kanucard.com',
+      from: process.env.FROM_EMAIL || 'contact@kanucard.com',
       to: process.env.ADMIN_EMAIL || 'contact@kanucard.com',
       subject: `[お問い合わせ] ${subject}`,
       html: `
@@ -578,7 +578,7 @@ app.post('/api/contact', async (req, res) => {
 
     // お客様向け自動返信メール
     const customerMailOptions = {
-      from: process.env.FROM_EMAIL || 'collection@kanucard.com',
+      from: process.env.FROM_EMAIL || 'contact@kanucard.com',
       to: email,
       subject: `お問い合わせを受け付けました - ${subject}`,
       html: `
@@ -616,7 +616,7 @@ app.post('/api/contact', async (req, res) => {
 
           <p style="font-size: 14px; color: #999; margin-top: 32px; text-align: center;">
             PSA代行サービス<br>
-            collection@kanucard.com
+            contact@kanucard.com
           </p>
         </div>
       `
@@ -912,7 +912,7 @@ app.post('/api/auth/verify-shopify-customer', async (req, res) => {
       console.log('==============================================');
 
       const emailResult = await sendEmail({
-        from: process.env.FROM_EMAIL || 'collection@kanucard.com',
+        from: process.env.FROM_EMAIL || 'contact@kanucard.com',
         to: email,
         subject: '【PSA代行サービス】ログイン認証コード',
         text: `PSA代行サービスのログイン認証コードは ${otp} です。このコードは10分間有効です。`,
@@ -1516,7 +1516,7 @@ app.post('/api/auth/customer-otp', async (req, res) => {
             ご不明な点がございましたら
           </p>
           <p style="color: #64748b; font-size: 12px; margin: 0;">
-            <a href="mailto:collection@kanucard.com" style="color: #667eea; text-decoration: none; font-weight: 600;">collection@kanucard.com</a><br>
+            <a href="mailto:contact@kanucard.com" style="color: #667eea; text-decoration: none; font-weight: 600;">contact@kanucard.com</a><br>
             までお問い合わせください
           </p>
         </div>
@@ -1525,7 +1525,7 @@ app.post('/api/auth/customer-otp', async (req, res) => {
 
     await sendEmail({
       to: email,
-      from: process.env.FROM_EMAIL || 'collection@kanucard.com',
+      from: process.env.FROM_EMAIL || 'contact@kanucard.com',
       subject: '【買取承認】認証コード - PSA代行サービス',
       text: `PSA代行サービスの買取承認用認証コードは ${otp} です。このコードは10分間有効です。`,
       html: emailHtml

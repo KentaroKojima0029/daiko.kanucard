@@ -45,7 +45,7 @@ async function testEmail() {
     console.log('メール送信を開始します...');
 
     const result = await sendEmail({
-      from: process.env.FROM_EMAIL || 'collection@kanucard.com',
+      from: process.env.FROM_EMAIL || 'contact@kanucard.com',
       to: testEmail,
       subject: '【テスト】PSA代行サービス - ログイン認証コード',
       text: `PSA代行サービスのログイン認証コードは ${otp} です。このコードは10分間有効です。`,

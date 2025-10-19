@@ -24,7 +24,16 @@ SHOPIFY_API_VERSION=2024-10
 JWT_SECRET=your-secure-jwt-secret-key-change-this-in-production
 ```
 
-#### 4. SMTP設定（メール送信）
+#### 4. メール送信設定
+
+**推奨: SendGridを使用（Renderで安定動作）**
+```
+SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+FROM_EMAIL=collection@kanucard.com
+ADMIN_EMAIL=collection@kanucard.com
+```
+
+**または: 直接SMTP（ローカル環境用）**
 ```
 SMTP_HOST=your-smtp-host
 SMTP_PORT=587
@@ -35,6 +44,8 @@ FROM_EMAIL=your-email@example.com
 ADMIN_EMAIL=admin@example.com
 MAIL_DEBUG=false
 ```
+
+> **Note**: RenderではSMTPポート587がブロックされることがあるため、本番環境ではSendGridの使用を強く推奨します。
 
 #### 5. 管理者認証
 ```

@@ -74,7 +74,7 @@ async function sendEmailHandler(req, res) {
       port: parseInt(process.env.SMTP_PORT || '587'),
       secure: false,
       auth: {
-        user: process.env.SMTP_USER || 'collection@kanucard.com',
+        user: process.env.SMTP_USER || 'contact@kanucard.com',
         pass: process.env.SMTP_PASS
       },
       connectionTimeout: 60000,
@@ -86,7 +86,7 @@ async function sendEmailHandler(req, res) {
 
     // メール送信オプション
     const mailOptions = {
-      from: from || process.env.FROM_EMAIL || 'collection@kanucard.com',
+      from: from || process.env.FROM_EMAIL || 'contact@kanucard.com',
       to,
       replyTo: replyTo || undefined,
       subject,

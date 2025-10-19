@@ -18,18 +18,23 @@ const USE_XSERVER_FALLBACK = ['true', '1', 'yes'].includes(
 const XSERVER_API_URL = process.env.XSERVER_API_URL;
 const XSERVER_API_KEY = process.env.XSERVER_API_KEY;
 
-// Nodemailer transporter設定
+// Nodemailer transporter設定（Xserver SMTP）
+console.log('[email-service] Using Xserver SMTP for email delivery');
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'sv10210.xserver.jp',
   port: parseInt(process.env.SMTP_PORT || '587'),
   secure: false,
   auth: {
-    user: process.env.SMTP_USER || 'collection@kanucard.com',
+    user: process.env.SMTP_USER || 'contact@kanucard.com',
     pass: process.env.SMTP_PASS
   },
-  connectionTimeout: 15000, // 15秒（短めに設定してフォールバックを早める）
-  greetingTimeout: 10000,   // 10秒
-  socketTimeout: 15000,     // 15秒
+  tls: {
+    rejectUnauthorized: false,
+    ciphers: 'SSLv3'
+  },
+  connectionTimeout: 30000,
+  greetingTimeout: 20000,
+  socketTimeout: 30000,
   logger: process.env.NODE_ENV !== 'production',
   debug: process.env.NODE_ENV !== 'production'
 });
@@ -291,8 +296,8 @@ function validateEmailConfig() {
   console.log('[email-service] Validating email configuration');
   console.log('============================================');
 
-  // SMTP設定チェック
-  console.log('[email-service] SMTP Configuration:');
+  // Xserver SMTP設定チェック
+  console.log('[email-service] Xserver SMTP Configuration:');
   console.log('  - SMTP_HOST:', process.env.SMTP_HOST || 'NOT SET');
   console.log('  - SMTP_PORT:', process.env.SMTP_PORT || 'NOT SET');
   console.log('  - SMTP_USER:', process.env.SMTP_USER || 'NOT SET');
