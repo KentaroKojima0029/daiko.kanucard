@@ -2016,9 +2016,19 @@ app.get('/contact', (req, res) => {
   res.redirect('/chat');
 });
 
+// ログインページ
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'login.html'));
+});
+
 // ホームページ（認証後のダッシュボード）
 app.get('/home', (req, res) => {
   res.sendFile(path.join(__dirname, 'home.html'));
+});
+
+// ルートパス（認証チェック＆リダイレクト）
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // SPAのフォールバック（HTMLファイルのみ）
@@ -2027,7 +2037,8 @@ app.get('*', (req, res) => {
   if (req.path.includes('.')) {
     return res.status(404).send('File not found');
   }
-  res.sendFile(path.join(__dirname, 'index.html'));
+  // 存在しないルートはルートにリダイレクト
+  res.redirect('/');
 });
 
 // ===== エラーハンドリング =====

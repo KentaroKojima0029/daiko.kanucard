@@ -3,16 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ログイン - PSA代行サービス</title>
-
-    <!-- React & React DOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-
-    <!-- Babel Standalone for JSX -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <!-- デフォルトスタイル -->
+    <title>PSA代行サービス - ログイン</title>
     <style>
         * {
             margin: 0;
@@ -21,47 +12,160 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-                sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
-        }
-
-        #root {
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
+            align-items: center;
             padding: 20px;
         }
 
-        .login-container {
-            background: white;
-            border-radius: 20px;
+        .container {
+            width: 100%;
+            max-width: 450px;
+            animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
+            overflow: hidden;
         }
 
-        .login-header {
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+            color: white;
+            padding: 40px 32px;
             text-align: center;
-            margin-bottom: 40px;
+            position: relative;
         }
 
-        .login-header h1 {
-            font-size: 28px;
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+            opacity: 0.1;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
             font-weight: 700;
-            color: #1a202c;
             margin-bottom: 8px;
+            letter-spacing: 0.02em;
+            position: relative;
+            z-index: 1;
         }
 
-        .login-header p {
-            color: #718096;
+        .header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 40px 32px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-weight: 700;
             font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .step.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .step.completed {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .step.inactive {
+            background: #e2e8f0;
+            color: #94a3b8;
+        }
+
+        .step-line {
+            width: 60px;
+            height: 2px;
+            background: #e2e8f0;
+            margin: 0 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-line.active {
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+        }
+
+        .form-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .form-group {
@@ -70,526 +174,756 @@
 
         .form-label {
             display: block;
-            margin-bottom: 8px;
             font-size: 14px;
             font-weight: 600;
-            color: #2d3748;
+            color: #1e293b;
+            margin-bottom: 8px;
         }
 
         .form-input {
             width: 100%;
-            padding: 12px 16px;
-            font-size: 16px;
+            padding: 14px 16px;
             border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            outline: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            color: #0f172a;
+            font-family: inherit;
         }
 
         .form-input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        .form-input:disabled {
-            background: #f7fafc;
-            cursor: not-allowed;
+        .form-input.error {
+            border-color: #ef4444;
+        }
+
+        .input-hint {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 6px;
+        }
+
+        .otp-container {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 24px 0;
+        }
+
+        .otp-input {
+            width: 50px;
+            height: 56px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            color: #0f172a;
+        }
+
+        .otp-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            transform: scale(1.05);
+        }
+
+        .otp-input.filled {
+            border-color: #10b981;
+            background: #f0fdf4;
         }
 
         .btn {
             width: 100%;
-            padding: 14px;
+            padding: 16px 24px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.02em;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1e40af 100%);
             color: white;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
         }
 
         .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+            box-shadow: 0 12px 32px rgba(59, 130, 246, 0.45);
         }
 
         .btn-secondary {
-            background: #f7fafc;
-            color: #4a5568;
-            border: 1px solid #e2e8f0;
+            background: transparent;
+            color: #3b82f6;
+            border: 2px solid #3b82f6;
             margin-top: 12px;
         }
 
         .btn-secondary:hover:not(:disabled) {
-            background: #edf2f7;
+            background: rgba(59, 130, 246, 0.05);
         }
 
-        .btn-text {
-            background: transparent;
-            color: #667eea;
-            padding: 8px;
-            margin-top: 12px;
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
             font-size: 14px;
+            display: none;
+            animation: slideDown 0.3s ease-out;
         }
 
-        .btn-text:hover {
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message-error {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+        }
+
+        .message-success {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            color: #065f46;
+        }
+
+        .message-info {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            color: #1e40af;
+        }
+
+        .resend-timer {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .resend-timer button {
+            background: none;
+            border: none;
+            color: #3b82f6;
+            font-weight: 600;
+            cursor: pointer;
             text-decoration: underline;
         }
 
-        .error-message {
-            background: #fed7d7;
-            color: #c53030;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            text-align: center;
+        .resend-timer button:hover {
+            color: #2563eb;
         }
 
-        .success-message {
-            background: #c6f6d5;
-            color: #22543d;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            text-align: center;
-        }
-
-        .info-message {
-            background: #e6fffa;
-            color: #234e52;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 20px;
-            font-size: 14px;
-            text-align: center;
-        }
-
-        /* OTP入力フィールド */
-        .otp-container {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 24px;
-        }
-
-        .otp-input {
-            flex: 1;
-            max-width: 50px;
-            height: 50px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-
-        .otp-input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .otp-input:disabled {
-            background: #f7fafc;
+        .resend-timer button:disabled {
+            color: #94a3b8;
             cursor: not-allowed;
+            text-decoration: none;
         }
 
-        /* ローディングスピナー */
-        .spinner {
+        .loading-spinner {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
             margin-right: 8px;
-            vertical-align: middle;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
 
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            color: #667eea;
+        .footer {
+            padding: 24px 32px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .footer p {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .footer a {
+            color: #3b82f6;
             text-decoration: none;
-            font-size: 14px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
+            font-weight: 600;
         }
 
-        .back-link:hover {
-            color: #764ba2;
+        .footer a:hover {
+            text-decoration: underline;
         }
 
-        .back-link svg {
-            margin-right: 4px;
+        .quick-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .quick-link {
+            color: #64748b;
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.2s;
+        }
+
+        .quick-link:hover {
+            color: #3b82f6;
+        }
+
+        @media (max-width: 480px) {
+            .content {
+                padding: 32px 24px;
+            }
+
+            .otp-input {
+                width: 44px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .step-line {
+                width: 40px;
+            }
+
+            .header {
+                padding: 32px 24px;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <div class="logo">🎯</div>
+                <h1>PSA代行サービス</h1>
+                <p>お客様専用ポータルへようこそ</p>
+            </div>
 
-    <!-- Loginコンポーネント -->
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+            <div class="content">
+                <!-- ステップインジケーター -->
+                <div class="step-indicator">
+                    <div class="step active" id="step1">1</div>
+                    <div class="step-line" id="stepLine"></div>
+                    <div class="step inactive" id="step2">2</div>
+                </div>
 
-        const Login = () => {
-            // 状態管理
-            const [step, setStep] = useState('email'); // 'email' または 'otp'
-            const [email, setEmail] = useState('');
-            const [otp, setOtp] = useState(['', '', '', '', '', '']);
-            const [loading, setLoading] = useState(false);
-            const [error, setError] = useState('');
-            const [success, setSuccess] = useState('');
-            const [resendCooldown, setResendCooldown] = useState(0);
+                <!-- メッセージエリア -->
+                <div id="errorMessage" class="message message-error"></div>
+                <div id="successMessage" class="message message-success"></div>
+                <div id="infoMessage" class="message message-info"></div>
 
-            // OTP入力フィールドのref
-            const otpRefs = useRef([]);
+                <!-- ステップ1: メールアドレス入力 -->
+                <div id="emailSection" class="form-section active">
+                    <form id="emailForm">
+                        <div class="form-group">
+                            <label class="form-label" for="email">
+                                メールアドレス
+                            </label>
+                            <input
+                                type="email"
+                                id="email"
+                                class="form-input"
+                                placeholder="example@email.com"
+                                required
+                                autocomplete="email"
+                            >
+                            <div class="input-hint">
+                                ※ Shopifyストアにご登録のメールアドレスをご入力ください
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="sendOtpBtn">
+                            認証コードを送信
+                        </button>
+                    </form>
 
-            // 再送信クールダウンタイマー
-            useEffect(() => {
-                if (resendCooldown > 0) {
-                    const timer = setTimeout(() => {
-                        setResendCooldown(resendCooldown - 1);
-                    }, 1000);
-                    return () => clearTimeout(timer);
-                }
-            }, [resendCooldown]);
+                    <div class="quick-links">
+                        <a href="/admin/index.html" class="quick-link">管理者ログイン</a>
+                        <a href="https://daiko.kanucard.com" class="quick-link">公式サイト</a>
+                        <a href="/chat" class="quick-link">お問い合わせ</a>
+                    </div>
+                </div>
 
-            // 認証トークンが既にある場合はマイページにリダイレクト
-            useEffect(() => {
-                const token = localStorage.getItem('kanucard_auth_token');
-                if (token) {
-                    window.location.href = '/mypage.html';
-                }
-            }, []);
-
-            // メールアドレス送信
-            const handleSendOTP = async (e) => {
-                e.preventDefault();
-                setLoading(true);
-                setError('');
-                setSuccess('');
-
-                try {
-                    const response = await fetch('/api/auth/verify-shopify-customer', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email })
-                    });
-
-                    const data = await response.json();
-
-                    if (!data.success) {
-                        throw new Error(data.message || '認証コードの送信に失敗しました');
-                    }
-
-                    setStep('otp');
-                    setSuccess('認証コードをメールで送信しました。メールをご確認ください。');
-                    setResendCooldown(60); // 60秒の再送信クールダウン
-
-                    // 最初のOTP入力フィールドにフォーカス
-                    setTimeout(() => {
-                        if (otpRefs.current[0]) {
-                            otpRefs.current[0].focus();
-                        }
-                    }, 100);
-                } catch (err) {
-                    setError(err.message || '認証コードの送信に失敗しました');
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            // OTP検証
-            const handleVerifyOTP = async (e) => {
-                e.preventDefault();
-                const otpCode = otp.join('');
-
-                if (otpCode.length !== 6) {
-                    setError('6桁の認証コードを入力してください');
-                    return;
-                }
-
-                setLoading(true);
-                setError('');
-                setSuccess('');
-
-                try {
-                    const response = await fetch('/api/auth/verify-otp', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, otp: otpCode })
-                    });
-
-                    const data = await response.json();
-
-                    if (!data.success) {
-                        throw new Error(data.message || '認証コードが正しくありません');
-                    }
-
-                    // トークンとユーザーデータを保存
-                    localStorage.setItem('kanucard_auth_token', data.token);
-                    localStorage.setItem('kanucard_user_data', JSON.stringify(data.user));
-
-                    setSuccess('ログインに成功しました！マイページへ移動します...');
-
-                    // マイページへリダイレクト
-                    setTimeout(() => {
-                        window.location.href = '/mypage.html';
-                    }, 1500);
-                } catch (err) {
-                    setError(err.message || '認証コードが正しくありません');
-                    // エラー時はOTPをクリア
-                    setOtp(['', '', '', '', '', '']);
-                    if (otpRefs.current[0]) {
-                        otpRefs.current[0].focus();
-                    }
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            // OTP入力処理
-            const handleOtpChange = (index, value) => {
-                // 数字以外は入力させない
-                if (!/^[0-9]$/.test(value) && value !== '') return;
-
-                const newOtp = [...otp];
-                newOtp[index] = value;
-                setOtp(newOtp);
-
-                // 自動フォーカス移動
-                if (value && index < 5) {
-                    otpRefs.current[index + 1].focus();
-                }
-
-                // 6桁全て入力されたら自動送信
-                if (newOtp.every(digit => digit !== '') && newOtp.join('').length === 6) {
-                    const event = { preventDefault: () => {} };
-                    handleVerifyOTP(event);
-                }
-            };
-
-            // OTPフィールドでのキー処理
-            const handleOtpKeyDown = (index, e) => {
-                if (e.key === 'Backspace' && !otp[index] && index > 0) {
-                    // 現在のフィールドが空でBackspaceが押されたら前のフィールドに移動
-                    otpRefs.current[index - 1].focus();
-                } else if (e.key === 'ArrowLeft' && index > 0) {
-                    // 左矢印キーで前のフィールドに移動
-                    otpRefs.current[index - 1].focus();
-                } else if (e.key === 'ArrowRight' && index < 5) {
-                    // 右矢印キーで次のフィールドに移動
-                    otpRefs.current[index + 1].focus();
-                }
-            };
-
-            // ペースト処理
-            const handleOtpPaste = (e) => {
-                e.preventDefault();
-                const pastedData = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6);
-                if (pastedData.length === 6) {
-                    const newOtp = pastedData.split('');
-                    setOtp(newOtp);
-                    // 最後のフィールドにフォーカス
-                    otpRefs.current[5].focus();
-                    // 自動送信
-                    setTimeout(() => {
-                        const event = { preventDefault: () => {} };
-                        handleVerifyOTP(event);
-                    }, 100);
-                }
-            };
-
-            // メールアドレス変更
-            const handleChangeEmail = () => {
-                setStep('email');
-                setOtp(['', '', '', '', '', '']);
-                setError('');
-                setSuccess('');
-            };
-
-            // 認証コード再送信
-            const handleResendOTP = async () => {
-                if (resendCooldown > 0) return;
-
-                setLoading(true);
-                setError('');
-                setSuccess('');
-
-                try {
-                    const response = await fetch('/api/auth/verify-shopify-customer', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email })
-                    });
-
-                    const data = await response.json();
-
-                    if (!data.success) {
-                        throw new Error(data.message || '認証コードの再送信に失敗しました');
-                    }
-
-                    setSuccess('認証コードを再送信しました。メールをご確認ください。');
-                    setResendCooldown(60);
-                    setOtp(['', '', '', '', '', '']);
-
-                    if (otpRefs.current[0]) {
-                        otpRefs.current[0].focus();
-                    }
-                } catch (err) {
-                    setError(err.message || '認証コードの再送信に失敗しました');
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            return (
-                <div className="login-container">
-                    <div className="login-header">
-                        <h1>ログイン</h1>
-                        <p>PSA代行サービス マイページ</p>
+                <!-- ステップ2: OTP入力 -->
+                <div id="otpSection" class="form-section">
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <p style="color: #475569; font-size: 14px; margin-bottom: 4px;">
+                            認証コードを送信しました
+                        </p>
+                        <p style="color: #1e293b; font-weight: 600;" id="emailDisplay"></p>
                     </div>
 
-                    {step === 'email' ? (
-                        <form onSubmit={handleSendOTP}>
-                            <div className="form-group">
-                                <label className="form-label" htmlFor="email">
-                                    メールアドレス
-                                </label>
-                                <input
-                                    id="email"
-                                    type="email"
-                                    className="form-input"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="登録済みのメールアドレス"
-                                    required
-                                    disabled={loading}
-                                    autoComplete="email"
-                                    autoFocus
-                                />
+                    <form id="otpForm">
+                        <div class="form-group">
+                            <label class="form-label" style="text-align: center; display: block;">
+                                6桁の認証コードを入力
+                            </label>
+                            <div class="otp-container">
+                                <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="0">
+                                <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="1">
+                                <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="2">
+                                <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="3">
+                                <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="4">
+                                <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="5">
                             </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="verifyOtpBtn">
+                            ログイン
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="changeEmailBtn">
+                            メールアドレスを変更
+                        </button>
+                    </form>
 
-                            {error && <div className="error-message">{error}</div>}
-                            {success && <div className="success-message">{success}</div>}
-
-                            <button
-                                type="submit"
-                                className="btn btn-primary"
-                                disabled={loading || !email}
-                            >
-                                {loading ? (
-                                    <>
-                                        <span className="spinner"></span>
-                                        送信中...
-                                    </>
-                                ) : (
-                                    '認証コードを送信'
-                                )}
-                            </button>
-
-                            <div className="info-message">
-                                Shopifyに登録されているメールアドレスを入力してください
-                            </div>
-                        </form>
-                    ) : (
-                        <form onSubmit={handleVerifyOTP}>
-                            <a href="#" onClick={handleChangeEmail} className="back-link">
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                                    <path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
-                                </svg>
-                                メールアドレスを変更
-                            </a>
-
-                            <p style={{ marginBottom: '20px', color: '#4a5568', fontSize: '14px' }}>
-                                <strong>{email}</strong> に認証コードを送信しました
-                            </p>
-
-                            <div className="form-group">
-                                <label className="form-label">
-                                    認証コード（6桁）
-                                </label>
-                                <div className="otp-container">
-                                    {otp.map((digit, index) => (
-                                        <input
-                                            key={index}
-                                            ref={el => otpRefs.current[index] = el}
-                                            type="text"
-                                            className="otp-input"
-                                            maxLength={1}
-                                            value={digit}
-                                            onChange={(e) => handleOtpChange(index, e.target.value)}
-                                            onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                                            onPaste={index === 0 ? handleOtpPaste : undefined}
-                                            disabled={loading}
-                                            autoComplete="off"
-                                            inputMode="numeric"
-                                            pattern="[0-9]"
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-
-                            {error && <div className="error-message">{error}</div>}
-                            {success && <div className="success-message">{success}</div>}
-
-                            <button
-                                type="submit"
-                                className="btn btn-primary"
-                                disabled={loading || otp.join('').length !== 6}
-                            >
-                                {loading ? (
-                                    <>
-                                        <span className="spinner"></span>
-                                        確認中...
-                                    </>
-                                ) : (
-                                    'ログイン'
-                                )}
-                            </button>
-
-                            <button
-                                type="button"
-                                className="btn btn-text"
-                                onClick={handleResendOTP}
-                                disabled={loading || resendCooldown > 0}
-                            >
-                                {resendCooldown > 0 ? (
-                                    `認証コードを再送信（${resendCooldown}秒）`
-                                ) : (
-                                    '認証コードを再送信'
-                                )}
-                            </button>
-                        </form>
-                    )}
+                    <div class="resend-timer">
+                        <span id="timerText">再送信可能まで: <span id="countdown">60</span>秒</span>
+                        <button id="resendBtn" disabled>認証コードを再送信</button>
+                    </div>
                 </div>
-            );
-        };
+            </div>
 
-        // Reactアプリケーションのレンダリング
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<Login />);
+            <div class="footer">
+                <p>
+                    初めてご利用の方は、Shopifyストアでアカウント作成後<br>
+                    ログインしてください
+                </p>
+                <p style="margin-top: 12px;">
+                    ご不明な点がございましたら<br>
+                    <a href="mailto:contact@kanucard.com">contact@kanucard.com</a><br>
+                    までお問い合わせください
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentEmail = '';
+        let resendTimer = null;
+        let resendCountdown = 60;
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 既にログイン済みの場合はホーム画面へリダイレクト
+            const authToken = localStorage.getItem('kanucard_auth_token');
+            if (authToken) {
+                // トークンの有効性を簡易チェック
+                try {
+                    const tokenParts = authToken.split('.');
+                    if (tokenParts.length === 3) {
+                        const payload = JSON.parse(atob(tokenParts[1]));
+
+                        // 有効期限チェック
+                        if (payload.exp && payload.exp * 1000 > Date.now()) {
+                            // 有効なトークンがある場合はホームへ
+                            console.log('[Index] Valid token found, redirecting to home...');
+                            window.location.href = '/home';
+                            return;
+                        } else {
+                            console.log('[Index] Token expired, clearing...');
+                        }
+                    }
+                } catch (e) {
+                    console.log('[Index] Invalid token, clearing...');
+                    // トークンが無効な場合はクリア
+                    localStorage.removeItem('kanucard_auth_token');
+                    localStorage.removeItem('kanucard_user_data');
+                }
+            }
+
+            setupOtpInputs();
+        });
+
+        // メールアドレス送信フォーム
+        document.getElementById('emailForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            const sendBtn = document.getElementById('sendOtpBtn');
+
+            // 入力検証
+            if (!email || !validateEmail(email)) {
+                showError('有効なメールアドレスを入力してください');
+                return;
+            }
+
+            currentEmail = email;
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<span class="loading-spinner"></span>送信中...';
+
+            try {
+                console.log('[Login] Sending OTP request for:', email);
+
+                const response = await fetch('/api/auth/verify-shopify-customer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email
+                    })
+                });
+
+                console.log('[Login] Response status:', response.status);
+
+                const data = await response.json();
+                console.log('[Login] Response data:', data);
+
+                if (!response.ok) {
+                    console.error('[Login] Error response:', data);
+                    const errorMsg = data.message || '認証コードの送信に失敗しました';
+                    // デバッグ情報も表示（本番環境のトラブルシューティング用）
+                    if (data.debug) {
+                        console.error('[Login] Debug info:', data.debug);
+                        throw new Error(`${errorMsg}\n詳細: ${data.debug}`);
+                    }
+                    throw new Error(errorMsg);
+                }
+
+                console.log('[Login] OTP sent successfully');
+                showSuccess('認証コードを送信しました');
+                showStep2();
+                startResendTimer();
+
+            } catch (error) {
+                console.error('[Login] Error:', error);
+                // 未登録ユーザーの場合は特別な処理
+                if (error.message === '登録されていないメールアドレスです') {
+                    showUnregisteredMessage();
+                } else {
+                    showError(error.message);
+                }
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '認証コードを送信';
+            }
+        });
+
+        // OTP検証フォーム
+        document.getElementById('otpForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const otp = getOtpValue();
+            const verifyBtn = document.getElementById('verifyOtpBtn');
+
+            if (otp.length !== 6) {
+                showError('6桁の認証コードを入力してください');
+                return;
+            }
+
+            verifyBtn.disabled = true;
+            verifyBtn.innerHTML = '<span class="loading-spinner"></span>確認中...';
+
+            try {
+                console.log('OTP検証開始:', { email: currentEmail, otp });
+
+                const response = await fetch('/api/auth/verify-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: currentEmail,
+                        otp: otp
+                    })
+                });
+
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                if (!response.ok) {
+                    throw new Error(data.message || '認証に失敗しました');
+                }
+
+                // データの存在確認
+                if (!data.token || !data.user) {
+                    console.error('レスポンスデータが不完全:', data);
+                    throw new Error('認証レスポンスが不正です');
+                }
+
+                // セッションに保存
+                sessionStorage.setItem('auth_token', data.token);
+                sessionStorage.setItem('user_email', currentEmail);
+                sessionStorage.setItem('user_data', JSON.stringify(data.user));
+                sessionStorage.setItem('login_time', Date.now().toString());
+                sessionStorage.setItem('last_activity', Date.now().toString());
+
+                console.log('セッション保存完了、リダイレクト準備');
+                showSuccess('認証に成功しました。ホーム画面へ移動します...');
+
+                setTimeout(() => {
+                    console.log('リダイレクト実行: /home');
+                    window.location.href = '/home';
+                }, 1500);
+
+            } catch (error) {
+                console.error('OTP検証エラー:', error);
+                showError(error.message);
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = 'ログイン';
+
+                // OTP入力欄をクリア
+                document.querySelectorAll('.otp-input').forEach(input => {
+                    input.value = '';
+                    input.classList.remove('filled');
+                });
+                document.querySelector('.otp-input[data-index="0"]').focus();
+            }
+        });
+
+        // メールアドレス変更ボタン
+        document.getElementById('changeEmailBtn').addEventListener('click', () => {
+            showStep1();
+            clearResendTimer();
+        });
+
+        // 再送信ボタン
+        document.getElementById('resendBtn').addEventListener('click', async () => {
+            const resendBtn = document.getElementById('resendBtn');
+            resendBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/auth/verify-shopify-customer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: currentEmail
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || '認証コードの再送信に失敗しました');
+                }
+
+                showInfo('認証コードを再送信しました');
+                startResendTimer();
+
+                // OTP入力欄をクリア
+                document.querySelectorAll('.otp-input').forEach(input => {
+                    input.value = '';
+                    input.classList.remove('filled');
+                });
+                document.querySelector('.otp-input[data-index="0"]').focus();
+
+            } catch (error) {
+                showError(error.message);
+                resendBtn.disabled = false;
+            }
+        });
+
+        // OTP入力欄のセットアップ
+        function setupOtpInputs() {
+            const inputs = document.querySelectorAll('.otp-input');
+
+            inputs.forEach((input, index) => {
+                // 入力時
+                input.addEventListener('input', (e) => {
+                    const value = e.target.value;
+
+                    if (value && /[0-9]/.test(value)) {
+                        input.classList.add('filled');
+                        if (index < inputs.length - 1) {
+                            inputs[index + 1].focus();
+                        }
+                    } else {
+                        input.value = '';
+                        input.classList.remove('filled');
+                    }
+                });
+
+                // バックスペース処理
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !input.value && index > 0) {
+                        inputs[index - 1].focus();
+                        inputs[index - 1].value = '';
+                        inputs[index - 1].classList.remove('filled');
+                    }
+                });
+
+                // ペースト処理
+                input.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '');
+
+                    for (let i = 0; i < Math.min(pastedData.length, 6); i++) {
+                        if (inputs[i]) {
+                            inputs[i].value = pastedData[i];
+                            inputs[i].classList.add('filled');
+                        }
+                    }
+
+                    // 最後の入力欄にフォーカス
+                    const lastIndex = Math.min(pastedData.length - 1, 5);
+                    if (inputs[lastIndex]) {
+                        inputs[lastIndex].focus();
+                    }
+                });
+            });
+        }
+
+        // OTP値を取得
+        function getOtpValue() {
+            const inputs = document.querySelectorAll('.otp-input');
+            let otp = '';
+            inputs.forEach(input => {
+                otp += input.value;
+            });
+            return otp;
+        }
+
+        // ステップ1を表示
+        function showStep1() {
+            document.getElementById('emailSection').classList.add('active');
+            document.getElementById('otpSection').classList.remove('active');
+            document.getElementById('step1').className = 'step active';
+            document.getElementById('step2').className = 'step inactive';
+            document.getElementById('stepLine').classList.remove('active');
+
+            // フォームをリセット
+            document.getElementById('email').value = currentEmail;
+            document.getElementById('sendOtpBtn').disabled = false;
+            document.getElementById('sendOtpBtn').innerHTML = '認証コードを送信';
+        }
+
+        // ステップ2を表示
+        function showStep2() {
+            document.getElementById('emailSection').classList.remove('active');
+            document.getElementById('otpSection').classList.add('active');
+            document.getElementById('step1').className = 'step completed';
+            document.getElementById('step2').className = 'step active';
+            document.getElementById('stepLine').classList.add('active');
+            document.getElementById('emailDisplay').textContent = currentEmail;
+
+            // 最初のOTP入力欄にフォーカス
+            setTimeout(() => {
+                document.querySelector('.otp-input[data-index="0"]').focus();
+            }, 300);
+        }
+
+        // 再送信タイマー
+        function startResendTimer() {
+            resendCountdown = 60;
+            const resendBtn = document.getElementById('resendBtn');
+            const timerText = document.getElementById('timerText');
+            const countdown = document.getElementById('countdown');
+
+            resendBtn.disabled = true;
+            timerText.style.display = 'inline';
+            resendBtn.style.display = 'none';
+
+            resendTimer = setInterval(() => {
+                resendCountdown--;
+                countdown.textContent = resendCountdown;
+
+                if (resendCountdown <= 0) {
+                    clearInterval(resendTimer);
+                    timerText.style.display = 'none';
+                    resendBtn.style.display = 'inline';
+                    resendBtn.disabled = false;
+                }
+            }, 1000);
+        }
+
+        // タイマーをクリア
+        function clearResendTimer() {
+            if (resendTimer) {
+                clearInterval(resendTimer);
+                resendTimer = null;
+            }
+        }
+
+        // メールアドレス検証
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        // エラー表示
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 5000);
+        }
+
+        // 成功メッセージ表示
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = message;
+            successMessage.classList.add('show');
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 3000);
+        }
+
+        // 情報メッセージ表示
+        function showInfo(message) {
+            const infoMessage = document.getElementById('infoMessage');
+            infoMessage.textContent = message;
+            infoMessage.classList.add('show');
+            setTimeout(() => {
+                infoMessage.classList.remove('show');
+            }, 3000);
+        }
+
+        // 未登録ユーザーメッセージ表示
+        function showUnregisteredMessage() {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.innerHTML = `
+                <div>
+                    <strong>アカウントが見つかりません</strong><br>
+                    このメールアドレスは登録されていません。<br>
+                    <a href="https://shop.kanucard.com/account/login"
+                       style="color: #3b82f6; font-weight: 600; text-decoration: underline; margin-top: 8px; display: inline-block;"
+                       target="_blank">
+                        こちらからアカウントを作成してください →
+                    </a>
+                </div>
+            `;
+            errorMessage.classList.add('show');
+        }
     </script>
 </body>
 </html>
