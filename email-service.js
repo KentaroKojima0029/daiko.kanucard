@@ -8,15 +8,12 @@
  */
 
 const nodemailer = require('nodemailer');
+const axios = require('axios');
 const logger = require('./logger');
 
 // 環境変数から設定を取得
-// USE_XSERVER_FALLBACKは'true'、'1'、'yes'のいずれかで有効化
-const USE_XSERVER_FALLBACK = ['true', '1', 'yes'].includes(
-  String(process.env.USE_XSERVER_FALLBACK || '').toLowerCase()
-);
-const XSERVER_API_URL = process.env.XSERVER_API_URL;
-const XSERVER_API_KEY = process.env.XSERVER_API_KEY;
+const VPS_API_URL = process.env.VPS_API_URL || 'https://api.kanucard.com';
+const USE_VPS_FALLBACK = process.env.NODE_ENV === 'production'; // 本番環境では常にVPS APIフォールバックを有効化
 
 // Nodemailer transporter設定（Xserver SMTP）
 console.log('[email-service] Using Xserver SMTP for email delivery');
@@ -40,78 +37,61 @@ const transporter = nodemailer.createTransport({
 });
 
 /**
- * XserverVPS APIを使用したメール送信（フォールバック）
+ * VPS APIを使用したメール送信（フォールバック）
  */
-async function sendViaXserverAPI(mailOptions) {
-  if (!XSERVER_API_URL || !XSERVER_API_KEY) {
-    throw new Error('XserverVPS API configuration missing');
-  }
-
-  logger.info('Attempting to send via XserverVPS API', {
+async function sendViaVPSAPI(mailOptions) {
+  logger.info('Attempting to send via VPS API', {
     to: mailOptions.to,
     subject: mailOptions.subject,
-    apiUrl: XSERVER_API_URL
+    apiUrl: VPS_API_URL
   });
 
   try {
-    // タイムアウト付きfetch（30秒）
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
-
-    const response = await fetch(`${XSERVER_API_URL}/api/send-email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Api-Key': XSERVER_API_KEY
-      },
-      body: JSON.stringify({
+    const response = await axios.post(
+      `${VPS_API_URL}/api/send-email`,
+      {
         from: mailOptions.from,
         to: mailOptions.to,
         replyTo: mailOptions.replyTo,
         subject: mailOptions.subject,
         html: mailOptions.html,
         text: mailOptions.text
-      }),
-      signal: controller.signal
-    });
+      },
+      {
+        timeout: 30000, // 30秒タイムアウト
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(`API request failed: ${response.status} - ${errorData.error || 'Unknown error'}`);
-    }
-
-    const result = await response.json();
-
-    logger.info('Email sent successfully via XserverVPS API', {
+    logger.info('Email sent successfully via VPS API', {
       to: mailOptions.to,
       subject: mailOptions.subject,
-      messageId: result.messageId
+      messageId: response.data.messageId,
+      status: response.status
     });
 
     return {
       success: true,
-      method: 'xserver-api',
-      messageId: result.messageId
+      method: 'vps-api',
+      messageId: response.data.messageId
     };
 
   } catch (error) {
-    if (error.name === 'AbortError') {
-      logger.error('XserverVPS API timeout', {
-        to: mailOptions.to,
-        subject: mailOptions.subject
-      });
-      throw new Error('XserverVPS API timeout after 30 seconds');
-    }
+    const errorMessage = error.response
+      ? `API error: ${error.response.status} - ${error.response.data?.error || error.response.statusText}`
+      : error.message;
 
-    logger.error('XserverVPS API send error', {
-      error: error.message,
+    logger.error('VPS API send error', {
+      error: errorMessage,
       to: mailOptions.to,
-      subject: mailOptions.subject
+      subject: mailOptions.subject,
+      status: error.response?.status,
+      data: error.response?.data
     });
 
-    throw error;
+    throw new Error(errorMessage);
   }
 }
 
@@ -202,71 +182,57 @@ async function sendEmail(mailOptions) {
   console.log('[email-service] Starting email send process');
   console.log('[email-service] To:', mailOptions.to);
   console.log('[email-service] Subject:', mailOptions.subject);
-  console.log('[email-service] Fallback enabled:', USE_XSERVER_FALLBACK);
-  console.log('[email-service] API configured:', !!(XSERVER_API_URL && XSERVER_API_KEY));
+  console.log('[email-service] VPS Fallback enabled:', USE_VPS_FALLBACK);
+  console.log('[email-service] VPS API URL:', VPS_API_URL);
   console.log('============================================');
 
-  // 1. まずSMTP送信を試行
+  // 1. まずSMTP送信を試行（タイムアウト短め）
   try {
-    console.log('[email-service] Attempting SMTP send...');
+    console.log('[email-service] Attempting direct SMTP send...');
     const result = await sendViaSMTP(mailOptions);
-    console.log('[email-service] ✓ SMTP send successful');
+    console.log('[email-service] ✓ Direct SMTP send successful');
     return result;
   } catch (smtpError) {
-    console.error('[email-service] ✗ SMTP send failed:', smtpError.message);
+    console.error('[email-service] ✗ Direct SMTP send failed:', smtpError.message);
     console.error('[email-service] SMTP error code:', smtpError.code);
 
     errors.push({
-      method: 'smtp',
+      method: 'direct-smtp',
       error: smtpError.message,
       code: smtpError.code
     });
 
-    logger.warn('SMTP send failed, attempting fallback', {
+    logger.warn('Direct SMTP send failed, attempting VPS API fallback', {
       error: smtpError.message,
       code: smtpError.code,
-      fallbackEnabled: USE_XSERVER_FALLBACK,
-      apiConfigured: !!(XSERVER_API_URL && XSERVER_API_KEY)
+      fallbackEnabled: USE_VPS_FALLBACK,
+      vpsApiUrl: VPS_API_URL
     });
   }
 
-  // 2. SMTP失敗時、フォールバックが有効ならXserverVPS APIを試行
-  if (USE_XSERVER_FALLBACK) {
-    console.log('[email-service] Fallback is enabled, checking API configuration...');
+  // 2. SMTP失敗時、VPS APIフォールバックを試行
+  if (USE_VPS_FALLBACK) {
+    console.log('[email-service] VPS API fallback is enabled, attempting...');
 
-    if (!XSERVER_API_URL) {
-      console.error('[email-service] ✗ XSERVER_API_URL not configured!');
+    try {
+      console.log('[email-service] Attempting VPS API fallback...');
+      const result = await sendViaVPSAPI(mailOptions);
+      console.log('[email-service] ✓ VPS API send successful');
+      return result;
+    } catch (apiError) {
+      console.error('[email-service] ✗ VPS API failed:', apiError.message);
+
       errors.push({
-        method: 'xserver-api',
-        error: 'XSERVER_API_URL not configured'
+        method: 'vps-api',
+        error: apiError.message
       });
-    } else if (!XSERVER_API_KEY) {
-      console.error('[email-service] ✗ XSERVER_API_KEY not configured!');
-      errors.push({
-        method: 'xserver-api',
-        error: 'XSERVER_API_KEY not configured'
+
+      logger.error('VPS API fallback also failed', {
+        error: apiError.message
       });
-    } else {
-      try {
-        console.log('[email-service] Attempting XserverVPS API fallback...');
-        const result = await sendViaXserverAPI(mailOptions);
-        console.log('[email-service] ✓ XserverVPS API send successful');
-        return result;
-      } catch (apiError) {
-        console.error('[email-service] ✗ XserverVPS API failed:', apiError.message);
-
-        errors.push({
-          method: 'xserver-api',
-          error: apiError.message
-        });
-
-        logger.error('XserverVPS API fallback also failed', {
-          error: apiError.message
-        });
-      }
     }
   } else {
-    console.warn('[email-service] Fallback is disabled (USE_XSERVER_FALLBACK not set to true)');
+    console.warn('[email-service] VPS API fallback is disabled (not in production mode)');
   }
 
   // 3. すべての方法が失敗した場合
@@ -310,29 +276,22 @@ function validateEmailConfig() {
     console.log('[email-service] ✓ SMTP configuration complete');
   }
 
-  // フォールバック設定チェック
-  console.log('[email-service] Fallback Configuration:');
-  console.log('  - USE_XSERVER_FALLBACK (raw):', process.env.USE_XSERVER_FALLBACK || 'NOT SET');
-  console.log('  - USE_XSERVER_FALLBACK (parsed):', USE_XSERVER_FALLBACK);
-  console.log('  - XSERVER_API_URL:', XSERVER_API_URL || 'NOT SET');
-  console.log('  - XSERVER_API_KEY:', XSERVER_API_KEY ? '****' : 'NOT SET');
+  // VPS APIフォールバック設定チェック
+  console.log('[email-service] VPS API Fallback Configuration:');
+  console.log('  - NODE_ENV:', process.env.NODE_ENV || 'NOT SET');
+  console.log('  - USE_VPS_FALLBACK:', USE_VPS_FALLBACK);
+  console.log('  - VPS_API_URL:', VPS_API_URL);
 
-  if (USE_XSERVER_FALLBACK) {
-    if (!XSERVER_API_URL) {
-      issues.push('XSERVER_API_URL not set');
-      console.error('[email-service] ✗ XSERVER_API_URL not set!');
-    }
-    if (!XSERVER_API_KEY) {
-      issues.push('XSERVER_API_KEY not set');
-      console.error('[email-service] ✗ XSERVER_API_KEY not set!');
-    }
-
-    if (XSERVER_API_URL && XSERVER_API_KEY) {
-      console.log('[email-service] ✓ Fallback configuration complete');
+  if (USE_VPS_FALLBACK) {
+    if (!VPS_API_URL) {
+      issues.push('VPS_API_URL not set');
+      console.error('[email-service] ✗ VPS_API_URL not set!');
+    } else {
+      console.log('[email-service] ✓ VPS API fallback configuration complete');
     }
   } else {
-    console.warn('[email-service] ⚠ Fallback is DISABLED');
-    console.warn('[email-service] Set USE_XSERVER_FALLBACK=true to enable');
+    console.warn('[email-service] ⚠ VPS API fallback is DISABLED (development mode)');
+    console.warn('[email-service] Will only use direct SMTP in development');
   }
 
   console.log('============================================');
@@ -356,8 +315,8 @@ function validateEmailConfig() {
   return {
     valid: true,
     smtpConfigured: true,
-    fallbackEnabled: USE_XSERVER_FALLBACK,
-    apiConfigured: !!(XSERVER_API_URL && XSERVER_API_KEY)
+    fallbackEnabled: USE_VPS_FALLBACK,
+    apiConfigured: !!VPS_API_URL
   };
 }
 
