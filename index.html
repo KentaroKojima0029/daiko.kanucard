@@ -663,6 +663,8 @@
                 sessionStorage.setItem('auth_token', data.token);
                 sessionStorage.setItem('user_email', currentEmail);
                 sessionStorage.setItem('user_data', JSON.stringify(data.user));
+                sessionStorage.setItem('login_time', Date.now().toString());
+                sessionStorage.setItem('last_activity', Date.now().toString());
 
                 console.log('セッション保存完了、リダイレクト準備');
                 showSuccess('認証に成功しました。ホーム画面へ移動します...');

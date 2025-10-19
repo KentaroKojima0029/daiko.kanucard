@@ -940,7 +940,7 @@ app.post('/api/auth/verify-otp', async (req, res) => {
         lastName: otpData.customerData.lastName
       },
       JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '30m' }  // 30分のセッション有効期限
     );
 
     // OTPストアから削除
@@ -993,6 +993,37 @@ const authenticateToken = (req, res, next) => {
     next();
   });
 };
+
+// セッション更新（リフレッシュ）エンドポイント
+app.post('/api/auth/refresh-session', authenticateToken, (req, res) => {
+  try {
+    // 既存のユーザー情報を使用して新しいトークンを生成
+    const newToken = jwt.sign(
+      {
+        customerId: req.user.customerId,
+        email: req.user.email,
+        firstName: req.user.firstName,
+        lastName: req.user.lastName
+      },
+      JWT_SECRET,
+      { expiresIn: '30m' }  // 新しい30分のセッション
+    );
+
+    logger.info('Session refreshed for user', { email: req.user.email });
+
+    res.json({
+      success: true,
+      message: 'セッションが更新されました',
+      token: newToken
+    });
+  } catch (error) {
+    logger.error('Session refresh error', { error: error.message });
+    res.status(500).json({
+      success: false,
+      message: 'セッションの更新に失敗しました'
+    });
+  }
+});
 
 // 顧客の注文履歴取得（認証必須）
 app.get('/api/shopify/customer/:email/orders', authenticateToken, async (req, res) => {
