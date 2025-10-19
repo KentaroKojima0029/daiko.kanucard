@@ -182,13 +182,39 @@ async function sendEmail(mailOptions) {
   console.log('[email-service] Starting email send process');
   console.log('[email-service] To:', mailOptions.to);
   console.log('[email-service] Subject:', mailOptions.subject);
-  console.log('[email-service] VPS Fallback enabled:', USE_VPS_FALLBACK);
+  console.log('[email-service] Environment:', process.env.NODE_ENV);
+  console.log('[email-service] VPS API enabled:', USE_VPS_FALLBACK);
   console.log('[email-service] VPS API URL:', VPS_API_URL);
   console.log('============================================');
 
-  // 1. まずSMTP送信を試行（タイムアウト短め）
+  // 本番環境では直接VPS APIを使用（高速化）
+  if (USE_VPS_FALLBACK) {
+    console.log('[email-service] Production mode: Using VPS API directly...');
+
+    try {
+      const result = await sendViaVPSAPI(mailOptions);
+      console.log('[email-service] ✓ VPS API send successful');
+      return result;
+    } catch (apiError) {
+      console.error('[email-service] ✗ VPS API failed:', apiError.message);
+
+      errors.push({
+        method: 'vps-api',
+        error: apiError.message
+      });
+
+      logger.error('VPS API send failed', {
+        error: apiError.message
+      });
+
+      // VPS API失敗時のエラーをそのままスロー
+      throw new Error(`VPS API failed: ${apiError.message}`);
+    }
+  }
+
+  // 開発環境では直接SMTP送信を試行
+  console.log('[email-service] Development mode: Attempting direct SMTP send...');
   try {
-    console.log('[email-service] Attempting direct SMTP send...');
     const result = await sendViaSMTP(mailOptions);
     console.log('[email-service] ✓ Direct SMTP send successful');
     return result;
@@ -202,37 +228,10 @@ async function sendEmail(mailOptions) {
       code: smtpError.code
     });
 
-    logger.warn('Direct SMTP send failed, attempting VPS API fallback', {
+    logger.error('Direct SMTP send failed', {
       error: smtpError.message,
-      code: smtpError.code,
-      fallbackEnabled: USE_VPS_FALLBACK,
-      vpsApiUrl: VPS_API_URL
+      code: smtpError.code
     });
-  }
-
-  // 2. SMTP失敗時、VPS APIフォールバックを試行
-  if (USE_VPS_FALLBACK) {
-    console.log('[email-service] VPS API fallback is enabled, attempting...');
-
-    try {
-      console.log('[email-service] Attempting VPS API fallback...');
-      const result = await sendViaVPSAPI(mailOptions);
-      console.log('[email-service] ✓ VPS API send successful');
-      return result;
-    } catch (apiError) {
-      console.error('[email-service] ✗ VPS API failed:', apiError.message);
-
-      errors.push({
-        method: 'vps-api',
-        error: apiError.message
-      });
-
-      logger.error('VPS API fallback also failed', {
-        error: apiError.message
-      });
-    }
-  } else {
-    console.warn('[email-service] VPS API fallback is disabled (not in production mode)');
   }
 
   // 3. すべての方法が失敗した場合
