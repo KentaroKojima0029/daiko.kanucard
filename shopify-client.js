@@ -1,6 +1,11 @@
 const { shopifyApi, ApiVersion } = require('@shopify/shopify-api');
 require('@shopify/shopify-api/adapters/node');
 
+// デバッグ: 環境変数の読み込み状況を確認
+console.log('[Shopify Module] Loading...');
+console.log('[Shopify Module] SHOPIFY_SHOP_NAME:', process.env.SHOPIFY_SHOP_NAME ? 'Set' : 'NOT SET');
+console.log('[Shopify Module] SHOPIFY_ADMIN_ACCESS_TOKEN:', process.env.SHOPIFY_ADMIN_ACCESS_TOKEN ? `Set (${process.env.SHOPIFY_ADMIN_ACCESS_TOKEN.length} chars)` : 'NOT SET');
+
 // Shopify設定
 const SHOPIFY_SHOP = process.env.SHOPIFY_SHOP_NAME;
 const SHOPIFY_ACCESS_TOKEN = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
@@ -54,8 +59,17 @@ function initShopify() {
 
 // GraphQL クライアントの作成
 function createGraphQLClient() {
+  // Shopifyが初期化されていない場合は再度初期化を試みる
+  if (!shopify) {
+    console.log('[Shopify] Client not initialized, attempting to initialize...');
+    initShopify();
+  }
+
   if (!shopify || !SHOPIFY_SHOP || !SHOPIFY_ACCESS_TOKEN) {
-    console.warn('[Shopify] Client creation failed - missing credentials');
+    console.error('[Shopify] Client creation failed');
+    console.error('[Shopify] shopify object:', shopify ? 'Exists' : 'NULL');
+    console.error('[Shopify] SHOPIFY_SHOP:', SHOPIFY_SHOP || 'MISSING');
+    console.error('[Shopify] SHOPIFY_ACCESS_TOKEN:', SHOPIFY_ACCESS_TOKEN ? 'Set' : 'MISSING');
     return null;
   }
 
@@ -88,8 +102,12 @@ async function findCustomerByEmail(email) {
     console.error('[Shopify] ❌ Client not available - missing configuration');
     console.error('[Shopify] Shop name:', SHOPIFY_SHOP || 'MISSING');
     console.error('[Shopify] Access token:', SHOPIFY_ACCESS_TOKEN ? '✓ Set' : '✗ MISSING');
+    console.error('[Shopify] Process env SHOPIFY_SHOP_NAME:', process.env.SHOPIFY_SHOP_NAME || 'MISSING');
+    console.error('[Shopify] Process env SHOPIFY_ADMIN_ACCESS_TOKEN:', process.env.SHOPIFY_ADMIN_ACCESS_TOKEN ? 'Set' : 'MISSING');
     console.log('====================================================');
-    throw new Error('Shopify client not configured. Check SHOPIFY_SHOP_NAME and SHOPIFY_ADMIN_ACCESS_TOKEN environment variables.');
+
+    // エラーを投げる代わりにnullを返す（server.jsでハンドリング）
+    return null;
   }
 
   try {
@@ -397,9 +415,6 @@ async function getCustomerOrders(customerId, limit = 20) {
   }
 }
 
-// 初期化
-initShopify();
-
 // 全顧客リストを取得（デバッグ用）
 async function listAllCustomers(limit = 10) {
   const client = createGraphQLClient();
@@ -467,8 +482,14 @@ async function listAllCustomers(limit = 10) {
   }
 }
 
-// 初期化
-initShopify();
+// モジュール読み込み時に初期化を実行
+console.log('[Shopify Module] Running initialization...');
+const initResult = initShopify();
+if (initResult) {
+  console.log('[Shopify Module] Initialization successful');
+} else {
+  console.log('[Shopify Module] Initialization failed - missing environment variables');
+}
 
 module.exports = {
   findCustomerByEmail,

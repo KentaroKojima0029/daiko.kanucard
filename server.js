@@ -3,7 +3,21 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
+// 環境変数の読み込み（本番環境では.envファイルを使わず、システムから読み込む）
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
+// 環境変数のデバッグ出力（起動時）
+console.log('========================================');
+console.log('🚀 Server Starting...');
+console.log('Environment:', process.env.NODE_ENV);
+console.log('Port:', process.env.PORT || 3000);
+console.log('Shopify Shop:', process.env.SHOPIFY_SHOP_NAME ? '✓ Configured' : '✗ Missing');
+console.log('Shopify Token:', process.env.SHOPIFY_ADMIN_ACCESS_TOKEN ? '✓ Configured' : '✗ Missing');
+console.log('SMTP Host:', process.env.SMTP_HOST || 'Not configured');
+console.log('SMTP User:', process.env.SMTP_USER || 'Not configured');
+console.log('========================================');
 
 const { init: initDatabase, submissionQueries, kaitoriQueries, getDatabase } = require('./database');
 const { getCustomerById, getCustomerOrders, listAllCustomers } = require('./shopify-client');
@@ -783,12 +797,12 @@ app.post('/api/auth/verify-shopify-customer', async (req, res) => {
     console.log('==============================================');
 
     // Shopifyで顧客が存在するか確認
-    let customer;
+    let customer = null;
     try {
       console.log('[OTP] Attempting to find customer in Shopify...');
       const { findCustomerByEmail } = require('./shopify-client');
       customer = await findCustomerByEmail(email);
-      console.log(`[OTP] Shopify customer found: ${!!customer}`);
+      console.log(`[OTP] Shopify customer lookup result: ${customer ? 'Found' : 'Not found or API error'}`);
       if (customer) {
         console.log(`[OTP] Customer ID: ${customer.id}`);
         console.log(`[OTP] Customer name: ${customer.firstName} ${customer.lastName}`);
@@ -813,16 +827,9 @@ app.post('/api/auth/verify-shopify-customer', async (req, res) => {
         }
       });
 
-      // 本番環境では詳細なエラーを返さない
-      const errorMessage = isProduction
-        ? 'システムエラーが発生しました。しばらくしてからお試しください。'
-        : `Shopify API Error: ${shopifyError.message}`;
-
-      return res.status(500).json({
-        success: false,
-        message: errorMessage,
-        ...(isProduction ? {} : { debug: shopifyError.message })
-      });
+      // Shopify APIエラーでも処理を続行する（nullとして扱う）
+      customer = null;
+      console.log('[OTP] Continuing with null customer due to Shopify API error');
     }
 
     if (!customer) {
