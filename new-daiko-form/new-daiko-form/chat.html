@@ -42,15 +42,13 @@
             gap: 16px;
         }
 
-        /* ホームボタン - 統一デザイン */
-        .btn-home-fixed {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: linear-gradient(135deg, #3b82f6, #1e40af);
+        .btn-back {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             color: white;
-            padding: 12px 20px;
-            border-radius: 50px;
+            padding: 8px 16px;
+            border-radius: 8px;
             text-decoration: none;
             font-size: 14px;
             font-weight: 600;
@@ -58,18 +56,16 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            z-index: 1001;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
-        .btn-home-fixed:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
         }
 
-        .btn-home-fixed svg {
-            width: 20px;
-            height: 20px;
+        .btn-back svg {
+            width: 18px;
+            height: 18px;
         }
 
         .header-title {
@@ -500,43 +496,20 @@
             .header-user {
                 font-size: 12px;
             }
-
-            .btn-home-fixed {
-                top: 10px;
-                left: 10px;
-                padding: 10px 16px;
-                font-size: 13px;
-            }
-
-            .btn-home-fixed svg {
-                width: 18px;
-                height: 18px;
-            }
         }
     </style>
 </head>
 <body>
-    <!-- ホームボタン -->
-    <a href="/" class="btn-home-fixed">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-        </svg>
-        ホーム
-    </a>
-
     <!-- ヘッダー -->
     <header class="header">
         <div class="header-container">
             <div class="header-left">
-<<<<<<< Updated upstream
-                <a href="https://daiko.kanucard.com" class="btn-back">
+                <a href="https://new-daiko-form.onrender.com" class="btn-back">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                     </svg>
                     戻る
                 </a>
-=======
->>>>>>> Stashed changes
                 <h1 class="header-title">メッセージ</h1>
             </div>
             <div class="header-user">

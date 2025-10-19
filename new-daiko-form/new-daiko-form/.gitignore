@@ -1,8 +1,5 @@
 # Environment variables
 .env
-.env.local
-.env.production
-.env.*.local
 .env.render
 
 # Database
@@ -11,9 +8,6 @@ daiko.db
 
 # Dependencies
 node_modules/
-
-# Next.js
-.next/
 
 # Logs
 *.log

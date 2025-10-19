@@ -105,57 +105,6 @@ openssl req -x509 -newkey rsa:4096 -keyout server.key -out server.crt -days 365 
   -subj "/C=JP/ST=Tokyo/L=Tokyo/O=PSA Agency/CN=localhost"
 ```
 
-## 🚀 本番環境へのデプロイ
-
-### Render.com での環境変数設定
-
-本番環境（Render.com）のダッシュボードで、以下の環境変数を設定してください：
-
-#### Shopify設定
-- `SHOPIFY_SHOP_NAME`: kanucard
-- `SHOPIFY_ADMIN_ACCESS_TOKEN`: [Shopifyダッシュボードから取得したアクセストークン]
-- `SHOPIFY_API_VERSION`: 2024-10
-
-#### JWT認証設定
-- `JWT_SECRET`: fbaa0bd83712c4d525e990c3f98ffe0a481235723b8705d2b5d7c33114d4d111
-
-#### SMTP設定（メール送信用）
-- `SMTP_HOST`: sv10210.xserver.jp
-- `SMTP_PORT`: 587
-- `SMTP_SECURE`: false
-- `SMTP_USER`: collection@kanucard.com
-- `SMTP_PASS`: Kanu29012300
-- `FROM_EMAIL`: collection@kanucard.com
-- `ADMIN_EMAIL`: collection@kanucard.com
-
-#### API URL設定
-- `NEXT_PUBLIC_API_URL`: https://api.kanucard.com
-- `API_URL`: https://api.kanucard.com
-- `ADMIN_API_URL`: https://kanucard-daiko-support.onrender.com
-
-#### 管理者認証
-- `ADMIN_USER`: admin
-- `ADMIN_PASSWORD`: #collection30
-
-### デプロイ手順
-
-1. **GitHubにプッシュ**
-   ```bash
-   git add .
-   git commit -m "Production ready with Shopify integration"
-   git push origin main
-   ```
-
-2. **Render.comでデプロイ**
-   - Render.comダッシュボードにログイン
-   - 環境変数を設定（上記参照）
-   - デプロイを実行
-
-3. **動作確認**
-   - https://api.kanucard.com にアクセス
-   - ログイン機能の確認
-   - Shopify連携の確認
-
 ## 🏃‍♂️ 起動方法
 
 ### 開発環境

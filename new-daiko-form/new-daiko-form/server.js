@@ -43,7 +43,7 @@ app.use(requestLogger);
 // CORS設定（外部管理画面用）
 app.use((req, res, next) => {
   const allowedOrigins = [
-    'https://daiko.kanucard.com',
+    'https://new-daiko-form.onrender.com',
     'http://localhost:3000',
     'http://localhost:3443',
     'https://kanucard.com',
@@ -804,11 +804,6 @@ app.post('/api/kaitori/respond', async (req, res) => {
 
 // ===== HTMLページルーティング =====
 
-// 代行申込フォームページ
-app.get('/form', (req, res) => {
-  res.sendFile(path.join(__dirname, 'form.html'));
-});
-
 // 進捗状況ページ
 app.get('/status', (req, res) => {
   res.sendFile(path.join(__dirname, 'status.html'));
@@ -827,20 +822,6 @@ app.get('/kaitori/admin', (req, res) => {
 // 買取承認ページ
 app.get('/kaitori/approval', (req, res) => {
   res.sendFile(path.join(__dirname, 'kaitori-approval.html'));
-});
-
-// メッセージ/チャットページ
-app.get('/chat', (req, res) => {
-  res.sendFile(path.join(__dirname, 'chat.html'));
-});
-
-app.get('/messages', (req, res) => {
-  res.sendFile(path.join(__dirname, 'chat.html'));
-});
-
-// お問い合わせページ（メッセージページへリダイレクト）
-app.get('/contact', (req, res) => {
-  res.redirect('/chat');
 });
 
 // SPAのフォールバック（HTMLファイルのみ）
@@ -866,11 +847,11 @@ app.listen(port, () => {
     nodeEnv: process.env.NODE_ENV
   });
   console.log(`Server running on port ${port}`);
-  console.log(`- Home: http://localhost:${port}/`);
-  console.log(`- Form: http://localhost:${port}/form`);
+  console.log(`- User page: http://localhost:${port}/`);
+  console.log(`- Login: http://localhost:${port}/login`);
   console.log(`- Status: http://localhost:${port}/status`);
-  console.log(`- Messages: http://localhost:${port}/chat`);
   console.log(`- Approval: http://localhost:${port}/approval`);
+  console.log(`- Contact: http://localhost:${port}/contact`);
   console.log(`- Admin: http://localhost:${port}/admin`);
   console.log(`- Health Check: http://localhost:${port}/api/health`);
   console.log(`- Shopify Test: http://localhost:${port}/api/test/shopify`);

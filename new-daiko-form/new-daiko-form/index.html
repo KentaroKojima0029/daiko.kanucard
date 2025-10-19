@@ -119,51 +119,9 @@
             padding: 8px;
         }
 
-        /* ホームボタン */
-        .btn-home-fixed {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: linear-gradient(135deg, #3b82f6, #1e40af);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            z-index: 1001;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-home-fixed:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
-        }
-
-        .btn-home-fixed svg {
-            width: 20px;
-            height: 20px;
-        }
-
         @media (max-width: 768px) {
             body {
                 padding-top: 70px;
-            }
-
-            .btn-home-fixed {
-                top: 10px;
-                left: 10px;
-                padding: 10px 16px;
-                font-size: 13px;
-            }
-
-            .btn-home-fixed svg {
-                width: 18px;
-                height: 18px;
             }
 
             .navbar-container {
@@ -1120,14 +1078,6 @@
     </style>
 </head>
 <body>
-    <!-- ホームボタン -->
-    <a href="/" class="btn-home-fixed">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-        </svg>
-        ホーム
-    </a>
-
     <!-- ナビゲーションバー -->
     <nav class="navbar">
         <div class="navbar-container">
@@ -1138,11 +1088,11 @@
                 ☰
             </button>
             <ul class="navbar-menu" id="navbarMenu">
-                <li><a href="/" class="navbar-link">ホーム</a></li>
-                <li><a href="/form" class="navbar-link active">代行フォーム</a></li>
+                <li><a href="/" class="navbar-link active">代行フォーム</a></li>
                 <li><a href="/status" class="navbar-link">進捗確認</a></li>
                 <li><a href="/chat" class="navbar-link">メッセージ</a></li>
                 <li><a href="/approval" class="navbar-link">買取承認</a></li>
+                <li><a href="/contact" class="navbar-link">お問い合わせ</a></li>
             </ul>
         </div>
     </nav>

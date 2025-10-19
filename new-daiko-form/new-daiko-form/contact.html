@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お問い合わせ - PSA代行サービス</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+            padding: 80px 20px 20px;
+            color: #1e293b;
+            letter-spacing: 0.02em;
+        }
+
+        /* ナビゲーションバー */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(203, 213, 225, 0.3);
+            z-index: 1000;
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.05em;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 8px;
+            list-style: none;
+        }
+
+        .navbar-link {
+            padding: 10px 20px;
+            color: #475569;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-link:hover {
+            background: linear-gradient(135deg, #1e40af, #1e3a8a);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+        }
+
+        .navbar-link.active {
+            background: linear-gradient(135deg, #1e40af, #1e3a8a);
+            color: white;
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+        }
+
+        .logout-btn {
+            border: none;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        .logout-btn:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+
+        .mobile-menu-button {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #1e40af;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 70px;
+            }
+
+            .navbar-container {
+                padding: 12px 16px;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .mobile-menu-button {
+                display: block;
+            }
+
+            .navbar-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                padding: 8px;
+            }
+
+            .navbar-menu.show {
+                display: flex;
+            }
+
+            .navbar-link {
+                padding: 14px 20px;
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 0.05em;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 0.03em;
+        }
+
+        .form-content {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 10px;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            opacity: 0.85;
+        }
+
+        .required {
+            color: #ef4444;
+            margin-left: 4px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 16px 20px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #ffffff;
+            color: #0f172a;
+            font-family: inherit;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #1e40af;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.08), 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+            color: white;
+            padding: 20px 48px;
+            font-size: 16px;
+            font-weight: 700;
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            margin-top: 32px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn-submit:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
+        }
+
+        .btn-submit:active:not(:disabled) {
+            transform: translateY(0px);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .contact-info {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .contact-info h3 {
+            font-size: 1.2rem;
+            color: #1a202c;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .contact-info p {
+            color: #6b7280;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .contact-info strong {
+            color: #1a202c;
+        }
+
+        .note-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid #f59e0b;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 24px;
+        }
+
+        .note-box strong {
+            color: #92400e;
+            font-size: 1.1rem;
+        }
+
+        .note-box ul {
+            margin-top: 12px;
+            margin-left: 24px;
+            color: #78350f;
+        }
+
+        .note-box li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- ナビゲーションバー -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">
+                PSA代行サービス
+            </a>
+            <button class="mobile-menu-button" id="mobileMenuButton">
+                ☰
+            </button>
+            <ul class="navbar-menu" id="navbarMenu">
+                <li><a href="/" class="navbar-link">代行フォーム</a></li>
+                <li><a href="/status" class="navbar-link">進捗確認</a></li>
+                <li><a href="/approval" class="navbar-link">買取承認</a></li>
+                <li><a href="/contact" class="navbar-link active">お問い合わせ</a></li>
+                <li><a href="/admin" class="navbar-link">管理者</a></li>
+                <li><button onclick="handleLogout()" class="navbar-link logout-btn">ログアウト</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="main-card">
+            <div class="header">
+                <h1>お問い合わせ</h1>
+                <p>ご質問・ご相談はこちらからお気軽にどうぞ</p>
+            </div>
+
+            <div class="form-content">
+                <div class="contact-info">
+                    <h3>直接のお問い合わせ</h3>
+                    <p><strong>メール:</strong> collection@kanucard.com</p>
+                    <p><strong>受付時間:</strong> 平日 10:00 - 18:00</p>
+                    <p>お急ぎの場合は、直接メールでお問い合わせください。24時間以内にご返信いたします。</p>
+                </div>
+
+                <form id="contactForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="name">
+                                お名前<span class="required">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="name"
+                                class="form-input"
+                                placeholder="山田 太郎"
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="email">
+                                メールアドレス<span class="required">*</span>
+                            </label>
+                            <input
+                                type="email"
+                                id="email"
+                                class="form-input"
+                                placeholder="example@email.com"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="subject">
+                            件名<span class="required">*</span>
+                        </label>
+                        <select id="subject" class="form-select" required>
+                            <option value="">選択してください</option>
+                            <option value="代行依頼について">代行依頼について</option>
+                            <option value="進捗確認について">進捗確認について</option>
+                            <option value="買取について">買取について</option>
+                            <option value="料金について">料金について</option>
+                            <option value="配送について">配送について</option>
+                            <option value="その他">その他</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="message">
+                            お問い合わせ内容<span class="required">*</span>
+                        </label>
+                        <textarea
+                            id="message"
+                            class="form-textarea"
+                            placeholder="お問い合わせ内容をご記入ください"
+                            required
+                        ></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        送信する
+                    </button>
+
+                    <div class="note-box">
+                        <strong>※ お問い合わせについて</strong>
+                        <ul>
+                            <li>ご入力いただいたメールアドレスにご返信いたします</li>
+                            <li>通常24時間以内にご返信しております</li>
+                            <li>土日祝日のお問い合わせは、翌営業日のご返信となります</li>
+                            <li>お急ぎの場合は、メールに「至急」とご記入ください</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // モバイルメニュー
+        document.addEventListener('DOMContentLoaded', () => {
+            setupMobileMenu();
+        });
+
+        function setupMobileMenu() {
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const navbarMenu = document.getElementById('navbarMenu');
+
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', () => {
+                    navbarMenu.classList.toggle('show');
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!mobileMenuButton.contains(e.target) && !navbarMenu.contains(e.target)) {
+                        navbarMenu.classList.remove('show');
+                    }
+                });
+
+                // メニュー内のリンクをクリックしたらメニューを閉じる
+                const menuLinks = navbarMenu.querySelectorAll('.navbar-link');
+                menuLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        navbarMenu.classList.remove('show');
+                    });
+                });
+            }
+        }
+
+        // フォーム送信
+        document.getElementById('contactForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '送信中...';
+
+            try {
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        subject,
+                        message
+                    })
+                });
+
+                if (response.ok) {
+                    alert('お問い合わせを受け付けました。ご返信までしばらくお待ちください。');
+                    document.getElementById('contactForm').reset();
+                } else {
+                    throw new Error('送信に失敗しました');
+                }
+            } catch (error) {
+                alert('送信に失敗しました。もう一度お試しいただくか、直接メールでお問い合わせください。');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '送信する';
+            }
+        });
+
+        // ログアウト機能
+        async function handleLogout() {
+            if (!confirm('ログアウトしますか？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    window.location.href = '/login';
+                } else {
+                    alert('ログアウトに失敗しました');
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('ログアウトに失敗しました');
+            }
+        }
+    </script>
+
+    <!-- 認証チェック -->
+    <script src="/auth-check.js"></script>
+</body>
+</html>

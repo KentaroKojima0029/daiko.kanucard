@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const { init: initDatabase, submissionQueries, kaitoriQueries } = require('./database');
@@ -737,8 +739,234 @@ app.get('/api/debug/search-email', async (req, res) => {
 
 // ===== Shopify注文履歴API =====
 
-// 顧客の注文履歴取得
-app.get('/api/shopify/customer/:email/orders', async (req, res) => {
+// ===== 2段階認証用のメモリストア =====
+// 本番環境では Redis や Database を使用することを推奨
+const otpStore = new Map(); // { email: { otp, expiresAt, attempts } }
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production';
+
+// OTP生成関数
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// ===== 認証API =====
+
+// ステップ1: メールアドレス検証とOTP送信
+app.post('/api/auth/verify-shopify-customer', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'メールアドレスが必要です'
+      });
+    }
+
+    logger.info('OTP request for customer', { email });
+
+    // Shopifyで顧客が存在するか確認
+    const { findCustomerByEmail } = require('./shopify-client');
+    const customer = await findCustomerByEmail(email);
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: '登録されていないメールアドレスです'
+      });
+    }
+
+    // OTP生成
+    const otp = generateOTP();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10分間有効
+
+    // OTPをストアに保存
+    otpStore.set(email, {
+      otp,
+      expiresAt,
+      attempts: 0,
+      customerData: {
+        id: customer.id,
+        firstName: customer.firstName || '',
+        lastName: customer.lastName || '',
+        email: customer.email,
+        phone: customer.phone || null,
+        tags: customer.tags || []
+      }
+    });
+
+    // OTPメール送信
+    const emailHtml = `
+      <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background-color: #667eea; padding: 30px 20px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">PSA代行サービス</h1>
+        </div>
+        <div style="padding: 40px 20px; background-color: #f9fafb;">
+          <h2 style="color: #1a202c; margin-bottom: 20px;">ログイン認証コード</h2>
+          <p style="color: #4a5568; line-height: 1.6;">
+            PSA代行サービスへのログインを行うため、以下の認証コードを入力してください。
+          </p>
+          <div style="background-color: white; border: 2px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 30px 0; text-align: center;">
+            <span style="font-size: 32px; font-weight: bold; color: #667eea; letter-spacing: 8px;">
+              ${otp}
+            </span>
+          </div>
+          <p style="color: #718096; font-size: 14px; line-height: 1.5;">
+            ※ この認証コードは10分間有効です。<br>
+            ※ このメールに心当たりがない場合は、無視してください。
+          </p>
+        </div>
+        <div style="padding: 20px; background-color: #edf2f7; text-align: center;">
+          <p style="color: #718096; font-size: 12px; margin: 0;">
+            © 2025 KanuCard PSA代行サービス
+          </p>
+        </div>
+      </div>
+    `;
+
+    await sendEmail({
+      to: email,
+      subject: '【PSA代行サービス】ログイン認証コード',
+      text: `PSA代行サービスのログイン認証コードは ${otp} です。このコードは10分間有効です。`,
+      html: emailHtml
+    });
+
+    logger.info('OTP sent successfully', { email });
+
+    res.json({
+      success: true,
+      message: '認証コードを送信しました'
+    });
+
+  } catch (error) {
+    console.error('OTP generation error:', error);
+    logger.error('OTP generation error', {
+      error: error.message,
+      email: req.body.email
+    });
+
+    res.status(500).json({
+      success: false,
+      message: 'システムエラーが発生しました'
+    });
+  }
+});
+
+// ステップ2: OTP検証とトークン発行
+app.post('/api/auth/verify-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'メールアドレスと認証コードが必要です'
+      });
+    }
+
+    // OTPストアから情報を取得
+    const otpData = otpStore.get(email);
+
+    if (!otpData) {
+      return res.status(400).json({
+        success: false,
+        message: '認証コードの有効期限が切れています'
+      });
+    }
+
+    // 試行回数チェック
+    if (otpData.attempts >= 5) {
+      otpStore.delete(email);
+      return res.status(429).json({
+        success: false,
+        message: '試行回数の上限を超えました。もう一度最初からやり直してください'
+      });
+    }
+
+    // 有効期限チェック
+    if (Date.now() > otpData.expiresAt) {
+      otpStore.delete(email);
+      return res.status(400).json({
+        success: false,
+        message: '認証コードの有効期限が切れています'
+      });
+    }
+
+    // OTP検証
+    if (otpData.otp !== otp) {
+      otpData.attempts += 1;
+      return res.status(401).json({
+        success: false,
+        message: '認証コードが正しくありません',
+        remainingAttempts: 5 - otpData.attempts
+      });
+    }
+
+    // JWT トークン生成
+    const token = jwt.sign(
+      {
+        customerId: otpData.customerData.id,
+        email: otpData.customerData.email,
+        firstName: otpData.customerData.firstName,
+        lastName: otpData.customerData.lastName
+      },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // OTPストアから削除
+    otpStore.delete(email);
+
+    logger.info('Customer authenticated successfully', { email });
+
+    res.json({
+      success: true,
+      message: 'ログインに成功しました',
+      token,
+      user: otpData.customerData
+    });
+
+  } catch (error) {
+    console.error('OTP verification error:', error);
+    logger.error('OTP verification error', {
+      error: error.message,
+      email: req.body.email
+    });
+
+    res.status(500).json({
+      success: false,
+      message: 'システムエラーが発生しました'
+    });
+  }
+});
+
+// トークン検証ミドルウェア
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      message: '認証が必要です'
+    });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({
+        success: false,
+        message: 'トークンが無効です'
+      });
+    }
+
+    req.user = user;
+    next();
+  });
+};
+
+// 顧客の注文履歴取得（認証必須）
+app.get('/api/shopify/customer/:email/orders', authenticateToken, async (req, res) => {
   try {
     const { email } = req.params;
 

@@ -48,7 +48,7 @@
             shopify: {
                 getCustomerOrders: async function(email) {
                     const response = await fetch(
-                        `http://localhost:3000/api/shopify/customer/${encodeURIComponent(email)}/orders`,
+                        `/api/shopify/customer/${encodeURIComponent(email)}/orders`,
                         {
                             headers: {
                                 'Content-Type': 'application/json',
@@ -78,8 +78,17 @@
             const [error, setError] = useState(null);
             const [expandedOrders, setExpandedOrders] = useState(new Set());
 
-            // コンポーネントマウント時に注文履歴を取得
+            // コンポーネントマウント時に認証チェックと注文履歴を取得
             useEffect(() => {
+                // 認証トークンのチェック
+                const token = localStorage.getItem('kanucard_auth_token');
+                if (!token) {
+                    // トークンがない場合はログインページへリダイレクト
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                // トークンがある場合は注文履歴を取得
                 fetchOrders();
             }, []);
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>承認システム - PSA代行サービス</title>
+    <title>買取承認 - PSA代行サービス</title>
     <style>
         * {
             margin: 0;
@@ -55,36 +55,6 @@
             position: relative;
         }
 
-        /* ホームボタン - 統一デザイン */
-        .btn-home-fixed {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: linear-gradient(135deg, #3b82f6, #1e40af);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            z-index: 1001;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-home-fixed:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
-        }
-
-        .btn-home-fixed svg {
-            width: 20px;
-            height: 20px;
-        }
-
         .header h1 {
             font-size: 1.8rem;
             font-weight: 700;
@@ -97,92 +67,38 @@
             opacity: 0.95;
         }
 
-        .content {
-            padding: 40px;
-        }
-
-        /* 認証キー入力画面 */
-        .auth-section {
-            display: block;
-        }
-
-        .auth-section.hidden {
-            display: none;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-label {
-            display: block;
+        .btn-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
             font-size: 14px;
             font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 8px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 500;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: #ffffff;
-            color: #0f172a;
-            font-family: inherit;
-            text-align: center;
-            letter-spacing: 0.1em;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .form-input:focus {
-            outline: none;
-            border-color: #1e40af;
-            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.08);
-        }
-
-        .form-input.error {
-            border-color: #dc2626;
-        }
-
-        .btn {
-            padding: 18px 48px;
-            font-size: 16px;
-            font-weight: 700;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            letter-spacing: 0.05em;
-            width: 100%;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
-            color: white;
-            box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35);
-        }
-
-        .btn-primary:hover:not(:disabled) {
+        .btn-home:hover {
+            background: rgba(255, 255, 255, 0.25);
             transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
+        .btn-home svg {
+            width: 18px;
+            height: 18px;
         }
 
-        /* 承認画面 */
-        .approval-section {
-            display: none;
-        }
-
-        .approval-section.show {
-            display: block;
+        .content {
+            padding: 40px;
         }
 
         .section {
@@ -269,6 +185,18 @@
             margin-top: 24px;
         }
 
+        .btn {
+            flex: 1;
+            padding: 18px 24px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.05em;
+        }
+
         .btn-approve {
             background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
             color: white;
@@ -291,6 +219,12 @@
             box-shadow: 0 12px 32px rgba(220, 38, 38, 0.45);
         }
 
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
         .bank-form {
             display: none;
             margin-top: 24px;
@@ -301,6 +235,57 @@
 
         .bank-form.show {
             display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #ffffff;
+            color: #0f172a;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1e40af;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.08);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+            color: white;
+            padding: 18px 48px;
+            font-size: 16px;
+            font-weight: 700;
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35);
+            letter-spacing: 0.05em;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(30, 64, 175, 0.45);
         }
 
         .message {
@@ -379,69 +364,44 @@
                 padding: 24px;
             }
 
-            .btn-home-fixed {
+            .btn-home {
                 top: 10px;
                 left: 10px;
-                padding: 10px 16px;
+                padding: 8px 16px;
                 font-size: 13px;
             }
 
-            .btn-home-fixed svg {
-                width: 18px;
-                height: 18px;
+            .btn-home svg {
+                width: 16px;
+                height: 16px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- ホームボタン -->
-    <a href="/" class="btn-home-fixed">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-        </svg>
-        ホーム
-    </a>
-
     <div class="container">
         <div class="card">
             <div class="header">
-                <h1>承認システム</h1>
-                <p>買取査定承認</p>
+                <a href="https://new-daiko-form.onrender.com" class="btn-home">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                    ホームへ戻る
+                </a>
+                <h1>買取承認</h1>
+                <p>カード査定結果をご確認ください</p>
             </div>
 
             <div class="content">
-                <div id="errorMessage" class="message message-error"></div>
-                <div id="successMessage" class="message message-success"></div>
-
-                <!-- 認証キー入力セクション -->
-                <div id="authSection" class="auth-section">
-                    <form id="authForm">
-                        <div class="form-group">
-                            <label class="form-label" for="authKey">認証キー</label>
-                            <input
-                                type="text"
-                                id="authKey"
-                                class="form-input"
-                                placeholder="認証キーを入力してください"
-                                autocomplete="off"
-                                spellcheck="false"
-                            >
-                            <p style="margin-top: 12px; color: #64748b; font-size: 0.9rem; text-align: center;">
-                                メールで受信した認証キーを入力してください
-                            </p>
-                        </div>
-                        <button type="submit" class="btn btn-primary">認証する</button>
-                    </form>
-                </div>
-
-                <!-- ローディング -->
                 <div id="loading" class="loading">
                     <div class="spinner"></div>
                     <p style="margin-top: 16px; color: #64748b;">読み込み中...</p>
                 </div>
 
-                <!-- 承認セクション -->
-                <div id="approvalSection" class="approval-section">
+                <div id="errorMessage" class="message message-error"></div>
+                <div id="successMessage" class="message message-success"></div>
+
+                <div id="mainContent" style="display: none;">
                     <!-- カード情報 -->
                     <div class="section">
                         <h2 class="section-title">カード情報</h2>
@@ -494,21 +454,21 @@
                         <form id="bankInfoForm">
                             <div class="form-group">
                                 <label class="form-label" for="bankName">銀行名</label>
-                                <input type="text" id="bankName" class="form-input" required placeholder="例: 三菱UFJ銀行" style="text-align: left;">
+                                <input type="text" id="bankName" class="form-input" required placeholder="例: 三菱UFJ銀行">
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="bankBranch">支店名</label>
-                                <input type="text" id="bankBranch" class="form-input" required placeholder="例: 新宿支店" style="text-align: left;">
+                                <input type="text" id="bankBranch" class="form-input" required placeholder="例: 新宿支店">
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="accountNumber">口座番号</label>
-                                <input type="text" id="accountNumber" class="form-input" required placeholder="例: 1234567" style="text-align: left;">
+                                <input type="text" id="accountNumber" class="form-input" required placeholder="例: 1234567">
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="accountHolder">口座名義</label>
-                                <input type="text" id="accountHolder" class="form-input" required placeholder="例: ヤマダ タロウ" style="text-align: left;">
+                                <input type="text" id="accountHolder" class="form-input" required placeholder="例: ヤマダ タロウ">
                             </div>
-                            <button type="submit" class="btn btn-primary">確定する</button>
+                            <button type="submit" class="btn-submit">確定する</button>
                         </form>
                     </div>
                 </div>
@@ -517,58 +477,42 @@
     </div>
 
     <script>
-        let currentToken = null;
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('id');
         let requestData = null;
 
-        // 認証フォーム送信
-        document.getElementById('authForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const authKey = document.getElementById('authKey').value.trim();
-            if (!authKey) {
-                showError('認証キーを入力してください');
+        // ページ読み込み時
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!token) {
+                showError('無効なURLです');
                 return;
             }
-
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.textContent = '認証中...';
-
-            // 認証キーをトークンとして使用
-            currentToken = authKey;
-            await loadRequestData();
-
-            submitBtn.disabled = false;
-            submitBtn.textContent = '認証する';
+            loadRequestData();
         });
 
         // データ読み込み
         async function loadRequestData() {
-            const authSection = document.getElementById('authSection');
-            const approvalSection = document.getElementById('approvalSection');
             const loading = document.getElementById('loading');
+            const mainContent = document.getElementById('mainContent');
 
-            authSection.classList.add('hidden');
             loading.classList.add('show');
 
             try {
-                const response = await fetch(`/api/kaitori/request/${currentToken}`);
+                const response = await fetch(`/api/kaitori/request/${token}`);
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.error || '認証キーが無効です');
+                    throw new Error(data.error || 'データの取得に失敗しました');
                 }
 
                 requestData = data;
                 displayRequestData(data);
 
                 loading.classList.remove('show');
-                approvalSection.classList.add('show');
+                mainContent.style.display = 'block';
             } catch (error) {
                 loading.classList.remove('show');
-                authSection.classList.remove('hidden');
                 showError(error.message);
-                document.getElementById('authKey').classList.add('error');
             }
         }
 
@@ -615,7 +559,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        token: currentToken,
+                        token: token,
                         responseType: 'rejected'
                     })
                 });
@@ -644,7 +588,7 @@
         document.getElementById('bankInfoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const submitBtn = e.target.querySelector('.btn-primary');
+            const submitBtn = e.target.querySelector('.btn-submit');
             submitBtn.disabled = true;
             submitBtn.textContent = '送信中...';
 
@@ -655,7 +599,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        token: currentToken,
+                        token: token,
                         responseType: 'approved',
                         bankInfo: {
                             bankName: document.getElementById('bankName').value,
