@@ -10,51 +10,56 @@
     <script>
         // 認証チェック
         (function() {
-            console.log('Home: 認証チェック開始');
-            const authToken = sessionStorage.getItem('auth_token');
-            const userEmail = sessionStorage.getItem('user_email');
-            const userData = sessionStorage.getItem('user_data');
+            console.log('[Home] 認証チェック開始');
+            const authToken = localStorage.getItem('kanucard_auth_token');
+            const userData = localStorage.getItem('kanucard_user_data');
 
-            console.log('Home: セッション確認', {
+            console.log('[Home] セッション確認', {
                 hasToken: !!authToken,
-                hasEmail: !!userEmail,
                 hasUserData: !!userData
             });
 
             if (!authToken) {
-                console.log('Home: トークンなし、ログインページへリダイレクト');
-                // 未認証の場合はログインページへリダイレクト
-                window.location.href = '/';
+                console.log('[Home] トークンなし、ログインページへリダイレクト');
+                // 未認証の場合はログインページへ直接リダイレクト
+                window.location.href = '/login';
                 return;
             }
 
             // トークンの有効性を簡易チェック
             try {
                 const tokenParts = authToken.split('.');
-                console.log('Home: トークン部分数:', tokenParts.length);
+                console.log('[Home] トークン部分数:', tokenParts.length);
 
                 if (tokenParts.length === 3) {
                     const payload = JSON.parse(atob(tokenParts[1]));
-                    console.log('Home: トークンペイロード:', payload);
+                    console.log('[Home] トークンペイロード:', {
+                        exp: new Date(payload.exp * 1000).toLocaleString(),
+                        email: payload.email
+                    });
 
                     // 有効期限チェック
                     if (payload.exp && payload.exp * 1000 < Date.now()) {
-                        console.log('Home: トークン期限切れ');
+                        console.log('[Home] トークン期限切れ、ログインページへリダイレクト');
                         // トークンが期限切れ
-                        sessionStorage.clear();
-                        window.location.href = '/';
+                        localStorage.removeItem('kanucard_auth_token');
+                        localStorage.removeItem('kanucard_user_data');
+                        window.location.href = '/login';
                         return;
                     }
-                    console.log('Home: 認証成功');
+                    console.log('[Home] 認証成功');
                 } else {
-                    console.log('Home: トークン形式が不正');
+                    console.log('[Home] トークン形式が不正、ログインページへリダイレクト');
+                    localStorage.removeItem('kanucard_auth_token');
+                    localStorage.removeItem('kanucard_user_data');
+                    window.location.href = '/login';
                 }
             } catch (e) {
-                console.error('Home: トークン検証エラー:', e);
-                // トークンが無効 - エラーの詳細を記録
-                console.log('Home: エラーのため再ログインが必要');
-                // sessionStorage.clear(); // 一時的にコメントアウト
-                // window.location.href = '/';
+                console.error('[Home] トークン検証エラー:', e);
+                console.log('[Home] エラーのため再ログインが必要');
+                localStorage.removeItem('kanucard_auth_token');
+                localStorage.removeItem('kanucard_user_data');
+                window.location.href = '/login';
             }
         })();
     </script>

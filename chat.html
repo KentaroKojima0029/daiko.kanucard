@@ -678,17 +678,16 @@
 
         // 認証チェック
         function checkAuth() {
-            // sessionStorageからユーザー情報を取得
-            const userData = sessionStorage.getItem('user_data');
-            const userEmail = sessionStorage.getItem('user_email');
+            // localStorageからユーザー情報を取得
+            const userDataStr = localStorage.getItem('kanucard_user_data');
 
-            if (userData) {
+            if (userDataStr) {
                 try {
-                    const user = JSON.parse(userData);
+                    const user = JSON.parse(userDataStr);
                     currentUser = {
                         id: user.id || 'user_' + Date.now(),
-                        name: `${user.lastName || ''} ${user.firstName || ''}`.trim() || userEmail,
-                        email: userEmail,
+                        name: `${user.lastName || ''} ${user.firstName || ''}`.trim() || user.email,
+                        email: user.email,
                         avatar: '👤'
                     };
                 } catch (e) {
@@ -1089,7 +1088,14 @@
         async function loadMessages() {
             try {
                 // ユーザーのメールアドレスを取得
-                const userEmail = currentUser?.email || sessionStorage.getItem('user_email');
+                let userEmail = currentUser?.email;
+                if (!userEmail) {
+                    const userDataStr = localStorage.getItem('kanucard_user_data');
+                    if (userDataStr) {
+                        const user = JSON.parse(userDataStr);
+                        userEmail = user.email;
+                    }
+                }
 
                 // すべてのメッセージまたは特定ユーザーのメッセージを取得
                 let url = '/api/messages';
