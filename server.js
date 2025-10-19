@@ -868,29 +868,29 @@ app.post('/api/auth/verify-shopify-customer', async (req, res) => {
       }
     });
 
-    // OTPメール送信
+    // OTPメール送信（スマホプレビュー最適化）
     const emailHtml = `
       <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background-color: #667eea; padding: 30px 20px; text-align: center;">
-          <h1 style="color: white; margin: 0; font-size: 24px;">PSA代行サービス</h1>
+        <div style="background-color: #667eea; padding: 20px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 20px;">PSA代行サービス</h1>
         </div>
-        <div style="padding: 40px 20px; background-color: #f9fafb;">
-          <h2 style="color: #1a202c; margin-bottom: 20px;">ログイン認証コード</h2>
-          <p style="color: #4a5568; line-height: 1.6;">
-            PSA代行サービスへのログインを行うため、以下の認証コードを入力してください。
-          </p>
-          <div style="background-color: white; border: 2px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 30px 0; text-align: center;">
-            <span style="font-size: 32px; font-weight: bold; color: #667eea; letter-spacing: 8px;">
+        <div style="padding: 30px 20px; background-color: #f9fafb;">
+          <div style="background-color: white; border: 3px solid #667eea; border-radius: 12px; padding: 25px; margin: 0 0 25px 0; text-align: center;">
+            <p style="color: #1a202c; font-size: 16px; font-weight: bold; margin: 0 0 15px 0;">ログイン認証コード</p>
+            <div style="font-size: 36px; font-weight: bold; color: #667eea; letter-spacing: 10px; margin: 10px 0;">
               ${otp}
-            </span>
+            </div>
           </div>
-          <p style="color: #718096; font-size: 14px; line-height: 1.5;">
-            ※ この認証コードは10分間有効です。<br>
-            ※ このメールに心当たりがない場合は、無視してください。
+          <p style="color: #4a5568; font-size: 14px; line-height: 1.6; margin: 0 0 15px 0;">
+            上記の6桁コードを入力してログインしてください。
+          </p>
+          <p style="color: #718096; font-size: 13px; line-height: 1.5; margin: 0;">
+            ※ 有効期限: 10分間<br>
+            ※ 心当たりがない場合は無視してください
           </p>
         </div>
-        <div style="padding: 20px; background-color: #edf2f7; text-align: center;">
-          <p style="color: #718096; font-size: 12px; margin: 0;">
+        <div style="padding: 15px; background-color: #edf2f7; text-align: center;">
+          <p style="color: #718096; font-size: 11px; margin: 0;">
             © 2025 KanuCard PSA代行サービス
           </p>
         </div>
@@ -915,7 +915,7 @@ app.post('/api/auth/verify-shopify-customer', async (req, res) => {
         from: process.env.FROM_EMAIL || 'contact@kanucard.com',
         to: email,
         subject: '【PSA代行サービス】ログイン認証コード',
-        text: `PSA代行サービスのログイン認証コードは ${otp} です。このコードは10分間有効です。`,
+        text: `認証コード: ${otp}\n\nPSA代行サービスのログイン用6桁コードです。\n有効期限: 10分間\n\n上記コードを入力してログインしてください。`,
         html: emailHtml
       });
 
@@ -1473,51 +1473,41 @@ app.post('/api/auth/customer-otp', async (req, res) => {
       }
     });
 
-    // OTPメール送信
+    // OTPメール送信（スマホプレビュー最適化）
     const emailHtml = `
       <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 30px 20px; text-align: center; border-radius: 12px 12px 0 0;">
-          <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">買取承認システム</h1>
-          <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0 0; font-size: 16px;">PSA代行サービス</p>
+        <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 20px; text-align: center; border-radius: 12px 12px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 20px; font-weight: 700;">買取承認システム</h1>
+          <p style="color: rgba(255, 255, 255, 0.9); margin: 8px 0 0 0; font-size: 14px;">PSA代行サービス</p>
         </div>
-        <div style="padding: 40px 20px; background-color: #f9fafb;">
-          <h2 style="color: #1a202c; margin-bottom: 20px; font-size: 22px;">認証コード</h2>
-
-          <p style="color: #4a5568; line-height: 1.8; margin-bottom: 30px; font-size: 16px;">
-            <strong>${customer.firstName || ''} ${customer.lastName || ''}</strong> 様<br>
-            買取承認画面へのアクセスに必要な認証コードをお送りします。
-          </p>
-
-          <div style="background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 12px; padding: 30px; margin: 30px 0; text-align: center; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);">
-            <p style="color: white; font-size: 14px; margin: 0 0 15px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">認証コード</p>
-            <div style="background: rgba(255, 255, 255, 0.95); border-radius: 8px; padding: 20px; display: inline-block;">
-              <span style="font-size: 36px; font-weight: bold; color: #2563eb; letter-spacing: 10px; font-family: 'Courier New', monospace;">
-                ${otp}
-              </span>
+        <div style="padding: 30px 20px; background-color: #f9fafb;">
+          <div style="background: white; border: 3px solid #667eea; border-radius: 12px; padding: 25px; margin: 0 0 20px 0; text-align: center;">
+            <p style="color: #1a202c; font-size: 16px; font-weight: bold; margin: 0 0 15px 0;">買取承認 認証コード</p>
+            <div style="font-size: 36px; font-weight: bold; color: #667eea; letter-spacing: 10px; margin: 10px 0; font-family: 'Courier New', monospace;">
+              ${otp}
             </div>
           </div>
 
-          <div style="background: #fff; border: 2px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 25px 0;">
-            <h3 style="color: #1e293b; margin: 0 0 12px 0; font-size: 16px;">承認対象カード</h3>
-            <p style="color: #64748b; margin: 0; font-size: 15px; line-height: 1.6;">
-              <strong style="color: #1e293b;">カード名:</strong> ${kaitoriRequest.card_name}<br>
-              ${kaitoriRequest.card_condition ? `<strong style="color: #1e293b;">コンディション:</strong> ${kaitoriRequest.card_condition}` : ''}
+          <p style="color: #4a5568; font-size: 14px; line-height: 1.6; margin: 0 0 15px 0;">
+            <strong>${customer.firstName || ''} ${customer.lastName || ''}</strong> 様<br>
+            上記の6桁コードを入力して買取承認画面にアクセスしてください。
+          </p>
+
+          <div style="background: #fff; border: 2px solid #e5e7eb; border-radius: 8px; padding: 15px; margin: 15px 0;">
+            <p style="color: #1e293b; margin: 0 0 8px 0; font-size: 14px; font-weight: bold;">承認対象カード</p>
+            <p style="color: #64748b; margin: 0; font-size: 13px; line-height: 1.5;">
+              ${kaitoriRequest.card_name}${kaitoriRequest.card_condition ? ` / ${kaitoriRequest.card_condition}` : ''}
             </p>
           </div>
 
-          <p style="color: #718096; font-size: 14px; line-height: 1.7; margin: 25px 0;">
-            ※ この認証コードは<strong>10分間</strong>有効です。<br>
-            ※ このメールに心当たりがない場合は、無視してください。<br>
-            ※ 認証コードは他者に共有しないでください。
+          <p style="color: #718096; font-size: 13px; line-height: 1.5; margin: 0;">
+            ※ 有効期限: 10分間<br>
+            ※ 心当たりがない場合は無視してください
           </p>
         </div>
-        <div style="padding: 20px; background: linear-gradient(135deg, #f3f4f6, #e5e7eb); text-align: center; border-radius: 0 0 12px 12px;">
-          <p style="color: #64748b; font-size: 12px; margin: 0 0 8px 0;">
-            ご不明な点がございましたら
-          </p>
-          <p style="color: #64748b; font-size: 12px; margin: 0;">
-            <a href="mailto:contact@kanucard.com" style="color: #667eea; text-decoration: none; font-weight: 600;">contact@kanucard.com</a><br>
-            までお問い合わせください
+        <div style="padding: 15px; background: linear-gradient(135deg, #f3f4f6, #e5e7eb); text-align: center; border-radius: 0 0 12px 12px;">
+          <p style="color: #64748b; font-size: 11px; margin: 0;">
+            お問い合わせ: <a href="mailto:contact@kanucard.com" style="color: #667eea; text-decoration: none;">contact@kanucard.com</a>
           </p>
         </div>
       </div>
@@ -1527,7 +1517,7 @@ app.post('/api/auth/customer-otp', async (req, res) => {
       to: email,
       from: process.env.FROM_EMAIL || 'contact@kanucard.com',
       subject: '【買取承認】認証コード - PSA代行サービス',
-      text: `PSA代行サービスの買取承認用認証コードは ${otp} です。このコードは10分間有効です。`,
+      text: `認証コード: ${otp}\n\n買取承認用の6桁コードです。\n対象カード: ${kaitoriRequest.card_name}\n有効期限: 10分間\n\n上記コードを入力して承認画面にアクセスしてください。`,
       html: emailHtml
     });
 
