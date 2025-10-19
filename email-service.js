@@ -308,8 +308,8 @@ function validateEmailConfig() {
   console.log('[email-service] ✓ Email configuration valid');
   logger.info('Email configuration validated', {
     smtpConfigured: true,
-    fallbackEnabled: USE_XSERVER_FALLBACK,
-    apiConfigured: !!(XSERVER_API_URL && XSERVER_API_KEY)
+    fallbackEnabled: USE_VPS_FALLBACK,
+    apiConfigured: !!VPS_API_URL
   });
 
   return {
