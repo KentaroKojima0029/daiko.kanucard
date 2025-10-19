@@ -1653,8 +1653,12 @@
         // ログアウト処理
         function handleLogout() {
             if (confirm('ログアウトしますか？')) {
-                sessionStorage.clear();
-                window.location.href = '/';
+                console.log('[Home] ログアウト実行');
+                // localStorageからトークンとユーザーデータを削除
+                localStorage.removeItem('kanucard_auth_token');
+                localStorage.removeItem('kanucard_user_data');
+                // ログイン画面へリダイレクト
+                window.location.href = '/login';
             }
         }
 

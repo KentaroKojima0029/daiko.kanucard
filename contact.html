@@ -559,7 +559,13 @@
                 return;
             }
 
+            console.log('[Contact] ログアウト実行');
+
             try {
+                // localStorageからトークンとユーザーデータを削除
+                localStorage.removeItem('kanucard_auth_token');
+                localStorage.removeItem('kanucard_user_data');
+
                 const response = await fetch('/api/auth/logout', {
                     method: 'POST',
                     headers: {
@@ -570,7 +576,8 @@
                 if (response.ok) {
                     window.location.href = '/login';
                 } else {
-                    alert('ログアウトに失敗しました');
+                    // APIエラーでもローカルストレージはクリア済みなのでリダイレクト
+                    window.location.href = '/login';
                 }
             } catch (error) {
                 console.error('Logout error:', error);

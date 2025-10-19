@@ -677,18 +677,19 @@
                     throw new Error('認証レスポンスが不正です');
                 }
 
-                // セッションに保存
-                sessionStorage.setItem('auth_token', data.token);
-                sessionStorage.setItem('user_email', currentEmail);
-                sessionStorage.setItem('user_data', JSON.stringify(data.user));
-                sessionStorage.setItem('login_time', Date.now().toString());
-                sessionStorage.setItem('last_activity', Date.now().toString());
+                // localStorageに保存（30分間有効）
+                localStorage.setItem('kanucard_auth_token', data.token);
+                localStorage.setItem('kanucard_user_data', JSON.stringify(data.user));
 
-                console.log('セッション保存完了、リダイレクト準備');
+                console.log('[Login] トークン保存完了:', {
+                    token: data.token.substring(0, 20) + '...',
+                    user: data.user.email
+                });
+
                 showSuccess('認証に成功しました。ホーム画面へ移動します...');
 
                 setTimeout(() => {
-                    console.log('リダイレクト実行: /home');
+                    console.log('[Login] リダイレクト実行: /home');
                     window.location.href = '/home';
                 }, 1500);
 
