@@ -1,0 +1,21 @@
+{
+  "name": "vps-email-api",
+  "version": "1.0.0",
+  "description": "VPS Email Sending API for Xserver",
+  "main": "vps-email-api.js",
+  "scripts": {
+    "start": "node vps-email-api.js",
+    "pm2": "pm2 start vps-email-api.js --name email-api",
+    "pm2:stop": "pm2 stop email-api",
+    "pm2:restart": "pm2 restart email-api",
+    "pm2:logs": "pm2 logs email-api"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "nodemailer": "^6.10.1",
+    "dotenv": "^16.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
