@@ -994,12 +994,12 @@
                     </div>
                     <div class="schedule-info">
                         <div class="schedule-info-item">
-                            <span class="schedule-info-label">受付締切</span>
-                            <span class="schedule-info-value" id="usaAcceptEnd">-</span>
+                            <span class="schedule-info-label">次回発送日</span>
+                            <span class="schedule-info-value" id="usaShipDate">-</span>
                         </div>
                         <div class="schedule-info-item">
-                            <span class="schedule-info-label">※弊社必着</span>
-                            <span class="schedule-info-value" id="usaArrival">-</span>
+                            <span class="schedule-info-label">弊社必着期限</span>
+                            <span class="schedule-info-value" id="usaDeadline">-</span>
                         </div>
                         <div class="schedule-info-item" id="usaNotesItem" style="display: none;">
                             <span class="schedule-info-label">備考</span>
@@ -1022,12 +1022,12 @@
                     </div>
                     <div class="schedule-info">
                         <div class="schedule-info-item">
-                            <span class="schedule-info-label">受付締切</span>
-                            <span class="schedule-info-value" id="japanAcceptEnd">-</span>
+                            <span class="schedule-info-label">次回発送日</span>
+                            <span class="schedule-info-value" id="japanShipDate">-</span>
                         </div>
                         <div class="schedule-info-item">
-                            <span class="schedule-info-label">※弊社必着</span>
-                            <span class="schedule-info-value" id="japanArrival">-</span>
+                            <span class="schedule-info-label">弊社必着期限</span>
+                            <span class="schedule-info-value" id="japanDeadline">-</span>
                         </div>
                         <div class="schedule-info-item" id="japanNotesItem" style="display: none;">
                             <span class="schedule-info-label">備考</span>
@@ -1185,6 +1185,8 @@
 
             // API呼び出し
             async fetchScheduleData() {
+                console.log('[Schedule] 📡 API呼び出し:', this.apiUrl);
+
                 const response = await fetch(this.apiUrl, {
                     method: 'GET',
                     headers: {
@@ -1192,15 +1194,23 @@
                     }
                 });
 
+                console.log('[Schedule] API レスポンスステータス:', response.status);
+
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
                 const result = await response.json();
+                console.log('[Schedule] API レスポンス:', JSON.stringify(result, null, 2));
 
                 if (!result.success || !result.data) {
                     throw new Error('無効なレスポンス形式');
                 }
+
+                console.log('[Schedule] ✅ API データ取得成功:', {
+                    usa: result.data.usa,
+                    japan: result.data.japan
+                });
 
                 return result.data;
             }
@@ -1321,6 +1331,7 @@
                 if (scheduleData.usa.nextShipDate) {
                     const date = new Date(scheduleData.usa.nextShipDate);
                     date.setHours(12, 0, 0, 0);
+                    console.log('[Schedule] 🇺🇸 USA発送日 (API):', scheduleData.usa.nextShipDate, '→', date.toLocaleDateString('ja-JP'));
                     return date;
                 }
                 // フォールバック: 毎週火曜
@@ -1329,6 +1340,7 @@
                 const daysUntilTuesday = (2 - dayOfWeek + 7) % 7 || 7;
                 next.setDate(next.getDate() + daysUntilTuesday);
                 next.setHours(12, 0, 0, 0);
+                console.log('[Schedule] 🇺🇸 USA発送日 (計算):', next.toLocaleDateString('ja-JP'));
                 return next;
             };
 
@@ -1336,6 +1348,7 @@
                 if (scheduleData.japan.nextShipDate) {
                     const date = new Date(scheduleData.japan.nextShipDate);
                     date.setHours(12, 0, 0, 0);
+                    console.log('[Schedule] 🇯🇵 Japan発送日 (API):', scheduleData.japan.nextShipDate, '→', date.toLocaleDateString('ja-JP'));
                     return date;
                 }
                 // フォールバック: 毎月15日
@@ -1345,6 +1358,7 @@
                 }
                 next.setDate(15);
                 next.setHours(12, 0, 0, 0);
+                console.log('[Schedule] 🇯🇵 Japan発送日 (計算):', next.toLocaleDateString('ja-JP'));
                 return next;
             };
 
@@ -1430,8 +1444,8 @@
                 japanCard.style.borderTop = `4px solid ${japanColors.text}`;
             }
 
-            // 受付日時・貨物到着日・割引バッジの表示
-            // アメリカ発送の日程情報を更新
+            // 日程情報を更新
+            // アメリカ発送の日程情報
             const usaAcceptStart = new Date(usaShipping);
             usaAcceptStart.setDate(usaAcceptStart.getDate() - 6); // 発送日の6日前から受付開始
 
@@ -1439,21 +1453,27 @@
             let usaDeadline;
             if (scheduleData.usa.deadlineDate) {
                 usaDeadline = new Date(scheduleData.usa.deadlineDate);
+                console.log('[Schedule] 🇺🇸 USA必着期限 (API):', usaDeadline.toLocaleDateString('ja-JP'));
             } else {
                 usaDeadline = new Date(usaShipping);
                 usaDeadline.setDate(usaDeadline.getDate() - 2); // デフォルト: 発送日の2日前
+                console.log('[Schedule] 🇺🇸 USA必着期限 (計算):', usaDeadline.toLocaleDateString('ja-JP'));
             }
 
-            document.getElementById('usaAcceptEnd').textContent = usaShipping.toLocaleDateString('ja-JP', {
+            // 次回発送日を表示（年月日形式で明確に）
+            document.getElementById('usaShipDate').textContent = usaShipping.toLocaleDateString('ja-JP', {
+                year: 'numeric',
                 month: 'numeric',
                 day: 'numeric'
-            }) + '日';
-            document.getElementById('usaArrival').textContent = usaDeadline.toLocaleDateString('ja-JP', {
+            });
+            // 弊社必着期限を表示（年月日形式で明確に）
+            document.getElementById('usaDeadline').textContent = usaDeadline.toLocaleDateString('ja-JP', {
+                year: 'numeric',
                 month: 'numeric',
                 day: 'numeric'
-            }) + '日';
+            });
 
-            // 日本発送の日程情報を更新
+            // 日本発送の日程情報
             const japanAcceptStart = new Date(japanShipping);
             japanAcceptStart.setMonth(japanAcceptStart.getMonth() - 1);
             japanAcceptStart.setDate(16); // 前月16日から受付開始
@@ -1462,19 +1482,25 @@
             let japanDeadline;
             if (scheduleData.japan.deadlineDate) {
                 japanDeadline = new Date(scheduleData.japan.deadlineDate);
+                console.log('[Schedule] 🇯🇵 Japan必着期限 (API):', japanDeadline.toLocaleDateString('ja-JP'));
             } else {
                 japanDeadline = new Date(japanShipping);
                 japanDeadline.setDate(japanDeadline.getDate() - 5); // デフォルト: 発送日の5日前
+                console.log('[Schedule] 🇯🇵 Japan必着期限 (計算):', japanDeadline.toLocaleDateString('ja-JP'));
             }
 
-            document.getElementById('japanAcceptEnd').textContent = japanShipping.toLocaleDateString('ja-JP', {
+            // 次回発送日を表示（年月日形式で明確に）
+            document.getElementById('japanShipDate').textContent = japanShipping.toLocaleDateString('ja-JP', {
+                year: 'numeric',
                 month: 'numeric',
                 day: 'numeric'
-            }) + '日';
-            document.getElementById('japanArrival').textContent = japanDeadline.toLocaleDateString('ja-JP', {
+            });
+            // 弊社必着期限を表示（年月日形式で明確に）
+            document.getElementById('japanDeadline').textContent = japanDeadline.toLocaleDateString('ja-JP', {
+                year: 'numeric',
                 month: 'numeric',
                 day: 'numeric'
-            }) + '日';
+            });
 
             // 割引バッジの表示（受付開始から3日間のみ）
             const usaDiscountBadge = document.getElementById('usaDiscountBadge');
