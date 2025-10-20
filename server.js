@@ -129,6 +129,11 @@ if (!emailConfig.valid) {
   });
 }
 
+// ページルーティング（静的ファイルより優先）
+app.get('/mypage', (req, res) => {
+  res.sendFile(__dirname + '/mypage.html');
+});
+
 // 静的ファイルの配信（優先）
 app.use(express.static(__dirname, {
   maxAge: '1d',
