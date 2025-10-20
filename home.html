@@ -1135,6 +1135,45 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
+        // グローバル変数：APIから取得した発送スケジュールデータ
+        let scheduleData = {
+            usa: {
+                nextShipDate: null,
+                deadlineDate: null,
+                notes: ''
+            },
+            japan: {
+                nextShipDate: null,
+                deadlineDate: null,
+                notes: ''
+            }
+        };
+
+        // 発送スケジュールをAPIから取得
+        async function loadShippingSchedule() {
+            try {
+                console.log('[Home] 📅 発送スケジュールをAPIから取得中...');
+                const response = await fetch('https://api.kanucard.com/api/public/schedule');
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    scheduleData = result.data;
+                    console.log('[Home] ✅ 発送スケジュール取得成功:', scheduleData);
+
+                    // スケジュールデータを使ってカウントダウン更新
+                    updateCountdowns();
+                } else {
+                    console.warn('[Home] ⚠️ 発送スケジュールの取得に失敗（フォールバック使用）');
+                    // フォールバック：計算ベースのスケジュールを使用
+                    updateCountdowns();
+                }
+            } catch (error) {
+                console.error('[Home] ❌ 発送スケジュール取得エラー:', error);
+                // エラー時は計算ベースのスケジュールを使用
+                updateCountdowns();
+            }
+        }
+
         // 残り日数に応じてグラデーション色を取得
         function getGradientColorByDays(days) {
             // 残り日数で色分け
@@ -1180,8 +1219,15 @@
         function updateCountdowns() {
             const now = new Date();
 
-            // 次回発送日の設定（例: アメリカは毎週火曜、日本は毎月15日）
+            // 次回発送日の設定
+            // APIデータがあればそれを使用、なければフォールバック（計算ベース）
             const getNextUSAShipping = () => {
+                if (scheduleData.usa.nextShipDate) {
+                    const date = new Date(scheduleData.usa.nextShipDate);
+                    date.setHours(12, 0, 0, 0);
+                    return date;
+                }
+                // フォールバック: 毎週火曜
                 const next = new Date();
                 const dayOfWeek = next.getDay();
                 const daysUntilTuesday = (2 - dayOfWeek + 7) % 7 || 7;
@@ -1191,6 +1237,12 @@
             };
 
             const getNextJapanShipping = () => {
+                if (scheduleData.japan.nextShipDate) {
+                    const date = new Date(scheduleData.japan.nextShipDate);
+                    date.setHours(12, 0, 0, 0);
+                    return date;
+                }
+                // フォールバック: 毎月15日
                 const next = new Date();
                 if (next.getDate() > 15) {
                     next.setMonth(next.getMonth() + 1);
@@ -1286,14 +1338,21 @@
             // アメリカ発送の日程情報を更新
             const usaAcceptStart = new Date(usaShipping);
             usaAcceptStart.setDate(usaAcceptStart.getDate() - 6); // 発送日の6日前から受付開始
-            const usaArrival = new Date(usaShipping);
-            usaArrival.setDate(usaArrival.getDate() + 6); // 発送から6日後に到着
+
+            // 弊社必着期限をAPIデータから取得、なければフォールバック
+            let usaDeadline;
+            if (scheduleData.usa.deadlineDate) {
+                usaDeadline = new Date(scheduleData.usa.deadlineDate);
+            } else {
+                usaDeadline = new Date(usaShipping);
+                usaDeadline.setDate(usaDeadline.getDate() - 2); // デフォルト: 発送日の2日前
+            }
 
             document.getElementById('usaAcceptEnd').textContent = usaShipping.toLocaleDateString('ja-JP', {
                 month: 'numeric',
                 day: 'numeric'
             }) + '日';
-            document.getElementById('usaArrival').textContent = usaArrival.toLocaleDateString('ja-JP', {
+            document.getElementById('usaArrival').textContent = usaDeadline.toLocaleDateString('ja-JP', {
                 month: 'numeric',
                 day: 'numeric'
             }) + '日';
@@ -1302,14 +1361,21 @@
             const japanAcceptStart = new Date(japanShipping);
             japanAcceptStart.setMonth(japanAcceptStart.getMonth() - 1);
             japanAcceptStart.setDate(16); // 前月16日から受付開始
-            const japanArrival = new Date(japanShipping);
-            japanArrival.setDate(25); // 当月25日に到着
+
+            // 弊社必着期限をAPIデータから取得、なければフォールバック
+            let japanDeadline;
+            if (scheduleData.japan.deadlineDate) {
+                japanDeadline = new Date(scheduleData.japan.deadlineDate);
+            } else {
+                japanDeadline = new Date(japanShipping);
+                japanDeadline.setDate(japanDeadline.getDate() - 5); // デフォルト: 発送日の5日前
+            }
 
             document.getElementById('japanAcceptEnd').textContent = japanShipping.toLocaleDateString('ja-JP', {
                 month: 'numeric',
                 day: 'numeric'
             }) + '日';
-            document.getElementById('japanArrival').textContent = japanArrival.toLocaleDateString('ja-JP', {
+            document.getElementById('japanArrival').textContent = japanDeadline.toLocaleDateString('ja-JP', {
                 month: 'numeric',
                 day: 'numeric'
             }) + '日';
@@ -1683,7 +1749,9 @@
             // ユーザー情報を取得して表示
             loadUserInfo();
 
-            updateCountdowns();
+            // 発送スケジュールをAPIから取得（初回）
+            loadShippingSchedule();
+
             updateBadges();
             updateDashboardData();
 
@@ -1692,6 +1760,9 @@
 
             // 5分ごとにダッシュボードデータ更新
             setInterval(updateDashboardData, 300000);
+
+            // 30分ごとに発送スケジュールを再取得
+            setInterval(loadShippingSchedule, 30 * 60 * 1000);
         });
 
         // ユーザー情報を取得して表示
