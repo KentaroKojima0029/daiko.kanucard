@@ -1062,7 +1062,7 @@ app.post('/api/auth/verify-otp', async (req, res) => {
         lastName: otpData.customerData.lastName
       },
       JWT_SECRET,
-      { expiresIn: '30m' }  // 30分のセッション有効期限
+      { expiresIn: '60m' }  // 60分のセッション有効期限
     );
 
     // OTPストアから削除
@@ -1128,7 +1128,7 @@ app.post('/api/auth/refresh-session', authenticateToken, (req, res) => {
         lastName: req.user.lastName
       },
       JWT_SECRET,
-      { expiresIn: '30m' }  // 新しい30分のセッション
+      { expiresIn: '60m' }  // 新しい60分のセッション
     );
 
     logger.info('Session refreshed for user', { email: req.user.email });

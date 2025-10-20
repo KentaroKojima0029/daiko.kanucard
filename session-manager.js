@@ -1,11 +1,11 @@
 /**
  * セッション管理ユーティリティ
- * 30分のセッション維持と自動更新を提供
+ * 60分のセッション維持と自動更新を提供
  */
 
 class SessionManager {
     constructor() {
-        this.SESSION_DURATION = 30 * 60 * 1000; // 30分（ミリ秒）
+        this.SESSION_DURATION = 60 * 60 * 1000; // 60分（ミリ秒）
         this.WARNING_TIME = 5 * 60 * 1000; // 警告を表示する時間（残り5分）
         this.CHECK_INTERVAL = 60 * 1000; // チェック間隔（1分）
         this.lastActivity = null;
@@ -120,7 +120,7 @@ class SessionManager {
         const timeSinceLogin = now - loginTime;
         const timeSinceActivity = now - lastActivity;
 
-        // ログインから30分経過、かつ最後のアクティビティから30分経過
+        // ログインから60分経過、かつ最後のアクティビティから60分経過
         if (timeSinceLogin > this.SESSION_DURATION && timeSinceActivity > this.SESSION_DURATION) {
             this.handleSessionTimeout();
             return;
@@ -241,7 +241,7 @@ class SessionManager {
             <div style="font-size: 48px; margin-bottom: 16px;">⏱️</div>
             <h2 style="margin-bottom: 12px; color: #1e293b;">セッションタイムアウト</h2>
             <p style="color: #64748b; margin-bottom: 24px;">
-                セキュリティのため、30分間操作がなかったためログアウトしました。
+                セキュリティのため、60分間操作がなかったためログアウトしました。
             </p>
             <button onclick="window.location.href='/'" style="
                 background: linear-gradient(135deg, #3b82f6, #2563eb);
