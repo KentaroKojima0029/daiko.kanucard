@@ -540,8 +540,17 @@
 
         // 初期化
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('========================================');
+            console.log('[Login] 🚀 ページ初期化');
+            console.log('[Login] 現在のURL:', window.location.href);
+
             // 既にログイン済みの場合はホーム画面へリダイレクト
             const authToken = localStorage.getItem('kanucard_auth_token');
+            console.log('[Login] 📦 既存トークン確認:', {
+                exists: !!authToken,
+                length: authToken ? authToken.length : 0
+            });
+
             if (authToken) {
                 // トークンの有効性を簡易チェック
                 try {
@@ -552,21 +561,28 @@
                         // 有効期限チェック
                         if (payload.exp && payload.exp * 1000 > Date.now()) {
                             // 有効なトークンがある場合はホームへ
-                            console.log('[Index] Valid token found, redirecting to home...');
+                            console.log('[Login] ✅ 有効なトークンを検出');
+                            console.log('[Login] ➡️ ホーム画面へリダイレクト');
+                            console.log('========================================');
                             window.location.href = '/home';
                             return;
                         } else {
-                            console.log('[Index] Token expired, clearing...');
+                            console.log('[Login] ⏰ トークン期限切れ - クリア');
+                            localStorage.removeItem('kanucard_auth_token');
+                            localStorage.removeItem('kanucard_user_data');
                         }
                     }
                 } catch (e) {
-                    console.log('[Index] Invalid token, clearing...');
+                    console.log('[Login] ❌ 無効なトークン - クリア');
+                    console.error('[Login] エラー:', e);
                     // トークンが無効な場合はクリア
                     localStorage.removeItem('kanucard_auth_token');
                     localStorage.removeItem('kanucard_user_data');
                 }
             }
 
+            console.log('[Login] ✅ ログインフォーム表示');
+            console.log('========================================');
             setupOtpInputs();
         });
 
@@ -650,7 +666,7 @@
             verifyBtn.innerHTML = '<span class="loading-spinner"></span>確認中...';
 
             try {
-                console.log('OTP検証開始:', { email: currentEmail, otp });
+                console.log('[Login] OTP検証開始:', { email: currentEmail, otp });
 
                 const response = await fetch('/api/auth/verify-otp', {
                     method: 'POST',
@@ -663,9 +679,9 @@
                     })
                 });
 
-                console.log('Response status:', response.status);
+                console.log('[Login] Response status:', response.status);
                 const data = await response.json();
-                console.log('Response data:', data);
+                console.log('[Login] Response data:', data);
 
                 if (!response.ok) {
                     throw new Error(data.message || '認証に失敗しました');
@@ -673,28 +689,51 @@
 
                 // データの存在確認
                 if (!data.token || !data.user) {
-                    console.error('レスポンスデータが不完全:', data);
+                    console.error('[Login] レスポンスデータが不完全:', data);
                     throw new Error('認証レスポンスが不正です');
                 }
+
+                console.log('[Login] ✅ 認証成功 - トークンとユーザーデータを保存します');
+
+                // まず古いデータをクリア
+                localStorage.removeItem('kanucard_auth_token');
+                localStorage.removeItem('kanucard_user_data');
 
                 // localStorageに保存（30分間有効）
                 localStorage.setItem('kanucard_auth_token', data.token);
                 localStorage.setItem('kanucard_user_data', JSON.stringify(data.user));
 
-                console.log('[Login] トークン保存完了:', {
-                    token: data.token.substring(0, 20) + '...',
-                    user: data.user.email
+                // 保存確認
+                const savedToken = localStorage.getItem('kanucard_auth_token');
+                const savedUser = localStorage.getItem('kanucard_user_data');
+
+                console.log('[Login] 💾 トークン保存確認:', {
+                    tokenSaved: !!savedToken,
+                    tokenLength: savedToken ? savedToken.length : 0,
+                    userSaved: !!savedUser,
+                    userEmail: data.user.email
                 });
 
+                if (!savedToken || !savedUser) {
+                    console.error('[Login] ❌ トークン保存に失敗しました');
+                    throw new Error('認証情報の保存に失敗しました。ブラウザの設定を確認してください。');
+                }
+
+                console.log('[Login] ✅ トークン保存完了 - ホーム画面へリダイレクトします');
                 showSuccess('認証に成功しました。ホーム画面へ移動します...');
 
+                // 少し待ってからリダイレクト（確実に保存されるように）
                 setTimeout(() => {
-                    console.log('[Login] リダイレクト実行: /home');
+                    console.log('[Login] 🚀 リダイレクト実行: /home');
+                    console.log('[Login] 最終確認 - localStorage:', {
+                        token: localStorage.getItem('kanucard_auth_token') ? '✓ 存在' : '✗ なし',
+                        user: localStorage.getItem('kanucard_user_data') ? '✓ 存在' : '✗ なし'
+                    });
                     window.location.href = '/home';
                 }, 1500);
 
             } catch (error) {
-                console.error('OTP検証エラー:', error);
+                console.error('[Login] ❌ OTP検証エラー:', error);
                 showError(error.message);
                 verifyBtn.disabled = false;
                 verifyBtn.innerHTML = 'ログイン';

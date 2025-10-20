@@ -4,23 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PSA代行サービス - ホーム</title>
-    <!-- セッション管理スクリプト -->
-    <script src="/session-manager.js"></script>
 
     <script>
         // 認証チェック
         (function() {
-            console.log('[Home] 認証チェック開始');
+            console.log('========================================');
+            console.log('[Home] 🔐 認証チェック開始');
+            console.log('[Home] 現在のURL:', window.location.href);
+            console.log('[Home] Timestamp:', new Date().toISOString());
+
             const authToken = localStorage.getItem('kanucard_auth_token');
             const userData = localStorage.getItem('kanucard_user_data');
 
-            console.log('[Home] セッション確認', {
-                hasToken: !!authToken,
-                hasUserData: !!userData
+            console.log('[Home] 📦 ローカルストレージ確認:', {
+                tokenExists: !!authToken,
+                tokenLength: authToken ? authToken.length : 0,
+                tokenPreview: authToken ? authToken.substring(0, 30) + '...' : 'なし',
+                userDataExists: !!userData,
+                userDataLength: userData ? userData.length : 0
             });
 
             if (!authToken) {
-                console.log('[Home] トークンなし、ログインページへリダイレクト');
+                console.log('[Home] ❌ トークンが見つかりません');
+                console.log('[Home] ⚠️ 全てのlocalStorageキーを確認:');
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    console.log(`  - ${key}: ${localStorage.getItem(key).substring(0, 50)}...`);
+                }
+                console.log('[Home] ➡️ ログインページへリダイレクト');
+                console.log('========================================');
                 // 未認証の場合はログインページへ直接リダイレクト
                 window.location.href = '/login';
                 return;
@@ -29,34 +41,56 @@
             // トークンの有効性を簡易チェック
             try {
                 const tokenParts = authToken.split('.');
-                console.log('[Home] トークン部分数:', tokenParts.length);
+                console.log('[Home] 🔍 トークン構造チェック:', {
+                    parts: tokenParts.length,
+                    expected: 3
+                });
 
                 if (tokenParts.length === 3) {
                     const payload = JSON.parse(atob(tokenParts[1]));
-                    console.log('[Home] トークンペイロード:', {
-                        exp: new Date(payload.exp * 1000).toLocaleString(),
-                        email: payload.email
+                    const expirationDate = new Date(payload.exp * 1000);
+                    const now = new Date();
+                    const remainingTime = expirationDate - now;
+
+                    console.log('[Home] 📋 トークン情報:', {
+                        email: payload.email,
+                        customerId: payload.customerId,
+                        expiresAt: expirationDate.toLocaleString(),
+                        now: now.toLocaleString(),
+                        remainingMinutes: Math.floor(remainingTime / 1000 / 60),
+                        isValid: remainingTime > 0
                     });
 
                     // 有効期限チェック
                     if (payload.exp && payload.exp * 1000 < Date.now()) {
-                        console.log('[Home] トークン期限切れ、ログインページへリダイレクト');
+                        console.log('[Home] ⏰ トークン期限切れ');
+                        console.log('[Home] ➡️ ログインページへリダイレクト');
+                        console.log('========================================');
                         // トークンが期限切れ
                         localStorage.removeItem('kanucard_auth_token');
                         localStorage.removeItem('kanucard_user_data');
                         window.location.href = '/login';
                         return;
                     }
-                    console.log('[Home] 認証成功');
+                    console.log('[Home] ✅ 認証成功 - ページ読み込み継続');
+                    console.log('========================================');
                 } else {
-                    console.log('[Home] トークン形式が不正、ログインページへリダイレクト');
+                    console.log('[Home] ❌ トークン形式が不正（部分数が3ではない）');
+                    console.log('[Home] ➡️ ログインページへリダイレクト');
+                    console.log('========================================');
                     localStorage.removeItem('kanucard_auth_token');
                     localStorage.removeItem('kanucard_user_data');
                     window.location.href = '/login';
                 }
             } catch (e) {
-                console.error('[Home] トークン検証エラー:', e);
-                console.log('[Home] エラーのため再ログインが必要');
+                console.error('[Home] ❌ トークン検証エラー:', e);
+                console.error('[Home] エラー詳細:', {
+                    name: e.name,
+                    message: e.message,
+                    stack: e.stack
+                });
+                console.log('[Home] ➡️ エラーのため再ログインが必要');
+                console.log('========================================');
                 localStorage.removeItem('kanucard_auth_token');
                 localStorage.removeItem('kanucard_user_data');
                 window.location.href = '/login';
@@ -1632,21 +1666,26 @@
 
         // ユーザー情報を取得して表示
         function loadUserInfo() {
-            const userData = sessionStorage.getItem('user_data');
-            const userEmail = sessionStorage.getItem('user_email');
+            const userData = localStorage.getItem('kanucard_user_data');
 
             if (userData) {
                 try {
                     const user = JSON.parse(userData);
+                    const userEmail = user.email;
                     const fullName = `${user.lastName || ''} ${user.firstName || ''}`.trim();
                     const displayName = fullName || userEmail || 'お客様';
 
                     document.getElementById('userName').textContent = displayName;
                     document.getElementById('welcomeMessage').textContent = `ようこそ、${displayName}様！`;
                 } catch (e) {
-                    document.getElementById('userName').textContent = userEmail || 'お客様';
+                    console.error('[Home] ユーザー情報の読み込みエラー:', e);
+                    document.getElementById('userName').textContent = 'お客様';
                     document.getElementById('welcomeMessage').textContent = `ようこそ！`;
                 }
+            } else {
+                console.log('[Home] ユーザー情報が見つかりません');
+                document.getElementById('userName').textContent = 'お客様';
+                document.getElementById('welcomeMessage').textContent = `ようこそ！`;
             }
         }
 
