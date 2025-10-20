@@ -1276,7 +1276,7 @@ db.exec(`
 `);
 
 // 初期データの挿入（既存データがない場合のみ）
-db.run(`
+db.exec(`
   INSERT OR IGNORE INTO shipping_schedule (country, next_ship_date, deadline_date, notes)
   VALUES
     ('usa', '2025-10-25', '2025-10-20', ''),
