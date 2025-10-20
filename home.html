@@ -1157,8 +1157,8 @@
         // 発送スケジュール管理クラス
         class ShippingSchedule {
             constructor() {
-                // Render.comのAPIを使用（管理画面と同じDB）
-                this.apiUrl = 'https://kanucard-daiko-support.onrender.com/api/public/schedule';
+                // Xserver VPS APIを使用（24時間稼働、高速応答）
+                this.apiUrl = 'https://api.kanucard.com/api/public/schedule';
                 this.retryCount = 0;
                 this.maxRetries = 3;
             }

@@ -73,6 +73,7 @@ app.use(requestLogger);
 app.use((req, res, next) => {
   const allowedOrigins = [
     'https://daiko.kanucard.com',
+    'https://kanucard-daiko-support.onrender.com', // Render.com管理画面
     'http://localhost:3000',
     'http://localhost:3443',
     'https://kanucard.com',
