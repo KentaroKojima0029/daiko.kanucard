@@ -241,6 +241,124 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
+        /* 発送スケジュール詳細セクション */
+        .shipping-schedule-container {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 0 0 30px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .shipping-schedule-container h3 {
+            text-align: center;
+            margin: 0 0 25px 0;
+            color: #2c3e50;
+            font-size: 1.4em;
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .country-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .country-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .usa-card {
+            border-top: 4px solid #e74c3c;
+        }
+
+        .japan-card {
+            border-top: 4px solid #3498db;
+        }
+
+        .country-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .country-header h4 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.2em;
+        }
+
+        .schedule-details {
+            padding: 20px;
+        }
+
+        .schedule-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .schedule-row:last-child {
+            border-bottom: none;
+        }
+
+        .deadline-row {
+            background: #fff3cd;
+            margin: 8px -10px;
+            padding: 12px 10px;
+            border-radius: 6px;
+        }
+
+        .schedule-row .label {
+            font-weight: 600;
+            color: #555;
+            flex: 1;
+        }
+
+        .schedule-row .value {
+            font-weight: 500;
+            text-align: right;
+            flex: 1;
+        }
+
+        .ship-date {
+            color: #2980b9;
+        }
+
+        .deadline-date {
+            color: #e67e22;
+            font-weight: 700;
+        }
+
+        .notes {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .loading-indicator {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 15px;
+            background: #f8d7da;
+            color: #721c24;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
         .countdown-title {
             font-size: 1.3rem;
             font-weight: 700;
@@ -846,6 +964,24 @@
                 margin-bottom: 20px;
             }
 
+            .shipping-schedule-container {
+                padding: 20px 15px;
+            }
+
+            .schedule-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .schedule-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .schedule-row .value {
+                text-align: left;
+            }
+
             .services-section {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 12px;
@@ -1033,6 +1169,62 @@
             </div>
         </section>
 
+        <!-- 発送スケジュール詳細表示 -->
+        <section class="shipping-schedule-container">
+            <h3>📦 次回発送スケジュール詳細</h3>
+
+            <div class="schedule-grid">
+                <!-- アメリカ向けスケジュール -->
+                <div class="country-card usa-card">
+                    <div class="country-header">
+                        <h4>🇺🇸 アメリカ向け</h4>
+                    </div>
+                    <div class="schedule-details">
+                        <div class="schedule-row">
+                            <span class="label">次回発送日:</span>
+                            <span id="usa-ship-date" class="value ship-date">読み込み中...</span>
+                        </div>
+                        <div class="schedule-row deadline-row">
+                            <span class="label">弊社必着期限:</span>
+                            <span id="usa-deadline-date" class="value deadline-date">読み込み中...</span>
+                        </div>
+                        <div class="schedule-row notes-row">
+                            <span class="label">備考:</span>
+                            <span id="usa-notes" class="value notes">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 日本向けスケジュール -->
+                <div class="country-card japan-card">
+                    <div class="country-header">
+                        <h4>🇯🇵 日本向け</h4>
+                    </div>
+                    <div class="schedule-details">
+                        <div class="schedule-row">
+                            <span class="label">次回発送日:</span>
+                            <span id="japan-ship-date" class="value ship-date">読み込み中...</span>
+                        </div>
+                        <div class="schedule-row deadline-row">
+                            <span class="label">弊社必着期限:</span>
+                            <span id="japan-deadline-date" class="value deadline-date">読み込み中...</span>
+                        </div>
+                        <div class="schedule-row notes-row">
+                            <span class="label">備考:</span>
+                            <span id="japan-notes" class="value notes">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="schedule-loading" class="loading-indicator" style="display: none;">
+                発送スケジュールを読み込み中...
+            </div>
+            <div id="schedule-error" class="error-message" style="display: none;">
+                発送スケジュールの読み込みに失敗しました
+            </div>
+        </section>
+
         <!-- サービスボタン -->
         <section class="services-section">
             <a href="/form" class="service-card form">
@@ -1149,28 +1341,147 @@
             }
         };
 
-        // 発送スケジュールをAPIから取得
-        async function loadShippingSchedule() {
-            try {
-                console.log('[Home] 📅 発送スケジュールをAPIから取得中...');
-                const response = await fetch('https://api.kanucard.com/api/public/schedule');
+        // 発送スケジュール管理クラス
+        class ShippingSchedule {
+            constructor() {
+                this.apiUrl = 'https://api.kanucard.com/api/public/schedule';
+                this.retryCount = 0;
+                this.maxRetries = 3;
+            }
+
+            // メイン読み込み関数
+            async loadSchedule() {
+                console.log('[Schedule] 📅 発送スケジュール読み込み開始');
+                this.showLoading(true);
+
+                try {
+                    const data = await this.fetchScheduleData();
+                    scheduleData = data; // グローバル変数も更新
+                    this.displayScheduleData(data);
+                    this.showError(false);
+                    console.log('[Schedule] ✅ 発送スケジュール表示完了');
+
+                    // カウントダウンも更新
+                    updateCountdowns();
+                } catch (error) {
+                    console.error('[Schedule] ❌ 読み込みエラー:', error);
+                    this.handleError(error);
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            // API呼び出し
+            async fetchScheduleData() {
+                const response = await fetch(this.apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
                 const result = await response.json();
 
-                if (result.success && result.data) {
-                    scheduleData = result.data;
-                    console.log('[Home] ✅ 発送スケジュール取得成功:', scheduleData);
+                if (!result.success || !result.data) {
+                    throw new Error('無効なレスポンス形式');
+                }
 
-                    // スケジュールデータを使ってカウントダウン更新
-                    updateCountdowns();
+                return result.data;
+            }
+
+            // データ表示
+            displayScheduleData(data) {
+                const { usa, japan } = data;
+
+                // アメリカ向けスケジュール
+                if (usa) {
+                    this.setElementText('usa-ship-date', this.formatDate(usa.nextShipDate) || '未設定');
+                    this.setElementText('usa-deadline-date', this.formatDate(usa.deadlineDate) || '未設定');
+                    this.setElementText('usa-notes', usa.notes || '-');
+                }
+
+                // 日本向けスケジュール
+                if (japan) {
+                    this.setElementText('japan-ship-date', this.formatDate(japan.nextShipDate) || '未設定');
+                    this.setElementText('japan-deadline-date', this.formatDate(japan.deadlineDate) || '未設定');
+                    this.setElementText('japan-notes', japan.notes || '-');
+                }
+            }
+
+            // 日付フォーマット
+            formatDate(dateString) {
+                if (!dateString) return null;
+                try {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('ja-JP', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        weekday: 'short'
+                    });
+                } catch (e) {
+                    return dateString;
+                }
+            }
+
+            // 要素のテキスト設定
+            setElementText(elementId, text) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = text;
+                }
+            }
+
+            // ローディング表示制御
+            showLoading(show) {
+                const loadingElement = document.getElementById('schedule-loading');
+                if (loadingElement) {
+                    loadingElement.style.display = show ? 'block' : 'none';
+                }
+            }
+
+            // エラー表示制御
+            showError(show) {
+                const errorElement = document.getElementById('schedule-error');
+                if (errorElement) {
+                    errorElement.style.display = show ? 'block' : 'none';
+                }
+            }
+
+            // エラーハンドリング
+            handleError(error) {
+                this.showError(true);
+
+                // エラー時のフォールバック表示
+                const errorText = '読み込みエラー';
+                ['usa-ship-date', 'usa-deadline-date', 'japan-ship-date', 'japan-deadline-date'].forEach(id => {
+                    this.setElementText(id, errorText);
+                });
+
+                // リトライ処理
+                if (this.retryCount < this.maxRetries) {
+                    this.retryCount++;
+                    console.log(`[Schedule] リトライ ${this.retryCount}/${this.maxRetries}`);
+                    setTimeout(() => this.loadSchedule(), 2000);
                 } else {
-                    console.warn('[Home] ⚠️ 発送スケジュールの取得に失敗（フォールバック使用）');
-                    // フォールバック：計算ベースのスケジュールを使用
+                    // 最大リトライ後はカウントダウンを更新（フォールバック）
                     updateCountdowns();
                 }
-            } catch (error) {
-                console.error('[Home] ❌ 発送スケジュール取得エラー:', error);
-                // エラー時は計算ベースのスケジュールを使用
-                updateCountdowns();
+            }
+        }
+
+        // グローバル変数として初期化
+        let shippingSchedule;
+
+        // 手動更新関数（必要に応じて）
+        function refreshSchedule() {
+            if (shippingSchedule) {
+                shippingSchedule.retryCount = 0;
+                shippingSchedule.loadSchedule();
             }
         }
 
@@ -1746,11 +2057,14 @@
 
         // 初期化
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('[Schedule] DOM読み込み完了 - スケジュール初期化');
+
             // ユーザー情報を取得して表示
             loadUserInfo();
 
-            // 発送スケジュールをAPIから取得（初回）
-            loadShippingSchedule();
+            // 発送スケジュールクラスを初期化してAPIから取得
+            shippingSchedule = new ShippingSchedule();
+            shippingSchedule.loadSchedule();
 
             updateBadges();
             updateDashboardData();
@@ -1762,7 +2076,12 @@
             setInterval(updateDashboardData, 300000);
 
             // 30分ごとに発送スケジュールを再取得
-            setInterval(loadShippingSchedule, 30 * 60 * 1000);
+            setInterval(() => {
+                if (shippingSchedule) {
+                    shippingSchedule.retryCount = 0;
+                    shippingSchedule.loadSchedule();
+                }
+            }, 30 * 60 * 1000);
         });
 
         // ユーザー情報を取得して表示
