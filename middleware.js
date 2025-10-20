@@ -11,6 +11,8 @@ const apiLimiter = rateLimit({
   message: 'リクエストが多すぎます。しばらく待ってから再度お試しください。',
   standardHeaders: true,
   legacyHeaders: false,
+  // プロキシ経由の接続を信頼（X-Forwarded-For等のヘッダーを使用）
+  trust: true,
   handler: (req, res) => {
     logger.security('Rate limit exceeded', {
       ip: req.ip,
@@ -28,6 +30,8 @@ const authLimiter = rateLimit({
   max: 100, // 1分間で100回まで
   message: '認証試行回数が上限に達しました。しばらく待ってから再度お試しください。',
   skipSuccessfulRequests: true, // 成功したリクエストはカウントしない
+  // プロキシ経由の接続を信頼（X-Forwarded-For等のヘッダーを使用）
+  trust: true,
   handler: (req, res) => {
     logger.security('Auth rate limit exceeded', {
       ip: req.ip,
@@ -44,6 +48,8 @@ const verifyLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1分
   max: 100, // 1分間で100回まで
   message: '認証コードの試行回数が上限に達しました。しばらく待ってから再度お試しください。',
+  // プロキシ経由の接続を信頼（X-Forwarded-For等のヘッダーを使用）
+  trust: true,
   handler: (req, res) => {
     logger.security('Verify code rate limit exceeded', {
       ip: req.ip,

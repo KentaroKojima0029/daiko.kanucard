@@ -48,7 +48,19 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Render/プロキシ環境対応
-app.set('trust proxy', 1);
+// プロキシ経由の環境（Nginx、Render等）では trust proxy を設定
+// 本番環境では Nginx が1つのプロキシとして動作するため '1' を設定
+// ローカル開発環境では false
+if (process.env.NODE_ENV === 'production') {
+  // 本番環境: Nginx等のリバースプロキシを信頼
+  // '1' = 最初のプロキシのみ信頼（Nginxからの X-Forwarded-For を使用）
+  app.set('trust proxy', 1);
+  console.log('Trust proxy enabled: trusting 1 hop (Nginx reverse proxy)');
+} else {
+  // 開発環境: プロキシなし
+  app.set('trust proxy', false);
+  console.log('Trust proxy disabled (development mode)');
+}
 
 // データベース初期化
 initDatabase();
@@ -71,17 +83,28 @@ app.use((req, res, next) => {
   ].filter(Boolean);
 
   const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin) || !origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+
+  // 同一オリジンリクエスト（Originヘッダーなし）または許可されたオリジンの場合のみCORSヘッダーを設定
+  if (!origin) {
+    // 同一オリジンリクエスト - CORSヘッダー不要
+    return next();
   }
 
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Auth');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  if (allowedOrigins.includes(origin)) {
+    // 許可されたオリジンのみ設定
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Auth');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
 
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+    }
+  } else {
+    // 許可されていないオリジンからのリクエスト
+    logger.warn('Blocked CORS request from unauthorized origin', { origin });
   }
+
   next();
 });
 

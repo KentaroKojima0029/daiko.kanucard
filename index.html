@@ -53,9 +53,38 @@
     </div>
 
     <script>
+        // Base64URLデコード関数（JWT用）
+        function base64UrlDecode(str) {
+            try {
+                let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+                while (base64.length % 4) {
+                    base64 += '=';
+                }
+                return atob(base64);
+            } catch (e) {
+                console.error('[Index] Base64URLデコードエラー:', e);
+                throw e;
+            }
+        }
+
+        // JWTトークンのペイロードを安全にデコード
+        function decodeJwtPayload(token) {
+            try {
+                const parts = token.split('.');
+                if (parts.length !== 3) {
+                    throw new Error('Invalid JWT format: expected 3 parts');
+                }
+                const payload = base64UrlDecode(parts[1]);
+                return JSON.parse(payload);
+            } catch (e) {
+                console.error('[Index] JWT解析エラー:', e);
+                throw e;
+            }
+        }
+
         // 認証チェックとリダイレクト
         (function() {
-            console.log('[Index] Checking authentication...');
+            console.log('[Index] 🔐 認証チェック開始...');
 
             // トークンを確認
             const authToken = localStorage.getItem('kanucard_auth_token');
@@ -63,32 +92,31 @@
             if (authToken) {
                 // トークンの有効性を確認
                 try {
-                    const tokenParts = authToken.split('.');
-                    if (tokenParts.length === 3) {
-                        const payload = JSON.parse(atob(tokenParts[1]));
+                    console.log('[Index] 🔍 トークン検証中...');
+                    const payload = decodeJwtPayload(authToken);
 
-                        // 有効期限チェック
-                        if (payload.exp && payload.exp * 1000 > Date.now()) {
-                            // 有効なトークン - ホーム画面へ
-                            console.log('[Index] Valid token found, redirecting to /home');
-                            window.location.href = '/home';
-                            return;
-                        } else {
-                            // トークン期限切れ
-                            console.log('[Index] Token expired, clearing...');
-                            localStorage.removeItem('kanucard_auth_token');
-                            localStorage.removeItem('kanucard_user_data');
-                        }
+                    // 有効期限チェック
+                    if (payload.exp && payload.exp * 1000 > Date.now()) {
+                        // 有効なトークン - ホーム画面へ
+                        console.log('[Index] ✅ 有効なトークン検出 - /home へリダイレクト');
+                        window.location.href = '/home';
+                        return;
+                    } else {
+                        // トークン期限切れ
+                        console.log('[Index] ⏰ トークン期限切れ - クリア');
+                        localStorage.removeItem('kanucard_auth_token');
+                        localStorage.removeItem('kanucard_user_data');
                     }
                 } catch (e) {
-                    console.log('[Index] Invalid token format, clearing...');
+                    console.error('[Index] ❌ トークン検証エラー:', e);
+                    console.log('[Index] トークンをクリア');
                     localStorage.removeItem('kanucard_auth_token');
                     localStorage.removeItem('kanucard_user_data');
                 }
             }
 
             // トークンがない、または無効 - ログイン画面へ
-            console.log('[Index] No valid token, redirecting to /login');
+            console.log('[Index] ➡️ /login へリダイレクト');
             window.location.href = '/login';
         })();
     </script>

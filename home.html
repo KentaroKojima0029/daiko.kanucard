@@ -6,6 +6,51 @@
     <title>PSA代行サービス - ホーム</title>
 
     <script>
+        // Base64URLデコード関数（JWT用）
+        // JWTはBase64URL形式（'-', '_'を使用、パディング省略可能）を使用するため、
+        // 標準のatob()では失敗する。Base64形式に変換してからデコード。
+        function base64UrlDecode(str) {
+            try {
+                // Base64URLをBase64に変換
+                let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+
+                // パディングを追加
+                while (base64.length % 4) {
+                    base64 += '=';
+                }
+
+                // デコード
+                return atob(base64);
+            } catch (e) {
+                console.error('[base64UrlDecode] デコードエラー:', e);
+                console.error('[base64UrlDecode] 入力文字列:', str);
+                throw e;
+            }
+        }
+
+        // JWTトークンのペイロードを安全にデコード
+        function decodeJwtPayload(token) {
+            try {
+                const parts = token.split('.');
+                if (parts.length !== 3) {
+                    throw new Error('Invalid JWT format: expected 3 parts');
+                }
+
+                const payload = base64UrlDecode(parts[1]);
+                return JSON.parse(payload);
+            } catch (e) {
+                console.error('[decodeJwtPayload] JWT解析エラー:', e);
+                console.error('[decodeJwtPayload] トークン長:', token.length);
+                console.error('[decodeJwtPayload] トークン形式:', {
+                    parts: token.split('.').length,
+                    part1Length: token.split('.')[0]?.length,
+                    part2Length: token.split('.')[1]?.length,
+                    part3Length: token.split('.')[2]?.length
+                });
+                throw e;
+            }
+        }
+
         // 認証チェック
         (function() {
             console.log('========================================');
@@ -40,55 +85,40 @@
 
             // トークンの有効性を簡易チェック
             try {
-                const tokenParts = authToken.split('.');
-                console.log('[Home] 🔍 トークン構造チェック:', {
-                    parts: tokenParts.length,
-                    expected: 3
+                console.log('[Home] 🔍 トークン検証開始');
+                const payload = decodeJwtPayload(authToken);
+                const expirationDate = new Date(payload.exp * 1000);
+                const now = new Date();
+                const remainingTime = expirationDate - now;
+
+                console.log('[Home] ✅ JWT デコード成功');
+                console.log('[Home] 📋 トークン情報:', {
+                    email: payload.email,
+                    customerId: payload.customerId,
+                    expiresAt: expirationDate.toLocaleString('ja-JP'),
+                    now: now.toLocaleString('ja-JP'),
+                    remainingMinutes: Math.floor(remainingTime / 1000 / 60),
+                    isValid: remainingTime > 0
                 });
 
-                if (tokenParts.length === 3) {
-                    const payload = JSON.parse(atob(tokenParts[1]));
-                    const expirationDate = new Date(payload.exp * 1000);
-                    const now = new Date();
-                    const remainingTime = expirationDate - now;
-
-                    console.log('[Home] 📋 トークン情報:', {
-                        email: payload.email,
-                        customerId: payload.customerId,
-                        expiresAt: expirationDate.toLocaleString(),
-                        now: now.toLocaleString(),
-                        remainingMinutes: Math.floor(remainingTime / 1000 / 60),
-                        isValid: remainingTime > 0
-                    });
-
-                    // 有効期限チェック
-                    if (payload.exp && payload.exp * 1000 < Date.now()) {
-                        console.log('[Home] ⏰ トークン期限切れ');
-                        console.log('[Home] ➡️ ログインページへリダイレクト');
-                        console.log('========================================');
-                        // トークンが期限切れ
-                        localStorage.removeItem('kanucard_auth_token');
-                        localStorage.removeItem('kanucard_user_data');
-                        window.location.href = '/login';
-                        return;
-                    }
-                    console.log('[Home] ✅ 認証成功 - ページ読み込み継続');
-                    console.log('========================================');
-                } else {
-                    console.log('[Home] ❌ トークン形式が不正（部分数が3ではない）');
+                // 有効期限チェック
+                if (payload.exp && payload.exp * 1000 < Date.now()) {
+                    console.log('[Home] ⏰ トークン期限切れ');
                     console.log('[Home] ➡️ ログインページへリダイレクト');
                     console.log('========================================');
+                    // トークンが期限切れ
                     localStorage.removeItem('kanucard_auth_token');
                     localStorage.removeItem('kanucard_user_data');
                     window.location.href = '/login';
+                    return;
                 }
+                console.log('[Home] ✅ 認証成功 - ページ読み込み継続');
+                console.log('========================================');
             } catch (e) {
                 console.error('[Home] ❌ トークン検証エラー:', e);
-                console.error('[Home] エラー詳細:', {
-                    name: e.name,
-                    message: e.message,
-                    stack: e.stack
-                });
+                console.error('[Home] エラー名:', e.name);
+                console.error('[Home] エラーメッセージ:', e.message);
+                console.error('[Home] エラースタック:', e.stack);
                 console.log('[Home] ➡️ エラーのため再ログインが必要');
                 console.log('========================================');
                 localStorage.removeItem('kanucard_auth_token');
