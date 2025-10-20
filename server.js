@@ -1262,6 +1262,28 @@ db.exec(`
 `);
 logger.info('Messages table ready');
 
+// 発送スケジュールテーブルの作成
+db.exec(`
+  CREATE TABLE IF NOT EXISTS shipping_schedule (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    country TEXT NOT NULL UNIQUE,
+    next_ship_date TEXT NOT NULL,
+    deadline_date TEXT NOT NULL,
+    notes TEXT,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_by TEXT
+  )
+`);
+
+// 初期データの挿入（既存データがない場合のみ）
+db.run(`
+  INSERT OR IGNORE INTO shipping_schedule (country, next_ship_date, deadline_date, notes)
+  VALUES
+    ('usa', '2025-10-25', '2025-10-20', ''),
+    ('japan', '2025-10-30', '2025-10-25', '')
+`);
+logger.info('Shipping schedule table ready');
+
 // メッセージ送信
 app.post('/api/messages', async (req, res) => {
   try {
@@ -2000,6 +2022,125 @@ app.get('/api/status/:id', async (req, res) => {
       success: false,
       error: 'ステータスの取得に失敗しました'
     });
+  }
+});
+
+// ===== 発送スケジュール管理API =====
+
+// GET /api/public/schedule - 公開用（認証不要）
+app.get('/api/public/schedule', async (req, res) => {
+  try {
+    const schedules = await new Promise((resolve, reject) => {
+      db.all(
+        'SELECT country, next_ship_date, deadline_date, notes FROM shipping_schedule',
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        }
+      );
+    });
+
+    const data = {
+      usa: schedules.find(s => s.country === 'usa') || { next_ship_date: '', deadline_date: '', notes: '' },
+      japan: schedules.find(s => s.country === 'japan') || { next_ship_date: '', deadline_date: '', notes: '' }
+    };
+
+    // キャメルケースに変換（フロントエンド互換性）
+    const formattedData = {
+      usa: {
+        nextShipDate: data.usa.next_ship_date,
+        deadlineDate: data.usa.deadline_date,
+        notes: data.usa.notes || ''
+      },
+      japan: {
+        nextShipDate: data.japan.next_ship_date,
+        deadlineDate: data.japan.deadline_date,
+        notes: data.japan.notes || ''
+      }
+    };
+
+    logger.info('Public shipping schedule fetched');
+    res.json({ success: true, data: formattedData });
+  } catch (error) {
+    console.error('Get public schedule error:', error);
+    logger.error('Get public schedule error', { error: error.message });
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /api/schedule - 管理者用（認証必要）
+app.get('/api/schedule', authenticateToken, async (req, res) => {
+  try {
+    const schedules = await new Promise((resolve, reject) => {
+      db.all(
+        'SELECT * FROM shipping_schedule ORDER BY country',
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        }
+      );
+    });
+
+    const data = {
+      usa: schedules.find(s => s.country === 'usa') || {},
+      japan: schedules.find(s => s.country === 'japan') || {}
+    };
+
+    logger.info('Admin shipping schedule fetched', { user: req.user.email });
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error('Get schedule error:', error);
+    logger.error('Get schedule error', { error: error.message });
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// PUT /api/schedule - 管理者用更新（認証必要）
+app.put('/api/schedule', authenticateToken, async (req, res) => {
+  try {
+    const { usa, japan } = req.body;
+    const updatedBy = req.user.email;
+
+    // アメリカ向け更新
+    if (usa) {
+      await new Promise((resolve, reject) => {
+        db.run(
+          `UPDATE shipping_schedule
+           SET next_ship_date = ?, deadline_date = ?, notes = ?,
+               updated_at = CURRENT_TIMESTAMP, updated_by = ?
+           WHERE country = 'usa'`,
+          [usa.nextShipDate, usa.deadlineDate, usa.notes || '', updatedBy],
+          (err) => {
+            if (err) reject(err);
+            else resolve();
+          }
+        );
+      });
+    }
+
+    // 日本向け更新
+    if (japan) {
+      await new Promise((resolve, reject) => {
+        db.run(
+          `UPDATE shipping_schedule
+           SET next_ship_date = ?, deadline_date = ?, notes = ?,
+               updated_at = CURRENT_TIMESTAMP, updated_by = ?
+           WHERE country = 'japan'`,
+          [japan.nextShipDate, japan.deadlineDate, japan.notes || '', updatedBy],
+          (err) => {
+            if (err) reject(err);
+            else resolve();
+          }
+        );
+      });
+    }
+
+    logger.info('Shipping schedule updated', { user: updatedBy });
+    res.json({ success: true, message: 'スケジュールを更新しました' });
+  } catch (error) {
+    console.error('Update schedule error:', error);
+    logger.error('Update schedule error', { error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
