@@ -1884,13 +1884,13 @@
             // 5分ごとにダッシュボードデータ更新
             setInterval(updateDashboardData, 300000);
 
-            // 30分ごとに発送スケジュールを再取得
-            setInterval(() => {
-                if (shippingSchedule) {
-                    shippingSchedule.retryCount = 0;
-                    shippingSchedule.loadSchedule();
-                }
-            }, 30 * 60 * 1000);
+            // 30分ごとに発送スケジュールを再取得（コメントアウト：リロード時のみ取得）
+            // setInterval(() => {
+            //     if (shippingSchedule) {
+            //         shippingSchedule.retryCount = 0;
+            //         shippingSchedule.loadSchedule();
+            //     }
+            // }, 30 * 60 * 1000);
         });
 
         // ユーザー情報を取得して表示
