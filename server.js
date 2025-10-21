@@ -831,6 +831,107 @@ function comparePhoneNumbers(phone1, phone2) {
 
 // ===== 認証API =====
 
+// ===== 管理者認証 =====
+// 管理者ログインAPI
+app.post('/api/admin/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    console.log('[Admin Login] ログイン試行:', { email });
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'メールアドレスとパスワードが必要です'
+      });
+    }
+
+    // 管理者認証情報（環境変数から取得、なければデフォルト）
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'collection@kanucard.com';
+    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '#collection30';
+
+    // メールアドレスとパスワードの検証
+    if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+      logger.warn('Failed admin login attempt', { email });
+      console.log('[Admin Login] ❌ ログイン失敗 - 認証情報が不正');
+      return res.status(401).json({
+        success: false,
+        message: 'メールアドレスまたはパスワードが正しくありません'
+      });
+    }
+
+    // JWT トークン生成（管理者用）
+    const token = jwt.sign(
+      {
+        email: ADMIN_EMAIL,
+        role: 'admin',
+        loginAt: Date.now()
+      },
+      JWT_SECRET,
+      { expiresIn: '8h' }  // 8時間のセッション有効期限
+    );
+
+    logger.info('Admin logged in successfully', { email });
+    console.log('[Admin Login] ✅ ログイン成功');
+
+    res.json({
+      success: true,
+      message: '管理者ログインに成功しました',
+      token,
+      user: {
+        email: ADMIN_EMAIL,
+        role: 'admin'
+      }
+    });
+
+  } catch (error) {
+    console.error('[Admin Login] エラー:', error);
+    logger.error('Admin login error', {
+      error: error.message,
+      email: req.body.email
+    });
+
+    res.status(500).json({
+      success: false,
+      message: 'システムエラーが発生しました'
+    });
+  }
+});
+
+// 管理者認証ミドルウェア
+const authenticateAdmin = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      message: '認証が必要です'
+    });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({
+        success: false,
+        message: 'トークンが無効です'
+      });
+    }
+
+    // 管理者権限チェック
+    if (user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: '管理者権限が必要です'
+      });
+    }
+
+    req.user = user;
+    next();
+  });
+};
+
+// ===== 顧客認証 =====
 // ステップ1: メールアドレス検証とOTP送信
 app.post('/api/auth/verify-shopify-customer', async (req, res) => {
   try {
