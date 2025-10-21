@@ -9,13 +9,29 @@ async function testOTPFlow() {
   console.log('メール:', email);
   console.log('');
 
+  // 電話番号の入力を促す
+  const phone = await new Promise((resolve) => {
+    const readline = require('readline').createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+
+    readline.question('Shopifyに登録されている電話番号を入力してください: ', (answer) => {
+      readline.close();
+      resolve(answer.trim());
+    });
+  });
+
+  console.log('入力された電話番号:', phone);
+  console.log('');
+
   try {
     // ステップ1: OTP送信
     console.log('1. OTP送信リクエスト...');
     const otpResponse = await fetch(`${baseUrl}/api/auth/verify-shopify-customer`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ email, phone })
     });
 
     const otpResult = await otpResponse.json();

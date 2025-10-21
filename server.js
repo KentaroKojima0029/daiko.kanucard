@@ -792,17 +792,61 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+// 電話番号正規化関数
+// 様々なフォーマットの電話番号を統一形式に変換
+function normalizePhoneNumber(phone) {
+  if (!phone) return null;
+
+  // 文字列に変換
+  let normalized = String(phone).trim();
+
+  // すべての空白、ハイフン、括弧を除去
+  normalized = normalized.replace(/[\s\-\(\)]/g, '');
+
+  // +81で始まる場合は0に変換（日本の国際形式）
+  if (normalized.startsWith('+81')) {
+    normalized = '0' + normalized.substring(3);
+  } else if (normalized.startsWith('81') && normalized.length >= 11) {
+    // 81で始まる場合も0に変換（+が省略されている場合）
+    normalized = '0' + normalized.substring(2);
+  }
+
+  // 数字以外を除去
+  normalized = normalized.replace(/\D/g, '');
+
+  return normalized;
+}
+
+// 電話番号比較関数
+function comparePhoneNumbers(phone1, phone2) {
+  const normalized1 = normalizePhoneNumber(phone1);
+  const normalized2 = normalizePhoneNumber(phone2);
+
+  if (!normalized1 || !normalized2) {
+    return false;
+  }
+
+  return normalized1 === normalized2;
+}
+
 // ===== 認証API =====
 
 // ステップ1: メールアドレス検証とOTP送信
 app.post('/api/auth/verify-shopify-customer', async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, phone } = req.body;
 
     if (!email) {
       return res.status(400).json({
         success: false,
         message: 'メールアドレスが必要です'
+      });
+    }
+
+    if (!phone) {
+      return res.status(400).json({
+        success: false,
+        message: '電話番号が必要です'
       });
     }
 
@@ -870,6 +914,36 @@ app.post('/api/auth/verify-shopify-customer', async (req, res) => {
         registerUrl: 'https://shop.kanucard.com/account/login'
       });
     }
+
+    // 電話番号の照合
+    const shopifyPhone = customer.phone;
+    console.log('[OTP] Phone verification:');
+    console.log(`[OTP] - Input phone: ${phone}`);
+    console.log(`[OTP] - Shopify phone: ${shopifyPhone}`);
+    console.log(`[OTP] - Input normalized: ${normalizePhoneNumber(phone)}`);
+    console.log(`[OTP] - Shopify normalized: ${normalizePhoneNumber(shopifyPhone)}`);
+
+    if (!shopifyPhone) {
+      logger.warn('Shopify customer has no phone number', { email });
+      return res.status(400).json({
+        success: false,
+        message: 'このアカウントには電話番号が登録されていません。Shopifyアカウントに電話番号を登録してください。'
+      });
+    }
+
+    if (!comparePhoneNumbers(phone, shopifyPhone)) {
+      logger.warn('Phone number mismatch', {
+        email,
+        inputPhone: normalizePhoneNumber(phone),
+        shopifyPhone: normalizePhoneNumber(shopifyPhone)
+      });
+      return res.status(403).json({
+        success: false,
+        message: '入力された電話番号がアカウントに登録されている電話番号と一致しません'
+      });
+    }
+
+    console.log('[OTP] ✅ Phone number verified successfully');
 
     // OTP生成
     const otp = generateOTP();
