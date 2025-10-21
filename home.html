@@ -969,7 +969,7 @@
                     <span>👤</span>
                     <span class="user-name" id="userName">読み込み中...</span>
                 </div>
-                <button class="logout-btn" onclick="handleLogout()">ログアウト</button>
+                <button class="logout-btn" id="logoutBtn">ログアウト</button>
             </div>
             <div class="logo">PSA代行サービス</div>
             <div class="subtitle">トレーディングカードのPSA鑑定代行</div>
@@ -1877,6 +1877,12 @@
 
             updateBadges();
             updateDashboardData();
+
+            // ログアウトボタンのイベントリスナー
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', handleLogout);
+            }
 
             // 1分ごとにカウントダウン更新
             setInterval(updateCountdowns, 60000);
