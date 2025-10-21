@@ -469,6 +469,22 @@
                                 ※ Shopifyストアにご登録のメールアドレスをご入力ください
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label class="form-label" for="phone">
+                                電話番号
+                            </label>
+                            <input
+                                type="tel"
+                                id="phone"
+                                class="form-input"
+                                placeholder="090-1234-5678"
+                                required
+                                autocomplete="tel"
+                            >
+                            <div class="input-hint">
+                                ※ Shopifyストアにご登録の電話番号をご入力ください
+                            </div>
+                        </div>
                         <button type="submit" class="btn btn-primary" id="sendOtpBtn">
                             認証コードを送信
                         </button>
@@ -535,6 +551,7 @@
 
     <script>
         let currentEmail = '';
+        let currentPhone = '';
         let resendTimer = null;
         let resendCountdown = 60;
 
@@ -641,6 +658,7 @@
             e.preventDefault();
 
             const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
             const sendBtn = document.getElementById('sendOtpBtn');
 
             // 入力検証
@@ -649,12 +667,18 @@
                 return;
             }
 
+            if (!phone) {
+                showError('電話番号を入力してください');
+                return;
+            }
+
             currentEmail = email;
+            currentPhone = phone;
             sendBtn.disabled = true;
             sendBtn.innerHTML = '<span class="loading-spinner"></span>送信中...';
 
             try {
-                console.log('[Login] Sending OTP request for:', email);
+                console.log('[Login] Sending OTP request for:', email, phone);
 
                 const response = await fetch('/api/auth/verify-shopify-customer', {
                     method: 'POST',
@@ -662,7 +686,8 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        email: email
+                        email: email,
+                        phone: phone
                     })
                 });
 
@@ -815,7 +840,8 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        email: currentEmail
+                        email: currentEmail,
+                        phone: currentPhone
                     })
                 });
 
@@ -911,6 +937,7 @@
 
             // フォームをリセット
             document.getElementById('email').value = currentEmail;
+            document.getElementById('phone').value = currentPhone;
             document.getElementById('sendOtpBtn').disabled = false;
             document.getElementById('sendOtpBtn').innerHTML = '認証コードを送信';
         }
