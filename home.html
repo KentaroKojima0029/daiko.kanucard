@@ -22,6 +22,8 @@
                 // デコード
                 return atob(base64);
             } catch (e) {
+                
+                
                 throw e;
             }
         }
@@ -37,32 +39,34 @@
                 const payload = base64UrlDecode(parts[1]);
                 return JSON.parse(payload);
             } catch (e) {
-                    parts: token.split('.').length,
-                    part1Length: token.split('.')[0]?.length,
-                    part2Length: token.split('.')[1]?.length,
-                    part3Length: token.split('.')[2]?.length
-                });
+                
+                
+                
                 throw e;
             }
         }
 
         // 認証チェック
         (function() {
+            
+            
+            
+            
 
             const authToken = localStorage.getItem('kanucard_auth_token');
             const userData = localStorage.getItem('kanucard_user_data');
 
-                tokenExists: !!authToken,
-                tokenLength: authToken ? authToken.length : 0,
-                tokenPreview: authToken ? authToken.substring(0, 30) + '...' : 'なし',
-                userDataExists: !!userData,
-                userDataLength: userData ? userData.length : 0
-            });
+            
 
             if (!authToken) {
+                
+                
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
+                    
                 }
+                
+                
                 // 未認証の場合はログインページへ直接リダイレクト
                 window.location.href = '/login';
                 return;
@@ -70,28 +74,35 @@
 
             // トークンの有効性を簡易チェック
             try {
+                
                 const payload = decodeJwtPayload(authToken);
                 const expirationDate = new Date(payload.exp * 1000);
                 const now = new Date();
                 const remainingTime = expirationDate - now;
 
-                    email: payload.email,
-                    customerId: payload.customerId,
-                    expiresAt: expirationDate.toLocaleString('ja-JP'),
-                    now: now.toLocaleString('ja-JP'),
-                    remainingMinutes: Math.floor(remainingTime / 1000 / 60),
-                    isValid: remainingTime > 0
-                });
+                
+                
 
                 // 有効期限チェック
                 if (payload.exp && payload.exp * 1000 < Date.now()) {
+                    
+                    
+                    
                     // トークンが期限切れ
                     localStorage.removeItem('kanucard_auth_token');
                     localStorage.removeItem('kanucard_user_data');
                     window.location.href = '/login';
                     return;
                 }
+                
+                
             } catch (e) {
+                
+                
+                
+                
+                
+                
                 localStorage.removeItem('kanucard_auth_token');
                 localStorage.removeItem('kanucard_user_data');
                 window.location.href = '/login';
@@ -1142,21 +1153,25 @@
 
             // メイン読み込み関数
             async loadSchedule() {
+                
 
                 try {
                     const data = await this.fetchScheduleData();
                     scheduleData = data; // グローバル変数も更新
                     this.displayScheduleData(data);
+                    
 
                     // カウントダウンも更新
                     updateCountdowns();
                 } catch (error) {
+                    
                     this.handleError(error);
                 }
             }
 
             // API呼び出し
             async fetchScheduleData() {
+                
 
                 const response = await fetch(this.apiUrl, {
                     method: 'GET',
@@ -1165,20 +1180,20 @@
                     }
                 });
 
+                
 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
                 const result = await response.json();
+                
 
                 if (!result.success || !result.data) {
                     throw new Error('無効なレスポンス形式');
                 }
 
-                    usa: result.data.usa,
-                    japan: result.data.japan
-                });
+                
 
                 return result.data;
             }
@@ -1222,13 +1237,16 @@
 
             // エラーハンドリング
             handleError(error) {
+                
 
                 // リトライ処理
                 if (this.retryCount < this.maxRetries) {
                     this.retryCount++;
+                    
                     setTimeout(() => this.loadSchedule(), 2000);
                 } else {
                     // 最大リトライ後はカウントダウンを更新（フォールバック）
+                    
                     updateCountdowns();
                 }
             }
@@ -1296,6 +1314,7 @@
                 if (scheduleData.usa.nextShipDate) {
                     const date = new Date(scheduleData.usa.nextShipDate);
                     date.setHours(12, 0, 0, 0);
+                    
                     return date;
                 }
                 // フォールバック: 毎週火曜
@@ -1304,6 +1323,7 @@
                 const daysUntilTuesday = (2 - dayOfWeek + 7) % 7 || 7;
                 next.setDate(next.getDate() + daysUntilTuesday);
                 next.setHours(12, 0, 0, 0);
+                
                 return next;
             };
 
@@ -1311,6 +1331,7 @@
                 if (scheduleData.japan.nextShipDate) {
                     const date = new Date(scheduleData.japan.nextShipDate);
                     date.setHours(12, 0, 0, 0);
+                    
                     return date;
                 }
                 // フォールバック: 毎月15日
@@ -1320,6 +1341,7 @@
                 }
                 next.setDate(15);
                 next.setHours(12, 0, 0, 0);
+                
                 return next;
             };
 
@@ -1414,9 +1436,11 @@
             let usaDeadline;
             if (scheduleData.usa.deadlineDate) {
                 usaDeadline = new Date(scheduleData.usa.deadlineDate);
+                
             } else {
                 usaDeadline = new Date(usaShipping);
                 usaDeadline.setDate(usaDeadline.getDate() - 2); // デフォルト: 発送日の2日前
+                
             }
 
             // 次回発送日を表示（年月日形式で明確に）
@@ -1441,9 +1465,11 @@
             let japanDeadline;
             if (scheduleData.japan.deadlineDate) {
                 japanDeadline = new Date(scheduleData.japan.deadlineDate);
+                
             } else {
                 japanDeadline = new Date(japanShipping);
                 japanDeadline.setDate(japanDeadline.getDate() - 5); // デフォルト: 発送日の5日前
+                
             }
 
             // 次回発送日を表示（年月日形式で明確に）
@@ -1825,6 +1851,7 @@
 
         // 初期化
         document.addEventListener('DOMContentLoaded', () => {
+            
 
             // ユーザー情報を取得して表示
             loadUserInfo();
@@ -1871,10 +1898,12 @@
                     document.getElementById('userName').textContent = displayName;
                     document.getElementById('welcomeMessage').textContent = `ようこそ、${displayName}様！`;
                 } catch (e) {
+                    
                     document.getElementById('userName').textContent = 'お客様';
                     document.getElementById('welcomeMessage').textContent = `ようこそ！`;
                 }
             } else {
+                
                 document.getElementById('userName').textContent = 'お客様';
                 document.getElementById('welcomeMessage').textContent = `ようこそ！`;
             }
@@ -1883,6 +1912,7 @@
         // ログアウト処理
         function handleLogout() {
             if (confirm('ログアウトしますか？')) {
+                
                 // localStorageからトークンとユーザーデータを削除
                 localStorage.removeItem('kanucard_auth_token');
                 localStorage.removeItem('kanucard_user_data');
