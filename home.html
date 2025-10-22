@@ -22,8 +22,6 @@
                 // デコード
                 return atob(base64);
             } catch (e) {
-                console.error('[base64UrlDecode] デコードエラー:', e);
-                console.error('[base64UrlDecode] 入力文字列:', str);
                 throw e;
             }
         }
@@ -39,9 +37,6 @@
                 const payload = base64UrlDecode(parts[1]);
                 return JSON.parse(payload);
             } catch (e) {
-                console.error('[decodeJwtPayload] JWT解析エラー:', e);
-                console.error('[decodeJwtPayload] トークン長:', token.length);
-                console.error('[decodeJwtPayload] トークン形式:', {
                     parts: token.split('.').length,
                     part1Length: token.split('.')[0]?.length,
                     part2Length: token.split('.')[1]?.length,
@@ -53,15 +48,10 @@
 
         // 認証チェック
         (function() {
-            console.log('========================================');
-            console.log('[Home] 🔐 認証チェック開始');
-            console.log('[Home] 現在のURL:', window.location.href);
-            console.log('[Home] Timestamp:', new Date().toISOString());
 
             const authToken = localStorage.getItem('kanucard_auth_token');
             const userData = localStorage.getItem('kanucard_user_data');
 
-            console.log('[Home] 📦 ローカルストレージ確認:', {
                 tokenExists: !!authToken,
                 tokenLength: authToken ? authToken.length : 0,
                 tokenPreview: authToken ? authToken.substring(0, 30) + '...' : 'なし',
@@ -70,14 +60,9 @@
             });
 
             if (!authToken) {
-                console.log('[Home] ❌ トークンが見つかりません');
-                console.log('[Home] ⚠️ 全てのlocalStorageキーを確認:');
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
-                    console.log(`  - ${key}: ${localStorage.getItem(key).substring(0, 50)}...`);
                 }
-                console.log('[Home] ➡️ ログインページへリダイレクト');
-                console.log('========================================');
                 // 未認証の場合はログインページへ直接リダイレクト
                 window.location.href = '/login';
                 return;
@@ -85,14 +70,11 @@
 
             // トークンの有効性を簡易チェック
             try {
-                console.log('[Home] 🔍 トークン検証開始');
                 const payload = decodeJwtPayload(authToken);
                 const expirationDate = new Date(payload.exp * 1000);
                 const now = new Date();
                 const remainingTime = expirationDate - now;
 
-                console.log('[Home] ✅ JWT デコード成功');
-                console.log('[Home] 📋 トークン情報:', {
                     email: payload.email,
                     customerId: payload.customerId,
                     expiresAt: expirationDate.toLocaleString('ja-JP'),
@@ -103,24 +85,13 @@
 
                 // 有効期限チェック
                 if (payload.exp && payload.exp * 1000 < Date.now()) {
-                    console.log('[Home] ⏰ トークン期限切れ');
-                    console.log('[Home] ➡️ ログインページへリダイレクト');
-                    console.log('========================================');
                     // トークンが期限切れ
                     localStorage.removeItem('kanucard_auth_token');
                     localStorage.removeItem('kanucard_user_data');
                     window.location.href = '/login';
                     return;
                 }
-                console.log('[Home] ✅ 認証成功 - ページ読み込み継続');
-                console.log('========================================');
             } catch (e) {
-                console.error('[Home] ❌ トークン検証エラー:', e);
-                console.error('[Home] エラー名:', e.name);
-                console.error('[Home] エラーメッセージ:', e.message);
-                console.error('[Home] エラースタック:', e.stack);
-                console.log('[Home] ➡️ エラーのため再ログインが必要');
-                console.log('========================================');
                 localStorage.removeItem('kanucard_auth_token');
                 localStorage.removeItem('kanucard_user_data');
                 window.location.href = '/login';
@@ -254,8 +225,10 @@
 
         .countdown-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: 1fr;
             gap: 20px;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
         .countdown-card {
@@ -318,9 +291,11 @@
 
         .schedule-info-item {
             display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 0;
             border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+            text-align: center;
         }
 
         .schedule-info-item:last-child {
@@ -330,11 +305,14 @@
         .schedule-info-label {
             color: #64748b;
             font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
         }
 
         .schedule-info-value {
             color: #1e293b;
             font-weight: 700;
+            font-size: 1.1rem;
         }
 
         .discount-badge {
@@ -966,7 +944,6 @@
         <header class="header">
             <div class="header-top">
                 <div class="user-info">
-                    <span>👤</span>
                     <span class="user-name" id="userName">読み込み中...</span>
                 </div>
                 <button class="logout-btn" id="logoutBtn">ログアウト</button>
@@ -1080,7 +1057,7 @@
 
             <a href="/mypage" class="service-card mypage">
                 <div class="service-icon-wrapper">
-                    <div class="service-icon">👤</div>
+                    <div class="service-icon">⚙️</div>
                 </div>
                 <div class="service-title">マイページ</div>
                 <div class="service-description">注文履歴・会員情報の確認</div>
@@ -1158,32 +1135,28 @@
         class ShippingSchedule {
             constructor() {
                 // Xserver VPS APIを使用（24時間稼働、高速応答）
-                this.apiUrl = 'https://api.kanucard.com/api/public/schedule';
+                this.apiUrl = '/api/public/schedule';
                 this.retryCount = 0;
                 this.maxRetries = 3;
             }
 
             // メイン読み込み関数
             async loadSchedule() {
-                console.log('[Schedule] 📅 発送スケジュール読み込み開始');
 
                 try {
                     const data = await this.fetchScheduleData();
                     scheduleData = data; // グローバル変数も更新
                     this.displayScheduleData(data);
-                    console.log('[Schedule] ✅ 発送スケジュール表示完了');
 
                     // カウントダウンも更新
                     updateCountdowns();
                 } catch (error) {
-                    console.error('[Schedule] ❌ 読み込みエラー:', error);
                     this.handleError(error);
                 }
             }
 
             // API呼び出し
             async fetchScheduleData() {
-                console.log('[Schedule] 📡 API呼び出し:', this.apiUrl);
 
                 const response = await fetch(this.apiUrl, {
                     method: 'GET',
@@ -1192,20 +1165,17 @@
                     }
                 });
 
-                console.log('[Schedule] API レスポンスステータス:', response.status);
 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
                 const result = await response.json();
-                console.log('[Schedule] API レスポンス:', JSON.stringify(result, null, 2));
 
                 if (!result.success || !result.data) {
                     throw new Error('無効なレスポンス形式');
                 }
 
-                console.log('[Schedule] ✅ API データ取得成功:', {
                     usa: result.data.usa,
                     japan: result.data.japan
                 });
@@ -1252,16 +1222,13 @@
 
             // エラーハンドリング
             handleError(error) {
-                console.warn('[Schedule] ⚠️ APIエラー - フォールバックを使用');
 
                 // リトライ処理
                 if (this.retryCount < this.maxRetries) {
                     this.retryCount++;
-                    console.log(`[Schedule] リトライ ${this.retryCount}/${this.maxRetries}`);
                     setTimeout(() => this.loadSchedule(), 2000);
                 } else {
                     // 最大リトライ後はカウントダウンを更新（フォールバック）
-                    console.log('[Schedule] 最大リトライ到達 - 計算ベースのスケジュールを使用');
                     updateCountdowns();
                 }
             }
@@ -1329,7 +1296,6 @@
                 if (scheduleData.usa.nextShipDate) {
                     const date = new Date(scheduleData.usa.nextShipDate);
                     date.setHours(12, 0, 0, 0);
-                    console.log('[Schedule] 🇺🇸 USA発送日 (API):', scheduleData.usa.nextShipDate, '→', date.toLocaleDateString('ja-JP'));
                     return date;
                 }
                 // フォールバック: 毎週火曜
@@ -1338,7 +1304,6 @@
                 const daysUntilTuesday = (2 - dayOfWeek + 7) % 7 || 7;
                 next.setDate(next.getDate() + daysUntilTuesday);
                 next.setHours(12, 0, 0, 0);
-                console.log('[Schedule] 🇺🇸 USA発送日 (計算):', next.toLocaleDateString('ja-JP'));
                 return next;
             };
 
@@ -1346,7 +1311,6 @@
                 if (scheduleData.japan.nextShipDate) {
                     const date = new Date(scheduleData.japan.nextShipDate);
                     date.setHours(12, 0, 0, 0);
-                    console.log('[Schedule] 🇯🇵 Japan発送日 (API):', scheduleData.japan.nextShipDate, '→', date.toLocaleDateString('ja-JP'));
                     return date;
                 }
                 // フォールバック: 毎月15日
@@ -1356,7 +1320,6 @@
                 }
                 next.setDate(15);
                 next.setHours(12, 0, 0, 0);
-                console.log('[Schedule] 🇯🇵 Japan発送日 (計算):', next.toLocaleDateString('ja-JP'));
                 return next;
             };
 
@@ -1451,11 +1414,9 @@
             let usaDeadline;
             if (scheduleData.usa.deadlineDate) {
                 usaDeadline = new Date(scheduleData.usa.deadlineDate);
-                console.log('[Schedule] 🇺🇸 USA必着期限 (API):', usaDeadline.toLocaleDateString('ja-JP'));
             } else {
                 usaDeadline = new Date(usaShipping);
                 usaDeadline.setDate(usaDeadline.getDate() - 2); // デフォルト: 発送日の2日前
-                console.log('[Schedule] 🇺🇸 USA必着期限 (計算):', usaDeadline.toLocaleDateString('ja-JP'));
             }
 
             // 次回発送日を表示（年月日形式で明確に）
@@ -1480,11 +1441,9 @@
             let japanDeadline;
             if (scheduleData.japan.deadlineDate) {
                 japanDeadline = new Date(scheduleData.japan.deadlineDate);
-                console.log('[Schedule] 🇯🇵 Japan必着期限 (API):', japanDeadline.toLocaleDateString('ja-JP'));
             } else {
                 japanDeadline = new Date(japanShipping);
                 japanDeadline.setDate(japanDeadline.getDate() - 5); // デフォルト: 発送日の5日前
-                console.log('[Schedule] 🇯🇵 Japan必着期限 (計算):', japanDeadline.toLocaleDateString('ja-JP'));
             }
 
             // 次回発送日を表示（年月日形式で明確に）
@@ -1866,7 +1825,6 @@
 
         // 初期化
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('[Schedule] DOM読み込み完了 - スケジュール初期化');
 
             // ユーザー情報を取得して表示
             loadUserInfo();
@@ -1913,12 +1871,10 @@
                     document.getElementById('userName').textContent = displayName;
                     document.getElementById('welcomeMessage').textContent = `ようこそ、${displayName}様！`;
                 } catch (e) {
-                    console.error('[Home] ユーザー情報の読み込みエラー:', e);
                     document.getElementById('userName').textContent = 'お客様';
                     document.getElementById('welcomeMessage').textContent = `ようこそ！`;
                 }
             } else {
-                console.log('[Home] ユーザー情報が見つかりません');
                 document.getElementById('userName').textContent = 'お客様';
                 document.getElementById('welcomeMessage').textContent = `ようこそ！`;
             }
@@ -1927,7 +1883,6 @@
         // ログアウト処理
         function handleLogout() {
             if (confirm('ログアウトしますか？')) {
-                console.log('[Home] ログアウト実行');
                 // localStorageからトークンとユーザーデータを削除
                 localStorage.removeItem('kanucard_auth_token');
                 localStorage.removeItem('kanucard_user_data');
