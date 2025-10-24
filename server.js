@@ -1292,6 +1292,83 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// シンプルログイン（メール+電話番号のみ、OTPなし）
+app.post('/api/auth/simple-login', async (req, res) => {
+  try {
+    const { email, phone } = req.body;
+
+    if (!email || !phone) {
+      return res.status(400).json({
+        success: false,
+        message: 'メールアドレスと電話番号の両方が必要です'
+      });
+    }
+
+    logger.info('Simple login attempt', { email });
+
+    // Shopifyで顧客を検索
+    const { findCustomerByEmail } = require('./shopify-client');
+    const customer = await findCustomerByEmail(email);
+
+    if (!customer) {
+      logger.warn('Customer not found', { email });
+      return res.status(404).json({
+        success: false,
+        message: '登録されていないメールアドレスです'
+      });
+    }
+
+    // 電話番号の照合
+    if (!customer.phone) {
+      logger.warn('Customer has no phone number', { email });
+      return res.status(400).json({
+        success: false,
+        message: 'このアカウントには電話番号が登録されていません'
+      });
+    }
+
+    if (!comparePhoneNumbers(phone, customer.phone)) {
+      logger.warn('Phone number mismatch', { email });
+      return res.status(403).json({
+        success: false,
+        message: '入力された電話番号がアカウントに登録されている電話番号と一致しません'
+      });
+    }
+
+    // JWT トークンを生成
+    const token = jwt.sign(
+      {
+        customerId: customer.id,
+        email: customer.email,
+        firstName: customer.firstName || '',
+        lastName: customer.lastName || ''
+      },
+      JWT_SECRET,
+      { expiresIn: '60m' }
+    );
+
+    logger.info('Simple login successful', { email });
+
+    res.json({
+      success: true,
+      message: 'ログインに成功しました',
+      token,
+      customer: {
+        id: customer.id,
+        firstName: customer.firstName || '',
+        lastName: customer.lastName || '',
+        email: customer.email
+      }
+    });
+  } catch (error) {
+    logger.error('Simple login error', { error: error.message });
+    res.status(500).json({
+      success: false,
+      message: 'ログイン処理中にエラーが発生しました'
+    });
+  }
+});
+
 // セッション更新（リフレッシュ）エンドポイント
 app.post('/api/auth/refresh-session', authenticateToken, (req, res) => {
   try {
